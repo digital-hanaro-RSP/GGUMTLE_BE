@@ -9,7 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "Advertisement")
 public class Advertisement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,4 +33,8 @@ public class Advertisement {
 
     @Column(nullable = false)
     private String link;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AdvertisementAdType adType = AdvertisementAdType.HANA;
 }
