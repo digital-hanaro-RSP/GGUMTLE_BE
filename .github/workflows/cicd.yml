@@ -19,12 +19,12 @@ jobs:
           java-version: '17'
 
       - name: Create resources directory
-        run: mkdir -p ./src/test/resources
-             mkdir -p ./src/main/resources
+        run: mkdir -p ./src/test/resources &&
+            mkdir -p ./src/main/resources
 
       - name: set props
-        run: echo "${{ secrets.APPLICATION_TEST }}" > ./src/test/resources/application.properties
-             echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
+        run: echo "${{ secrets.APPLICATION_TEST }}" > ./src/test/resources/application.properties &&
+            echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
 
       - name: grant exe
         run: chmod +x gradlew
@@ -45,12 +45,12 @@ jobs:
           java-version: '17'
 
       - name: Create resources directory
-        run: mkdir -p ./src/test/resources
-             mkdir -p ./src/main/resources
+        run: mkdir -p ./src/test/resources &&
+            mkdir -p ./src/main/resources
 
       - name: set props
-        run: echo "${{ secrets.APPLICATION_TEST }}" > ./src/test/resources/application.properties
-             echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
+        run: echo "${{ secrets.APPLICATION_TEST }}" > ./src/test/resources/application.properties &&
+            echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
 
       - name: grant exe
         run: chmod +x gradlew
