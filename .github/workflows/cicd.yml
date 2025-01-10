@@ -19,15 +19,17 @@ jobs:
           java-version: '17'
 
       - name: Create resources directory
-        run: mkdir -p ./src/main/resources
+        run: mkdir -p ./src/test/resources &&
+            mkdir -p ./src/main/resources
 
       - name: set props
-        run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
+        run: echo "${{ secrets.APPLICATION_TEST }}" > ./src/test/resources/application.properties &&
+            echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
 
       - name: grant exe
         run: chmod +x gradlew
 
-      - name: build with gradle
+      - name: build and test with gradle
         run: ./gradlew clean build
 
   build:
@@ -43,16 +45,18 @@ jobs:
           java-version: '17'
 
       - name: Create resources directory
-        run: mkdir -p ./src/main/resources
+        run: mkdir -p ./src/test/resources &&
+            mkdir -p ./src/main/resources
 
       - name: set props
-        run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
+        run: echo "${{ secrets.APPLICATION_TEST }}" > ./src/test/resources/application.properties &&
+            echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
 
       - name: grant exe
         run: chmod +x gradlew
 
       - name: build with gradle
-        run: ./gradlew clean build
+        run: ./gradlew clean build -x test
 
       - name: setup ssh
         run: |
