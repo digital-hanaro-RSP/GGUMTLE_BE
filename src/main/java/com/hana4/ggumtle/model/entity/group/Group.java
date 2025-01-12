@@ -27,4 +27,7 @@ public class Group extends BaseEntity {
 
     @Column(nullable = false)
     private String imageUrl;
+
+		public Group(String name, String category, String description, String imageUrl) {
+		}
 }
