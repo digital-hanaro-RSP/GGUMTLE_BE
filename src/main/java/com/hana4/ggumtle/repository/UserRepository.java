@@ -9,5 +9,7 @@ import com.hana4.ggumtle.model.entity.user.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
-		Optional<User> findFirstByUsername(String username);
+		Optional<User> findFirstByName(String name);
+
+		Boolean existsUserByTel(String tel);
 }
