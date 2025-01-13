@@ -5,7 +5,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hana4.ggumtle.dto.user.UserRequestDto;
 import com.hana4.ggumtle.dto.user.UserResponseDto;
-import com.hana4.ggumtle.exception.AlreadyExistsException;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.user.User;
