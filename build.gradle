@@ -75,10 +75,6 @@ jacocoTestCoverageVerification {
 jar {
     enabled = false
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 1b370f8 ([feat]Mapper제거#15)
 //actuator
 springBoot {
     buildInfo()
