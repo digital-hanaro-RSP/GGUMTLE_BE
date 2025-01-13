@@ -21,11 +21,10 @@ public class BaseEntity {
     @CreationTimestamp
     @Column(nullable = false, updatable = false, columnDefinition = "timestamp")
     @ColumnDefault("CURRENT_TIMESTAMP")
-    private LocalDateTime createAt;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(nullable = false, columnDefinition = "timestamp")
     @ColumnDefault("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
-    private LocalDateTime updateAt;
+    private LocalDateTime updatedAt;
 }
-
