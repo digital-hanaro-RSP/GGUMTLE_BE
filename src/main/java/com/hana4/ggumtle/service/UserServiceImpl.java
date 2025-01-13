@@ -19,16 +19,11 @@ public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 
 	@Override
-	public void exists(String tel) {
-		if (userRepository.existsUserByTel(tel)){
-			throw new CustomException(ErrorCode.ALREADY_EXISTS, "해당 전화번호를 사용하는 유저가 이미 존재합니다.");
-		}
-	}
-
-	@Override
 	public UserResponseDto.UserInfo register(UserRequestDto.Register userRequestDto) {
 
-		exists(userRequestDto.getTel());
+		if (userRepository.existsUserByTel(userRequestDto.getTel())){
+			throw new CustomException(ErrorCode.ALREADY_EXISTS, "해당 전화번호를 사용하는 유저가 이미 존재합니다.");
+		}
 
 		User user = userRepository.save(userRequestDto.toEntity());
 		return UserResponseDto.UserInfo.from(user);
