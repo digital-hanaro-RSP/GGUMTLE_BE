@@ -44,4 +44,22 @@ public class UserResponseDto {
 				.build();
 		}
 	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@Builder
+	public static class Login {
+		private String accessToken;
+		private String refreshToken;
+	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@Builder
+	public static class Refresh {
+		private String accessToken;
+		private String refreshToken;
+	}
 }
