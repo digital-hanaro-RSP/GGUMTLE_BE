@@ -2,7 +2,6 @@ package com.hana4.ggumtle.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,7 +9,7 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class JoinGroupSuccessResponseDto {
@@ -19,7 +18,8 @@ public class JoinGroupSuccessResponseDto {
 		private String message = "ok";
 		private JoinGroupDataDto data;
 
-		public static class JoinGroupDataDto extends BaseDto{
+		@SuperBuilder
+		public static class JoinGroupDataDto extends BaseDto {
 				private String id;
 				private Long groupId;
 				private Long userId;
