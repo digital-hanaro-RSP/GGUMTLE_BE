@@ -6,13 +6,15 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.ColumnDefault;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
-@Table(uniqueConstraints = {
+@Table(name = "`User`", uniqueConstraints = {
         @UniqueConstraint(
                 name = "uniq_User_tel",
                 columnNames = {"tel"}
@@ -32,18 +34,19 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "permission", nullable = false, columnDefinition = "SMALLINT DEFAULT 0")
+    @Column(nullable = false, columnDefinition = "SMALLINT DEFAULT 0")
     private short permission;
 
     @Column(nullable = false)
     private LocalDateTime birthDate;
 
     @Column(nullable = false)
-    private char gender;
+    private String gender;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserRole role;
+    @ColumnDefault("USER")
+    private UserRole role = UserRole.USER;
 
     private String profileImageUrl;
 
