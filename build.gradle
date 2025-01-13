@@ -29,7 +29,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
     implementation 'org.springdoc:springdoc-openapi-security:2.1.0'
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -76,6 +75,10 @@ jacocoTestCoverageVerification {
 jar {
     enabled = false
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1b370f8 ([feat]Mapper제거#15)
 //actuator
 springBoot {
     buildInfo()

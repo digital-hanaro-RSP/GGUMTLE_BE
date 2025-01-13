@@ -16,7 +16,6 @@ import com.hana4.ggumtle.model.dto.JoinGroupSuccessResponseDto.JoinGroupDataDto;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
 import com.hana4.ggumtle.model.entity.user.User;
-import com.hana4.ggumtle.model.mapper.GroupMapper;
 import com.hana4.ggumtle.repository.GroupMemberRepository;
 import com.hana4.ggumtle.repository.GroupRepository;
 import com.hana4.ggumtle.repository.UserRepository;
@@ -38,13 +37,30 @@ public class GroupServiceImpl implements GroupService {
 				Group group = new Group(request.getName(), request.getCategory(), request.getDescription(),
 						request.getImageUrl());
 				groupRepository.save(group);
-				return GroupMapper.toDto(group);
+				return GroupResponseDto.builder()
+						.id(group.getId())
+						.name(group.getName())
+						.category(String.valueOf(group.getCategory()))
+						.description(group.getDescription())
+						.imageUrl(group.getImageUrl())
+						.build();
+
 		}
 
 		@Override
 		public List<GroupResponseDto> getAllGroups() {
 				List<Group> groups = groupRepository.findAll();
-				return groups.stream().map(GroupMapper::toDto).collect(Collectors.toList());
+				return groups.stream()
+						.map(group -> GroupResponseDto.builder()
+								.id(group.getId())
+								.name(group.getName())
+								.category(String.valueOf(group.getCategory()))
+								.description(group.getDescription())
+								.imageUrl(group.getImageUrl())
+								.createdAt(group.getCreatedAt())
+								.updatedAt(group.getUpdatedAt())
+								.build())
+						.collect(Collectors.toList());
 		}
 
 		public void deleteGroup(Long groupId) {
