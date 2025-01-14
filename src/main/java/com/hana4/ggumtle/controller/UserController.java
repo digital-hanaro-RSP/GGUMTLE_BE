@@ -1,6 +1,8 @@
 package com.hana4.ggumtle.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hana4.ggumtle.dto.ApiResponse;
 import com.hana4.ggumtle.dto.user.UserRequestDto;
 import com.hana4.ggumtle.dto.user.UserResponseDto;
+import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.UserService;
 
 import jakarta.servlet.http.Cookie;
@@ -31,12 +34,14 @@ public class UserController {
 	}
 
 	@PostMapping("/user")
-	public ResponseEntity<ApiResponse<UserResponseDto.UserInfo>> register(@RequestBody @Valid UserRequestDto.Register request) {
+	public ResponseEntity<ApiResponse<UserResponseDto.UserInfo>> register(
+		@RequestBody @Valid UserRequestDto.Register request) {
 		return ResponseEntity.ok(ApiResponse.success(userService.register(request)));
 	}
 
 	@PostMapping("/tokens")
-	public ResponseEntity<ApiResponse<UserResponseDto.Login>> login(@RequestBody @Valid UserRequestDto.Login request, HttpServletResponse response) {
+	public ResponseEntity<ApiResponse<UserResponseDto.Login>> login(@RequestBody @Valid UserRequestDto.Login request,
+		HttpServletResponse response) {
 		// 로그인 후 accessToken과 refreshToken 생성
 		UserResponseDto.Login loginResponse = userService.login(request);
 
@@ -45,11 +50,18 @@ public class UserController {
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<ApiResponse<UserResponseDto.Refresh>> tokenRefresh(@RequestBody @Valid UserRequestDto.Refresh refreshTokenRequestDTO, HttpServletResponse response) {
+	public ResponseEntity<ApiResponse<UserResponseDto.Refresh>> tokenRefresh(
+		@RequestBody @Valid UserRequestDto.Refresh refreshTokenRequestDto, HttpServletResponse response) {
 		// token 재발급
-		UserResponseDto.Refresh refreshResponse = userService.refresh(refreshTokenRequestDTO);
+		UserResponseDto.Refresh refreshResponse = userService.refresh(refreshTokenRequestDto);
 
 		setRefreshTokenCookie(response, refreshResponse.getRefreshToken());
 		return ResponseEntity.ok(ApiResponse.success(refreshResponse));
+	}
+
+	@PatchMapping("/mydata/permission")
+	public ResponseEntity<ApiResponse<UserResponseDto.UserInfo>> updatePermission(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		return ResponseEntity.ok(ApiResponse.success(userService.updatePermission(userDetails.getUser())));
 	}
 }

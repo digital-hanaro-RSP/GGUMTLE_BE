@@ -1,13 +1,14 @@
 package com.hana4.ggumtle.vo;
 
-import com.hana4.ggumtle.global.error.CustomException;
-import com.hana4.ggumtle.global.error.ErrorCode;
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.global.error.ErrorCode;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 /**
  * RefreshToken 저장 객체
@@ -56,8 +57,8 @@ public class RefreshToken {
 
 	// user refresh token remove
 	public static void removeUserRefreshToken(final String refreshToken) {
-		for(Map.Entry<String, String> entry : refreshTokens.entrySet()) {
-			if(entry.getValue().equals(refreshToken)) {
+		for (Map.Entry<String, String> entry : refreshTokens.entrySet()) {
+			if (entry.getValue().equals(refreshToken)) {
 				removeRefreshToken(entry.getKey());
 			}
 		}

@@ -1,5 +1,8 @@
 package com.hana4.ggumtle.service;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,8 +11,10 @@ import com.hana4.ggumtle.dto.user.UserRequestDto;
 import com.hana4.ggumtle.dto.user.UserResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
+import com.hana4.ggumtle.model.entity.myData.MyData;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.repository.UserRepository;
+import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.security.provider.JwtProvider;
 import com.hana4.ggumtle.vo.RefreshToken;
 
@@ -22,10 +27,11 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
+	private final MyDataService myDataService;
 
 	public User getUserByTel(String tel) {
 		return userRepository.getUserByTel(tel)
-			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 전화번호의 사용자를 찾을 수 없습니다."));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 전화번호를 사용하는 유저를 찾을 수 없습니다. : " + tel));
 	}
 
 	public UserResponseDto.UserInfo register(UserRequestDto.Register userRequestDto) {
@@ -41,6 +47,10 @@ public class UserService {
 			.build();
 
 		User user = userRepository.save(updatedDto.toEntity());
+
+		// MyData 생성 및 저장
+		myDataService.createRandomMyData(user);
+
 		return UserResponseDto.UserInfo.from(user);
 	}
 
@@ -97,5 +107,12 @@ public class UserService {
 	private void checkRefreshToken(final String refreshToken) {
 		if(Boolean.FALSE.equals(jwtProvider.validateToken(refreshToken)))
 			throw new CustomException(ErrorCode.TOKEN_INVALID);
+	}
+
+	public UserResponseDto.UserInfo updatePermission(User user) {
+		System.out.println("user = " + user);
+		user.setPermission((short)1);
+		// Transactional이라 save할 필요없는듯
+		return UserResponseDto.UserInfo.from(user);
 	}
 }

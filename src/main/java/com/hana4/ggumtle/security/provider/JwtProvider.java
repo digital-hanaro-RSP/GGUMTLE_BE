@@ -1,22 +1,25 @@
 package com.hana4.ggumtle.security.provider;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SecurityException;
-import jakarta.annotation.PostConstruct;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.hana4.ggumtle.model.entity.user.User;
-import com.hana4.ggumtle.service.UserService;
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
@@ -24,7 +27,7 @@ import com.hana4.ggumtle.service.UserService;
 public class JwtProvider {
 
 	// jwt 만료 시간 1시간
-	private static final long JWT_TOKEN_VALID = (long) 1000 * 60 * 30;
+	private static final long JWT_TOKEN_VALID = (long)1000 * 60 * 30;
 
 	@Value("${jwt.secret}")
 	private String secret;
@@ -56,7 +59,7 @@ public class JwtProvider {
 	 */
 	public <T> T getClaimFromToken(final String token, final Function<Claims, T> claimsResolver) {
 		// token 유효성 검증
-		if(Boolean.FALSE.equals(validateToken(token)))
+		if (Boolean.FALSE.equals(validateToken(token)))
 			return null;
 
 		final Claims claims = getAllClaimsFromToken(token);

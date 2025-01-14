@@ -3,7 +3,7 @@ package com.hana4.ggumtle.security.handler;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import org.springframework.security.access.AccessDeniedException;  //import 주의
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
@@ -23,9 +23,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
-
 	@Override
-	public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws
+	public void handle(HttpServletRequest request, HttpServletResponse response,
+		AccessDeniedException accessDeniedException) throws
 		IOException, ServletException {
 		log.info("[CustomAccessDeniedHandler] :: {}", accessDeniedException.getMessage());
 		log.info("[CustomAccessDeniedHandler] :: {}", request.getRequestURL());

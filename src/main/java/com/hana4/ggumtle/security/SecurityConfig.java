@@ -3,13 +3,11 @@ package com.hana4.ggumtle.security;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -57,7 +55,6 @@ public class SecurityConfig {
 			mvc.pattern("/refresh"),
 			mvc.pattern("/favicon.ico"),
 			mvc.pattern("/error"),
-			// mvc.pattern("/h2")  // 이 부분을 주석 처리하고 밑에서 설정
 		};
 
 		// http request 인증 설정
@@ -71,7 +68,8 @@ public class SecurityConfig {
 		http.csrf(csrf -> csrf
 				.ignoringRequestMatchers(PathRequest.toH2Console())  // H2 콘솔에 대해 CSRF 무시 처리
 			)
-			.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));  // Same-origin 설정
+			.headers(
+				headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));  // Same-origin 설정
 
 		// form login 비활성화 (JWT 사용)
 		http.formLogin(AbstractHttpConfigurer::disable);
