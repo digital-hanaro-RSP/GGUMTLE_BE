@@ -1,6 +1,7 @@
 package com.hana4.ggumtle.model.entity.post;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -8,21 +9,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hana4.ggumtle.dto.ApiResponse;
+import com.hana4.ggumtle.security.CustomUserDetails;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/community/group/{groupId}")
+@Slf4j
 public class PostController {
 	private final PostService postService;
 
-	@PostMapping("/post/{userId}")
+	@PostMapping("/post")
 	public ResponseEntity<ApiResponse<PostResponseDto.PostInfo>> writePost(
 		@RequestBody @Valid PostRequestDto.Write write, @PathVariable("groupId") Long groupId,
-		@PathVariable("userId") String userId) {
-		return ResponseEntity.ok(ApiResponse.success(postService.save(userId, groupId, write)));
+		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		return ResponseEntity.ok(ApiResponse.success(postService.save(groupId, customUserDetails.getUser(), write)));
 	}
 }
 

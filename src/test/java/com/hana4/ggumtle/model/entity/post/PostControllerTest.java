@@ -1,28 +1,42 @@
 package com.hana4.ggumtle.model.entity.post;
 
 import static org.mockito.BDDMockito.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.LocalDateTime;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hana4.ggumtle.WithMockCustomUser;
 import com.hana4.ggumtle.config.TestSecurityConfig;
+import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.model.entity.user.UserRole;
+import com.hana4.ggumtle.security.CustomUserDetails;
+import com.hana4.ggumtle.security.filter.JwtAuthFilter;
 import com.hana4.ggumtle.security.provider.JwtProvider;
+import com.hana4.ggumtle.service.CustomUserDetailsService;
 
 @WebMvcTest(PostController.class)
-// @WithMockUser(username = "kkkk")
+@WithMockCustomUser
 @Import(TestSecurityConfig.class)
 class PostControllerTest {
+
 	@MockitoBean
-	private PostService postService;
+	PostService postService;
 
 	@Autowired
 	MockMvc mockMvc;
@@ -31,37 +45,80 @@ class PostControllerTest {
 	ObjectMapper objectMapper;
 
 	@MockitoBean
+	JwtAuthFilter jwtAuthFilter;
+
+	@MockitoBean
 	JwtProvider jwtProvider;
+
+	@MockitoBean
+	CustomUserDetailsService customUserDetailsService;
+
+	@Autowired
+	WebApplicationContext webApplicationContext;
+
+	@BeforeEach
+	public void setup() {
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+			.apply(springSecurity()) // Spring Security 통합
+			.build();
+	}
 
 	@Test
 	void writePost() throws Exception {
+
 		// given
+		User user = new User(
+			"1", // id
+			"01012341234", // tel
+			"password", // password
+			"남인우", // name
+			(short)1, // permission
+			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
+			"M", // gender
+			UserRole.USER, // role
+			"https://example.com/profile.jpg", // profileImageUrl
+			"inwoo" // nickname
+		);
+
 		String imageUrls = "imageUrl";
 		String content = "content";
 		PostRequestDto.Write write = new PostRequestDto.Write(imageUrls, content, PostType.POST);
-		PostResponseDto.PostInfo postInfo = new PostResponseDto.PostInfo("1", 1L, 1L, null, imageUrls, content,
-			PostType.POST);
+
+		PostResponseDto.PostInfo post = new PostResponseDto.PostInfo(
+			"1", // userId
+			1L, // groupId
+			1L, // bucketId
+			null, // snapShot
+			imageUrls, // imageUrls
+			content, // content
+			PostType.POST // postType
+		);
+
+		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
+			.getAuthentication()
+			.getPrincipal();
+		System.out.println("customUserDetails = " + customUserDetails.getUser());
+		given(postService.save(eq(1L), eq(customUserDetails.getUser()), eq(write))).willReturn(post);
 
 		// when
-		when(postService.save("1", 1L, write)).thenReturn(postInfo);
-
-		// then
 		String reqBody = objectMapper.writeValueAsString(write);
 
-		mockMvc.perform(MockMvcRequestBuilders.post("/community/group/{groupId}/post/{userId}", 1L, "1")
+		// then
+		mockMvc.perform(MockMvcRequestBuilders.post("/community/group/{groupId}/post", 1L)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(reqBody))
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("ok"))
-			.andExpect(jsonPath("$.data.userId").value(1))
-			.andExpect(jsonPath("$.data.groupId").value(1))
-			.andExpect(jsonPath("$.data.bucketId").value(1))
-			.andExpect(jsonPath("$.data.snapShot").doesNotExist())
-			.andExpect(jsonPath("$.data.imageUrls").value(imageUrls))
-			.andExpect(jsonPath("$.data.content").value(content))
-			.andExpect(jsonPath("$.data.postType").value("POST"))
+			.andExpect(jsonPath("$.data.userId").value(post.getUserId()))
+			.andExpect(jsonPath("$.data.groupId").value(post.getGroupId()))
+			.andExpect(jsonPath("$.data.bucketId").value(post.getBucketId()))
+			.andExpect(jsonPath("$.data.imageUrls").value(post.getImageUrls()))
+			.andExpect(jsonPath("$.data.content").value(post.getContent()))
+			.andExpect(jsonPath("$.data.postType").value(post.getPostType().name()))
 			.andDo(print());
+
+		verify(postService).save(1L, customUserDetails.getUser(), write);
 	}
 }

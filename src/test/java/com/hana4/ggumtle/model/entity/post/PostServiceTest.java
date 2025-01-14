@@ -17,7 +17,6 @@ import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.group.GroupRepository;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.model.entity.user.UserRole;
-import com.hana4.ggumtle.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
@@ -30,16 +29,11 @@ class PostServiceTest {
 	@Mock
 	private GroupRepository groupRepository;
 
-	@Mock
-	private UserRepository userRepository;
-
 	@Test
 	void savePost_성공() {
 		// given
 		String userId = "1";
 		Long groupId = 1L;
-		// PostRequestDto.Write writeDto = new PostRequestDto.Write("imageUrl", "content", PostType.POST);
-		// Post post = new Post(groupId, userId, writeDto.getImageUrls(), writeDto.getContent(), writeDto.getPostType());
 		PostResponseDto.PostInfo expectedPostInfo = new PostResponseDto.PostInfo(
 			"1", groupId, 1L, null, "imageUrl", "content", PostType.POST
 		);
@@ -76,11 +70,10 @@ class PostServiceTest {
 		post.setGroup(group);
 		post.setContent("content");
 		when(groupRepository.findById(1L)).thenReturn(Optional.of(group));
-		when(userRepository.findById("1")).thenReturn(Optional.of(user));
 		when(postRepository.save(any(Post.class))).thenReturn(post);
 
 		// when
-		PostResponseDto.PostInfo result = postService.save(userId, groupId, write);
+		PostResponseDto.PostInfo result = postService.save(groupId, user, write);
 
 		// then
 		assertThat(result).isNotNull();
