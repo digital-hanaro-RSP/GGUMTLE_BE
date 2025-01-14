@@ -70,6 +70,7 @@ public class UserService {
 		return UserResponseDto.Login.builder()
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
+			.permission(userInfo.getPermission())
 			.build();
 	}
 

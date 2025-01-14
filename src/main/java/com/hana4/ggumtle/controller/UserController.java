@@ -39,7 +39,7 @@ public class UserController {
 		return ResponseEntity.ok(ApiResponse.success(userService.register(request)));
 	}
 
-	@PostMapping("/tokens")
+	@PostMapping("/auth/tokens")
 	public ResponseEntity<ApiResponse<UserResponseDto.Login>> login(@RequestBody @Valid UserRequestDto.Login request,
 		HttpServletResponse response) {
 		// 로그인 후 accessToken과 refreshToken 생성
@@ -49,7 +49,7 @@ public class UserController {
 		return ResponseEntity.ok(ApiResponse.success(loginResponse));
 	}
 
-	@PostMapping("/refresh")
+	@PostMapping("/auth/refresh")
 	public ResponseEntity<ApiResponse<UserResponseDto.Refresh>> tokenRefresh(
 		@RequestBody @Valid UserRequestDto.Refresh refreshTokenRequestDto, HttpServletResponse response) {
 		// token 재발급
