@@ -2,7 +2,6 @@ package com.hana4.ggumtle.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +33,7 @@ public class GroupController {
 
 	// 그룹 생성
 	@PostMapping
-	public ResponseEntity<ApiResponse<GroupResponseDto.Create>> createGroup (
+	public ResponseEntity<ApiResponse<GroupResponseDto.Create>> createGroup(
 		@RequestBody @Valid GroupRequestDto.Create request) {
 		try {
 			GroupResponseDto.Create response = groupService.createGroup(request);
@@ -56,7 +55,8 @@ public class GroupController {
 
 	// 커뮤니티 그룹 가입
 	@PostMapping("/{groupId}/member")
-	public ResponseEntity<ApiResponse<GroupMemberResponseDto.JoinGroup>> joinGroup(@PathVariable Long groupId, @RequestBody @Valid
+	public ResponseEntity<ApiResponse<GroupMemberResponseDto.JoinGroup>> joinGroup(@PathVariable Long groupId,
+		@RequestBody @Valid
 		GroupMemberRequestDto.Create request) {
 		try {
 			GroupMemberResponseDto.JoinGroup response = groupService.joinGroup(groupId, request);
@@ -64,5 +64,5 @@ public class GroupController {
 		} catch (CustomException ce) {
 			throw new CustomException(ErrorCode.NOT_FOUND);
 		}
-	}}
+	}
 }
