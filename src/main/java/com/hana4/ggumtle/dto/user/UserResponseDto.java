@@ -5,9 +5,6 @@ import java.time.LocalDateTime;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.model.entity.user.UserRole;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,5 +40,24 @@ public class UserResponseDto {
 				.nickname(user.getNickname())
 				.build();
 		}
+	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@Builder
+	public static class Login {
+		private String accessToken;
+		private String refreshToken;
+		private short permission;
+	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@Builder
+	public static class Refresh {
+		private String accessToken;
+		private String refreshToken;
 	}
 }
