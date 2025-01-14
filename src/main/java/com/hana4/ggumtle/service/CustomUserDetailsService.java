@@ -1,8 +1,5 @@
 package com.hana4.ggumtle.service;
 
-import java.util.Collections;
-
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,22 +11,6 @@ import com.hana4.ggumtle.security.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
 
-// @Service
-// @RequiredArgsConstructor
-// public class CustomUserDetailsService implements UserDetailsService {
-// 	private final UserRepository userRepository;
-//
-// 	@Override
-// 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-// 		User user = userRepository.findById(username)
-// 			.orElseThrow(() -> new UsernameNotFoundException("User not found with Id: " + username));
-// 		return new org.springframework.security.core.userdetails.User(
-// 			user.getTel(), user.getPassword(),
-// 			Collections.singleton(new SimpleGrantedAuthority(user.getRole().name()))
-// 		);
-// 	}
-// }
-
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -38,7 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		User user = userRepository.findById(username)
-			.orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + username));
+			.orElseThrow(() -> new UsernameNotFoundException("해당 유저가 존재하지 않습니다. 아이디 : " + username));
 		return new CustomUserDetails(user);
 	}
 }

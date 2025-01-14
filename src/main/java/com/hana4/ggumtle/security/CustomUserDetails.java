@@ -16,8 +16,4 @@ public class CustomUserDetails extends org.springframework.security.core.userdet
 	public com.hana4.ggumtle.model.entity.user.User getUser() {
 		return user;
 	}
-
-	public String getTel() {
-		return user.getTel();
-	}
 }
