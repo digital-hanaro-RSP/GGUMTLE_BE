@@ -1,17 +1,20 @@
 package com.hana4.ggumtle.security.handler;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hana4.ggumtle.global.error.ErrorCode;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -21,9 +24,11 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CustomAuthenticationEntryPointHandler implements AuthenticationEntryPoint {
 
-	@Override
+	private final ObjectMapper objectMapper;
+
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException authException) throws IOException {
 		log.info("[CustomAuthenticationEntryPointHandler] :: {}", authException.getMessage());
@@ -31,16 +36,14 @@ public class CustomAuthenticationEntryPointHandler implements AuthenticationEntr
 		log.info("[CustomAuthenticationEntryPointHandler] :: 토근 정보가 만료되었거나 존재하지 않음");
 
 		response.setStatus(ErrorCode.ACCESS_DENIED.getHttpStatus().value());
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setCharacterEncoding("UTF-8");
-		response.setContentType("application/json; charset=UTF-8");
 
-		JsonObject returnJson = new JsonObject();
-		returnJson.addProperty("code", ErrorCode.ACCESS_DENIED.getHttpStatus().value());
-		returnJson.addProperty("error", ErrorCode.ACCESS_DENIED.getHttpStatus().getReasonPhrase());
-		returnJson.addProperty("message", ErrorCode.ACCESS_DENIED.getMessage());
+		Map<String, Object> body = new HashMap<>();
+		body.put("code", ErrorCode.ACCESS_DENIED.getHttpStatus().value());
+		body.put("error", ErrorCode.ACCESS_DENIED.getHttpStatus().getReasonPhrase());
+		body.put("message", ErrorCode.ACCESS_DENIED.getMessage());
 
-		PrintWriter out = response.getWriter();
-		out.print(returnJson);
+		objectMapper.writeValue(response.getWriter(), body);
 	}
-
 }
