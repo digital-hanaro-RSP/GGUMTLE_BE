@@ -8,4 +8,6 @@ import com.hana4.ggumtle.model.entity.user.User;
 
 public interface GroupMemberRepository extends JpaRepository<GroupMember, Long> {
 	boolean existsByGroupAndUser(Group group, User user);
+
+	int countByGroup(Group group);    //해당 그룹의 멤버 수를 가져옴.
 }

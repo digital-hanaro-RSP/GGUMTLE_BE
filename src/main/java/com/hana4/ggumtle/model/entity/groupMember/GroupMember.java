@@ -23,7 +23,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(name = "uniq_GroupMember_composition", columnNames = {"groupId",
 	"userId"}))
