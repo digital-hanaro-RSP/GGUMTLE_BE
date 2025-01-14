@@ -9,5 +9,5 @@ package com.hana4.ggumtle.model.entity.bucket;
  * LEARN - 배우고 싶다.
  */
 public enum BucketTagType {
-    DO,BE,HAVE,GO,LEARN
+	DO, BE, HAVE, GO, LEARN
 }

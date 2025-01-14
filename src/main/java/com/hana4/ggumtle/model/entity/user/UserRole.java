@@ -6,5 +6,5 @@ package com.hana4.ggumtle.model.entity.user;
  * USER - 일반유저
  */
 public enum UserRole {
-    ADMIN, USER
+	ADMIN, USER
 }
