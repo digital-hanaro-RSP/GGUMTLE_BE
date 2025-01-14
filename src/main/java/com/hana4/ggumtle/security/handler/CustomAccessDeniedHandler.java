@@ -1,18 +1,21 @@
 package com.hana4.ggumtle.security.handler;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hana4.ggumtle.global.error.ErrorCode;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -22,7 +25,10 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+	private final ObjectMapper objectMapper;
+
 	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response,
 		AccessDeniedException accessDeniedException) throws
@@ -32,15 +38,14 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 		log.info("[CustomAccessDeniedHandler] :: 토큰 정보가 만료되었거나 존재하지 않음");
 
 		response.setStatus(ErrorCode.FORBIDDEN.getHttpStatus().value());
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setCharacterEncoding("UTF-8");
-		response.setContentType("application/json; charset=UTF-8");
 
-		JsonObject returnJson = new JsonObject();
-		returnJson.addProperty("code", ErrorCode.FORBIDDEN.getHttpStatus().value());
-		returnJson.addProperty("error", ErrorCode.FORBIDDEN.getHttpStatus().getReasonPhrase());
-		returnJson.addProperty("message", ErrorCode.FORBIDDEN.getMessage());
+		Map<String, Object> body = new HashMap<>();
+		body.put("code", ErrorCode.FORBIDDEN.getHttpStatus().value());
+		body.put("error", ErrorCode.FORBIDDEN.getHttpStatus().getReasonPhrase());
+		body.put("message", ErrorCode.FORBIDDEN.getMessage());
 
-		PrintWriter out = response.getWriter();
-		out.print(returnJson);
+		objectMapper.writeValue(response.getWriter(), body);
 	}
 }
