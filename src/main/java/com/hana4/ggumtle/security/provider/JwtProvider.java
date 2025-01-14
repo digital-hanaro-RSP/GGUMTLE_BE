@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtProvider {
 
 	// jwt 만료 시간 1시간
-	private static final long JWT_TOKEN_VALID = (long)1000 * 60 * 30;
+	private static final long JWT_TOKEN_VALID = (long)1000 * 60 * 60;
 
 	@Value("${jwt.secret}")
 	private String secret;
@@ -134,7 +134,7 @@ public class JwtProvider {
 			.setClaims(claims)
 			.setId(id)
 			.setIssuedAt(new Date(System.currentTimeMillis()))
-			.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALID)) // 30분
+			.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALID)) // 1시간
 			.signWith(key)
 			.compact();
 	}
@@ -167,7 +167,7 @@ public class JwtProvider {
 	private String doGenerateRefreshToken(final String id) {
 		return Jwts.builder()
 			.setId(id)
-			.setExpiration(new Date(System.currentTimeMillis() + (JWT_TOKEN_VALID * 2) * 24)) // 24시간
+			.setExpiration(new Date(System.currentTimeMillis() + (JWT_TOKEN_VALID * 24))) // 24시간
 			.setIssuedAt(new Date(System.currentTimeMillis()))
 			.signWith(key)
 			.compact();
