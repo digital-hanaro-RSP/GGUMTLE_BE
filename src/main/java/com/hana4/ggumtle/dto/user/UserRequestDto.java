@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 
 public class UserRequestDto {
 	@Getter
-	@Builder
+	@Builder(toBuilder = true) // 기존 필드 값은 유지하고 변경하려는 필드만 수정된 값으로 교체
 	@AllArgsConstructor
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	public static class Register {
@@ -56,5 +56,26 @@ public class UserRequestDto {
 				.nickname(this.nickname)
 				.build();
 		}
+	}
+
+	@Getter
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	public static class Login {
+		@NotEmpty(message = "전화번호를 입력하세요.")
+		private String tel;
+
+		@NotEmpty(message = "비밀번호를 입력하세요.")
+		private String password;
+	}
+
+	@Getter
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	public static class Refresh {
+		@NotEmpty(message = "refreshToken을 입력하세요.")
+		private String refreshToken;
 	}
 }
