@@ -1,8 +1,5 @@
 package com.hana4.ggumtle.service;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,10 +8,8 @@ import com.hana4.ggumtle.dto.user.UserRequestDto;
 import com.hana4.ggumtle.dto.user.UserResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
-import com.hana4.ggumtle.model.entity.myData.MyData;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.repository.UserRepository;
-import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.security.provider.JwtProvider;
 import com.hana4.ggumtle.vo.RefreshToken;
 
@@ -30,13 +25,13 @@ public class UserService {
 	private final MyDataService myDataService;
 
 	public User getUserByTel(String tel) {
-		return userRepository.getUserByTel(tel)
+		return userRepository.findUserByTel(tel)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 전화번호를 사용하는 유저를 찾을 수 없습니다. : " + tel));
 	}
 
 	public UserResponseDto.UserInfo register(UserRequestDto.Register userRequestDto) {
 
-		if (userRepository.existsUserByTel(userRequestDto.getTel())){
+		if (userRepository.existsUserByTel(userRequestDto.getTel())) {
 			throw new CustomException(ErrorCode.ALREADY_EXISTS, "해당 전화번호를 사용하는 유저가 이미 존재합니다.");
 		}
 
@@ -59,7 +54,7 @@ public class UserService {
 		User userInfo = this.getUserByTel(userRequestDto.getTel());
 
 		// password 일치 여부 체크
-		if(!passwordEncoder.matches(userRequestDto.getPassword(), userInfo.getPassword()))
+		if (!passwordEncoder.matches(userRequestDto.getPassword(), userInfo.getPassword()))
 			throw new CustomException(ErrorCode.NOT_CORRECT);
 
 		// jwt 토큰 생성
@@ -83,7 +78,7 @@ public class UserService {
 		checkRefreshToken(userRequestDto.getRefreshToken());
 
 		// refresh token id 조회
-		var id = RefreshToken.getRefreshToken(userRequestDto.getRefreshToken());
+		String id = RefreshToken.getRefreshToken(userRequestDto.getRefreshToken());
 
 		// 새로운 access token 생성
 		String newAccessToken = jwtProvider.generateAccessToken(id);
@@ -105,7 +100,7 @@ public class UserService {
 	 * refresh token 검증
 	 */
 	private void checkRefreshToken(final String refreshToken) {
-		if(Boolean.FALSE.equals(jwtProvider.validateToken(refreshToken)))
+		if (Boolean.FALSE.equals(jwtProvider.validateToken(refreshToken)))
 			throw new CustomException(ErrorCode.TOKEN_INVALID);
 	}
 

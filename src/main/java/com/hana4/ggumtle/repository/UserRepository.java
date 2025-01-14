@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.hana4.ggumtle.model.entity.user.User;
 
 public interface UserRepository extends JpaRepository<User, String> {
-	Optional<User> getUserByTel(String tel);
+	Optional<User> findUserByTel(String tel);
 	Boolean existsUserByTel(String tel);
 }

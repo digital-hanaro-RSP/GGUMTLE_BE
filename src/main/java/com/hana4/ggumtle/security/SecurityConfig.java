@@ -55,6 +55,8 @@ public class SecurityConfig {
 			mvc.pattern("/refresh"),
 			mvc.pattern("/favicon.ico"),
 			mvc.pattern("/error"),
+			mvc.pattern("/swagger-resources/**\""),
+			mvc.pattern("/v3/api-docs/**"),
 		};
 
 		// http request 인증 설정
