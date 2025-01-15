@@ -5,6 +5,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,6 +71,19 @@ public class GroupController {
 		GroupMemberRequestDto.Create request, @AuthenticationPrincipal CustomUserDetails userDetails) {
 		try {
 			GroupMemberResponseDto.JoinGroup response = groupService.joinGroup(groupId, request, userDetails.getUser());
+			return ResponseEntity.ok(ApiResponse.success(response));
+		} catch (CustomException ce) {
+			throw new CustomException(ErrorCode.NOT_FOUND);
+		}
+	}
+
+	// 커뮤니티 그룹 탈퇴(memberCount = 0 이면 자동으로 그룹 삭제.)
+	@DeleteMapping("/{groupId}/member")
+	public ResponseEntity<ApiResponse<GroupMemberResponseDto.LeaveGroup>> leaveGroup(
+		@PathVariable Long groupId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		try {
+			GroupMemberResponseDto.LeaveGroup response = groupService.leaveGroup(groupId, userDetails.getUser());
 			return ResponseEntity.ok(ApiResponse.success(response));
 		} catch (CustomException ce) {
 			throw new CustomException(ErrorCode.NOT_FOUND);

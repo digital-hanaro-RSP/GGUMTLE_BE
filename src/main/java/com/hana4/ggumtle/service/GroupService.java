@@ -54,19 +54,24 @@ public class GroupService {
 		});
 	}
 
-	//그룹 내 인원이 0명이면 그룹 자동 삭제
-	public void deleteGroup(Long groupId) {
+	public GroupMemberResponseDto.LeaveGroup leaveGroup(Long groupId, User user) {
 		Group group = groupRepository.findById(groupId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-		int memberCount = groupMemberRepository.countByGroup(group);
+		// 그룹 멤버 삭제
+		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-		if (memberCount == 0) {
-			groupRepository.deleteById(groupId);
-		} else {
-			throw new IllegalStateException(
-				"Cannot delete group with active members. Current member count: " + memberCount);
+		GroupMemberResponseDto.LeaveGroup response = GroupMemberResponseDto.LeaveGroup.from(groupMember);
+
+		groupMemberRepository.delete(groupMember);
+
+		// 멤버 수 확인 후 그룹 자동 삭제
+		int remainingMembers = groupMemberRepository.countByGroup(group);
+		if (remainingMembers == 0) {
+			groupRepository.delete(group);
 		}
+		return response;
 	}
 
 	public GroupMemberResponseDto.JoinGroup joinGroup(Long groupId, GroupMemberRequestDto.Create request, User user) {
