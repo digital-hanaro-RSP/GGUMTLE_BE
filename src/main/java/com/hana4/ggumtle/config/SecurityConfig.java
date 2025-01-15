@@ -1,4 +1,4 @@
-package com.hana4.ggumtle.security;
+package com.hana4.ggumtle.config;
 
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -57,6 +57,8 @@ public class SecurityConfig {
 			mvc.pattern("/error"),
 			mvc.pattern("/swagger-resources/**\""),
 			mvc.pattern("/v3/api-docs/**"),
+			mvc.pattern("/swagger-ui/**"),
+			mvc.pattern("/webjars/**"),
 		};
 
 		// http request 인증 설정

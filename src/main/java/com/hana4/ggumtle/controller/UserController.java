@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hana4.ggumtle.dto.ApiResponse;
+import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.dto.user.UserRequestDto;
 import com.hana4.ggumtle.dto.user.UserResponseDto;
 import com.hana4.ggumtle.security.CustomUserDetails;
@@ -34,34 +34,35 @@ public class UserController {
 	}
 
 	@PostMapping("/user")
-	public ResponseEntity<ApiResponse<UserResponseDto.UserInfo>> register(
+	public ResponseEntity<CustomApiResponse<UserResponseDto.UserInfo>> register(
 		@RequestBody @Valid UserRequestDto.Register request) {
-		return ResponseEntity.ok(ApiResponse.success(userService.register(request)));
+		return ResponseEntity.ok(CustomApiResponse.success(userService.register(request)));
 	}
 
 	@PostMapping("/auth/tokens")
-	public ResponseEntity<ApiResponse<UserResponseDto.Login>> login(@RequestBody @Valid UserRequestDto.Login request,
+	public ResponseEntity<CustomApiResponse<UserResponseDto.Login>> login(
+		@RequestBody @Valid UserRequestDto.Login request,
 		HttpServletResponse response) {
 		// 로그인 후 accessToken과 refreshToken 생성
 		UserResponseDto.Login loginResponse = userService.login(request);
 
 		setRefreshTokenCookie(response, loginResponse.getRefreshToken());
-		return ResponseEntity.ok(ApiResponse.success(loginResponse));
+		return ResponseEntity.ok(CustomApiResponse.success(loginResponse));
 	}
 
 	@PostMapping("/auth/refresh")
-	public ResponseEntity<ApiResponse<UserResponseDto.Refresh>> tokenRefresh(
+	public ResponseEntity<CustomApiResponse<UserResponseDto.Refresh>> tokenRefresh(
 		@RequestBody @Valid UserRequestDto.Refresh refreshTokenRequestDto, HttpServletResponse response) {
 		// token 재발급
 		UserResponseDto.Refresh refreshResponse = userService.refresh(refreshTokenRequestDto);
 
 		setRefreshTokenCookie(response, refreshResponse.getRefreshToken());
-		return ResponseEntity.ok(ApiResponse.success(refreshResponse));
+		return ResponseEntity.ok(CustomApiResponse.success(refreshResponse));
 	}
 
 	@PatchMapping("/mydata/permission")
-	public ResponseEntity<ApiResponse<UserResponseDto.UserInfo>> updatePermission(
+	public ResponseEntity<CustomApiResponse<UserResponseDto.UserInfo>> updatePermission(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return ResponseEntity.ok(ApiResponse.success(userService.updatePermission(userDetails.getUser())));
+		return ResponseEntity.ok(CustomApiResponse.success(userService.updatePermission(userDetails.getUser())));
 	}
 }
