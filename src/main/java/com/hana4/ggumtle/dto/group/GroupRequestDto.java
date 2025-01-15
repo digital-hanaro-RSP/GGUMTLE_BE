@@ -27,6 +27,15 @@ public class GroupRequestDto {
 		@NotEmpty(message = "이미지 url을 입력하세요.")
 		private String imageUrl;
 
+		public static Create from(Group group) {
+			return Create.builder()
+				.name(group.getName())
+				.category(group.getCategory())
+				.description(group.getDescription())
+				.imageUrl(group.getImageUrl())
+				.build();
+		}
+
 		public Group toEntity() {
 			return new Group().toBuilder()
 				.name(this.name)
