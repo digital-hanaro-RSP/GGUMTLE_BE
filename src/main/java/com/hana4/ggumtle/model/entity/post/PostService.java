@@ -8,10 +8,12 @@ import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.group.GroupRepository;
 import com.hana4.ggumtle.model.entity.user.User;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PostService {
 	private final PostRepository postRepository;
 	private final GroupRepository groupRepository;
