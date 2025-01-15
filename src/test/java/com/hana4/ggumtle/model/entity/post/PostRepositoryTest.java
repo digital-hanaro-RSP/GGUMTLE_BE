@@ -18,8 +18,6 @@ import com.hana4.ggumtle.repository.GroupRepository;
 import com.hana4.ggumtle.repository.PostRepository;
 import com.hana4.ggumtle.repository.UserRepository;
 
-import jakarta.persistence.EntityManager;
-
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class PostRepositoryTest {
@@ -31,9 +29,6 @@ class PostRepositoryTest {
 
 	@Autowired
 	GroupRepository groupRepository;
-
-	@Autowired
-	EntityManager em;
 
 	@BeforeEach
 	void beforeEach() {
