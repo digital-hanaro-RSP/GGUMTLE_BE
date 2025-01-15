@@ -42,7 +42,7 @@ public class Bucket extends BaseEntity {
 	private DreamAccount dreamAccount;
 
 	@ManyToOne
-	@JoinColumn(name = "userId", nullable = true, foreignKey = @ForeignKey(name = "fk_Bucket_userId_User"))
+	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_Bucket_userId_User"))
 	private User user;
 
 	@Column(nullable = false)
@@ -83,7 +83,7 @@ public class Bucket extends BaseEntity {
 	private Boolean isRecommended;
 	private BigDecimal originId;
 
-	public void updateFromDto(BucketRequestDto dto) {
+	public void updateFromDto(BucketRequestDto.Create dto) {
 		this.title = dto.getTitle();
 		this.tagType = dto.getTagType();
 		this.dueDate = dto.getDueDate();

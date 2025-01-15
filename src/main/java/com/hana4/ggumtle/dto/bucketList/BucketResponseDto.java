@@ -38,11 +38,13 @@ public class BucketResponseDto {
 		private BigDecimal originId;
 		private BigDecimal safeBox;
 		private Long followers;
+		private String userId;
 
 		private List<Recommendation> recommendations;
 
 		public static BucketInfo form(Bucket bucket) {
 			return BucketInfo.builder()
+				.userId(bucket.getUser().getId())
 				.id(bucket.getId())
 				.title(bucket.getTitle())
 				.tagType(bucket.getTagType())

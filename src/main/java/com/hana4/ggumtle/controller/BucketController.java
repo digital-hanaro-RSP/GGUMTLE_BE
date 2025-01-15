@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,6 +20,7 @@ import com.hana4.ggumtle.dto.ApiResponse;
 import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
 import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
 import com.hana4.ggumtle.dto.recommendation.RecommendationResponseDto;
+import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.BucketService;
 
 import jakarta.validation.Valid;
@@ -32,9 +34,10 @@ public class BucketController {
 
 	@PostMapping
 	public ResponseEntity<ApiResponse<BucketResponseDto.BucketInfo>> createBucket(
-		@RequestBody @Valid BucketRequestDto requestDto) {
+		@RequestBody @Valid BucketRequestDto.Create requestDto,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-		BucketResponseDto.BucketInfo createdBucket = bucketService.createBucket(requestDto);
+		BucketResponseDto.BucketInfo createdBucket = bucketService.createBucket(requestDto, userDetails.getUser());
 
 		return ResponseEntity.ok(ApiResponse.success(createdBucket));
 	}
@@ -42,7 +45,7 @@ public class BucketController {
 	@PutMapping("/{bucketId}")
 	public ResponseEntity<ApiResponse<BucketResponseDto.BucketInfo>> updateBucket(
 		@PathVariable("bucketId") Long bucketId,
-		@RequestBody BucketRequestDto requestDto) {
+		@RequestBody BucketRequestDto.Create requestDto) {
 		// 1. Bucket을 수정하고 반환
 		BucketResponseDto.BucketInfo updatedBucket = bucketService.updateBucket(bucketId, requestDto);
 
