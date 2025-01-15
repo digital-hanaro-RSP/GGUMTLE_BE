@@ -39,9 +39,11 @@ public class GroupController {
 	// 그룹 생성
 	@PostMapping
 	public ResponseEntity<ApiResponse<GroupResponseDto.Create>> createGroup(
-		@RequestBody @Valid GroupRequestDto.Create request) {
+		@RequestBody @Valid GroupRequestDto.Create request,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
 		try {
-			GroupResponseDto.Create response = groupService.createGroup(request);
+			GroupResponseDto.Create response = groupService.createGroup(request, userDetails.getUser());
 			return ResponseEntity.ok(ApiResponse.success(response));
 		} catch (CustomException ce) {
 			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);

@@ -21,14 +21,16 @@ public class GroupResponseDto {
 		private GroupCategory category;
 		private String description;
 		private String imageUrl;
+		private int memberCount;
 
-		public static Create from(Group group) {
+		public static Create from(Group group, int memberCount) {
 			return Create.builder()
 				.id(group.getId())
 				.name(group.getName())
 				.category(group.getCategory())
 				.description(group.getDescription())
 				.imageUrl(group.getImageUrl())
+				.memberCount(memberCount)
 				.createdAt(group.getCreatedAt())
 				.updatedAt(group.getUpdatedAt())
 				.build();

@@ -17,7 +17,6 @@ import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.repository.GroupMemberRepository;
 import com.hana4.ggumtle.repository.GroupRepository;
-import com.hana4.ggumtle.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,21 +28,28 @@ import lombok.extern.slf4j.Slf4j;
 public class GroupService {
 	private final GroupRepository groupRepository;
 	private final GroupMemberRepository groupMemberRepository;
-	private final UserRepository userRepository;
 
 	//그룹 생성
-	public GroupResponseDto.Create createGroup(GroupRequestDto.Create request) {
+	@Transactional
+	public GroupResponseDto.Create createGroup(GroupRequestDto.Create request, User user) {
 		Group group = request.toEntity();
+		Group savedGroup = groupRepository.save(group);
 
-		return GroupResponseDto.Create.from(groupRepository.save(group));
+		// 그룹 생성자를 멤버로 추가
+		GroupMember groupMember = GroupMember.builder()
+			.group(savedGroup)
+			.user(user)
+			.build();
+		groupMemberRepository.save(groupMember);
+
+		// memberCount가 1인 상태로 응답 반환
+		return GroupResponseDto.Create.from(savedGroup, 1);
 	}
 
 	//모든 그룹 조회(그룹 내 멤버 count)
 	public Page<GroupResponseDto.Read> getAllGroupsWithMemberCount(GroupCategory category, String search,
 		Pageable pageable) {
 		Page<Object[]> results = groupRepository.findGroupsWithMemberCount(category, search, pageable);
-
-		System.out.println("results = " + results);
 
 		// Object[] -> DTO 변환
 		return results.map(result -> {
