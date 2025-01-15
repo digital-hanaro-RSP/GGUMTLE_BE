@@ -1,9 +1,8 @@
 package com.hana4.ggumtle.dto.groupMember;
 
-import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,12 +15,12 @@ public class GroupMemberRequestDto {
 	@AllArgsConstructor
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	public static class Create {
-		@NotEmpty(message = "그룹 이름을 입력하세요.")
-		private Group groupId;
+		@NotNull(message = "그룹 이름을 입력하세요.")
+		private Long groupId;
 
 		public GroupMember toEntity() {
 			return new GroupMember().toBuilder()
-				.group(this.groupId)
+				// .group(this.groupId)
 				.build();
 		}
 	}
