@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hana4.ggumtle.dto.ApiResponse;
+import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.dto.group.GroupRequestDto;
 import com.hana4.ggumtle.dto.group.GroupResponseDto;
 import com.hana4.ggumtle.dto.groupMember.GroupMemberRequestDto;
@@ -38,13 +38,13 @@ public class GroupController {
 
 	// 그룹 생성
 	@PostMapping
-	public ResponseEntity<ApiResponse<GroupResponseDto.Create>> createGroup(
+	public ResponseEntity<CustomApiResponse<GroupResponseDto.Create>> createGroup(
 		@RequestBody @Valid GroupRequestDto.Create request,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
 		try {
 			GroupResponseDto.Create response = groupService.createGroup(request, userDetails.getUser());
-			return ResponseEntity.ok(ApiResponse.success(response));
+			return ResponseEntity.ok(CustomApiResponse.success(response));
 		} catch (CustomException ce) {
 			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
@@ -68,12 +68,12 @@ public class GroupController {
 
 	// 커뮤니티 그룹 가입
 	@PostMapping("/{groupId}/member")
-	public ResponseEntity<ApiResponse<GroupMemberResponseDto.JoinGroup>> joinGroup(@PathVariable Long groupId,
+	public ResponseEntity<CustomApiResponse<GroupMemberResponseDto.JoinGroup>> joinGroup(@PathVariable Long groupId,
 		@RequestBody @Valid
 		GroupMemberRequestDto.Create request, @AuthenticationPrincipal CustomUserDetails userDetails) {
 		try {
 			GroupMemberResponseDto.JoinGroup response = groupService.joinGroup(groupId, request, userDetails.getUser());
-			return ResponseEntity.ok(ApiResponse.success(response));
+			return ResponseEntity.ok(CustomApiResponse.success(response));
 		} catch (CustomException ce) {
 			throw new CustomException(ErrorCode.NOT_FOUND);
 		}
@@ -81,12 +81,12 @@ public class GroupController {
 
 	// 커뮤니티 그룹 탈퇴(memberCount = 0 이면 자동으로 그룹 삭제.)
 	@DeleteMapping("/{groupId}/member")
-	public ResponseEntity<ApiResponse<GroupMemberResponseDto.LeaveGroup>> leaveGroup(
+	public ResponseEntity<CustomApiResponse<GroupMemberResponseDto.LeaveGroup>> leaveGroup(
 		@PathVariable Long groupId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		try {
 			GroupMemberResponseDto.LeaveGroup response = groupService.leaveGroup(groupId, userDetails.getUser());
-			return ResponseEntity.ok(ApiResponse.success(response));
+			return ResponseEntity.ok(CustomApiResponse.success(response));
 		} catch (CustomException ce) {
 			throw new CustomException(ErrorCode.NOT_FOUND);
 		}

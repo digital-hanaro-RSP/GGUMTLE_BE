@@ -2,8 +2,8 @@ package com.hana4.ggumtle.dto.groupMember;
 
 import java.time.LocalDateTime;
 
-import com.hana4.ggumtle.dto.ApiResponse;
 import com.hana4.ggumtle.dto.BaseDto;
+import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -14,7 +14,7 @@ import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
 public class GroupMemberResponseDto {
-	private ApiResponse<JoinGroup> response;
+	private CustomApiResponse<JoinGroup> response;
 
 	@SuperBuilder
 	public static class JoinGroup extends BaseDto {
