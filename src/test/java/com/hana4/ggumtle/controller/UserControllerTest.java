@@ -115,7 +115,7 @@ public class UserControllerTest {
 			.build();
 
 		// 응답 DTO
-		UserResponseDto.Login loginResponse = UserResponseDto.Login.builder()
+		UserResponseDto.TokensWithPermission loginResponse = UserResponseDto.TokensWithPermission.builder()
 			.accessToken("testAccessToken")
 			.refreshToken("testRefreshToken")
 			.build();
@@ -174,7 +174,7 @@ public class UserControllerTest {
 		UserRequestDto.Refresh refreshRequest = new UserRequestDto.Refresh("oldRefreshToken");
 
 		// 응답 DTO
-		UserResponseDto.Refresh refreshResponse = UserResponseDto.Refresh.builder()
+		UserResponseDto.Tokens refreshResponse = UserResponseDto.Tokens.builder()
 			.accessToken("newAccessToken")
 			.refreshToken("newRefreshToken")
 			.build();

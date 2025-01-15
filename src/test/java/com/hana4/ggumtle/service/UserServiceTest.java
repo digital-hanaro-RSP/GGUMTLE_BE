@@ -158,7 +158,7 @@ class UserServiceTest {
 			when(jwtProvider.generateRefreshToken(any())).thenReturn("refreshToken");
 
 			// When
-			UserResponseDto.Login result = userService.login(loginDto);
+			UserResponseDto.TokensWithPermission result = userService.login(loginDto);
 
 			// Then
 			assertThat(result).isNotNull();
@@ -208,7 +208,7 @@ class UserServiceTest {
 			when(jwtProvider.generateAccessToken(any())).thenReturn(newAccessToken);
 			when(jwtProvider.generateRefreshToken(any())).thenReturn(newRefreshToken);
 
-			UserResponseDto.Refresh result = userService.refresh(refreshDto);
+			UserResponseDto.Tokens result = userService.refresh(refreshDto);
 
 			assertThat(result).isNotNull();
 			assertThat(result.getAccessToken()).isEqualTo(newAccessToken);

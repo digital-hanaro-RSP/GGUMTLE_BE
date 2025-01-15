@@ -13,6 +13,9 @@ import com.hana4.ggumtle.dto.user.UserResponseDto;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -20,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "User", description = "회원가입, 로그인, 토큰 재발급, 약관동의 API")
 public class UserController {
 	public final UserService userService;
 
@@ -33,33 +37,41 @@ public class UserController {
 		response.addCookie(refreshTokenCookie);
 	}
 
+	@Operation(summary = "회원가입", description = "새로운 사용자를 등록합니다.")
 	@PostMapping("/user")
 	public ResponseEntity<CustomApiResponse<UserResponseDto.UserInfo>> register(
 		@RequestBody @Valid UserRequestDto.Register request) {
 		return ResponseEntity.ok(CustomApiResponse.success(userService.register(request)));
 	}
 
+	@Operation(summary = "사용자 로그인", description = "사용자 로그인을 처리합니다.")
 	@PostMapping("/auth/tokens")
-	public ResponseEntity<CustomApiResponse<UserResponseDto.Login>> login(
+	public ResponseEntity<CustomApiResponse<UserResponseDto.TokensWithPermission>> login(
 		@RequestBody @Valid UserRequestDto.Login request,
 		HttpServletResponse response) {
 		// 로그인 후 accessToken과 refreshToken 생성
-		UserResponseDto.Login loginResponse = userService.login(request);
+		UserResponseDto.TokensWithPermission loginResponse = userService.login(request);
 
 		setRefreshTokenCookie(response, loginResponse.getRefreshToken());
 		return ResponseEntity.ok(CustomApiResponse.success(loginResponse));
 	}
 
+	@Operation(summary = "토큰 갱신", description = "리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급합니다.")
 	@PostMapping("/auth/refresh")
-	public ResponseEntity<CustomApiResponse<UserResponseDto.Refresh>> tokenRefresh(
+	public ResponseEntity<CustomApiResponse<UserResponseDto.Tokens>> tokenRefresh(
 		@RequestBody @Valid UserRequestDto.Refresh refreshTokenRequestDto, HttpServletResponse response) {
 		// token 재발급
-		UserResponseDto.Refresh refreshResponse = userService.refresh(refreshTokenRequestDto);
+		UserResponseDto.Tokens refreshResponse = userService.refresh(refreshTokenRequestDto);
 
 		setRefreshTokenCookie(response, refreshResponse.getRefreshToken());
 		return ResponseEntity.ok(CustomApiResponse.success(refreshResponse));
 	}
 
+	@Operation(
+		summary = "마이데이터 약관동의",
+		description = "user permission을 1로 업데이트합니다.",
+		security = @SecurityRequirement(name = "bearerAuth")
+	)
 	@PatchMapping("/mydata/permission")
 	public ResponseEntity<CustomApiResponse<UserResponseDto.UserInfo>> updatePermission(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
