@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hana4.ggumtle.dto.ApiResponse;
+import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.security.CustomUserDetails;
@@ -26,10 +26,11 @@ public class PostController {
 	private final PostService postService;
 
 	@PostMapping("/post")
-	public ResponseEntity<ApiResponse<PostResponseDto.PostInfo>> writePost(
+	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> writePost(
 		@RequestBody @Valid PostRequestDto.Write write, @PathVariable("groupId") Long groupId,
 		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-		return ResponseEntity.ok(ApiResponse.success(postService.save(groupId, customUserDetails.getUser(), write)));
+		return ResponseEntity.ok(
+			CustomApiResponse.success(postService.save(groupId, customUserDetails.getUser(), write)));
 	}
 }
 
