@@ -3,6 +3,7 @@ package com.hana4.ggumtle.model.entity.bucket;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.hana4.ggumtle.dto.bucketlist.BucketRequestDto;
 import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -28,7 +29,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
 @Table(name = "Bucket")
 public class Bucket extends BaseEntity {
@@ -37,11 +38,11 @@ public class Bucket extends BaseEntity {
 	private Long id;
 
 	@ManyToOne
-	@JoinColumn(name = "dreamAccountId", nullable = false, foreignKey = @ForeignKey(name = "fk_Bucket_dreamAccountId_DreamAccount"))
+	@JoinColumn(name = "dreamAccountId", nullable = true, foreignKey = @ForeignKey(name = "fk_Bucket_dreamAccountId_DreamAccount"))
 	private DreamAccount dreamAccount;
 
 	@ManyToOne
-	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_Bucket_userId_User"))
+	@JoinColumn(name = "userId", nullable = true, foreignKey = @ForeignKey(name = "fk_Bucket_userId_User"))
 	private User user;
 
 	@Column(nullable = false)
@@ -54,7 +55,7 @@ public class Bucket extends BaseEntity {
 	private LocalDateTime dueDate;
 
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-	private boolean isDueSet;
+	private Boolean isDueSet;
 
 	private String memo;
 
@@ -70,7 +71,7 @@ public class Bucket extends BaseEntity {
 	private BucketStatus status;
 
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-	private boolean isAutoAllocate;
+	private Boolean isAutoAllocate;
 
 	private BigDecimal allocateAmount;
 
@@ -79,5 +80,22 @@ public class Bucket extends BaseEntity {
 	private BigDecimal safeBox;
 
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-	private boolean isRecommended;
+	private Boolean isRecommended;
+	private BigDecimal originId;
+
+	public void updateFromDto(BucketRequestDto dto) {
+		this.title = dto.getTitle();
+		this.tagType = dto.getTagType();
+		this.dueDate = dto.getDueDate();
+		this.howTo = dto.getHowTo();
+		this.isDueSet = dto.getIsDueSet();
+		this.isAutoAllocate = dto.getIsAutoAllocate();
+		this.allocateAmount = dto.getAllocateAmount();
+		this.cronCycle = dto.getCronCycle();
+		this.goalAmount = dto.getGoalAmount();
+		this.memo = dto.getMemo();
+		this.status = dto.getStatus();
+		this.isRecommended = dto.getIsRecommended();
+		this.originId = dto.getOriginId();
+	}
 }
