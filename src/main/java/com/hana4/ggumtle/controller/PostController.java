@@ -1,4 +1,4 @@
-package com.hana4.ggumtle.model.entity.post;
+package com.hana4.ggumtle.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -9,7 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hana4.ggumtle.dto.ApiResponse;
+import com.hana4.ggumtle.dto.post.PostRequestDto;
+import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.security.CustomUserDetails;
+import com.hana4.ggumtle.service.PostService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

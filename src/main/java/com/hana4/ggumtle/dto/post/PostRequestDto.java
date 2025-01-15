@@ -1,6 +1,8 @@
-package com.hana4.ggumtle.model.entity.post;
+package com.hana4.ggumtle.dto.post;
 
 import com.hana4.ggumtle.model.entity.group.Group;
+import com.hana4.ggumtle.model.entity.post.Post;
+import com.hana4.ggumtle.model.entity.post.PostType;
 import com.hana4.ggumtle.model.entity.user.User;
 
 import jakarta.validation.constraints.NotEmpty;

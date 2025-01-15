@@ -12,11 +12,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.hana4.ggumtle.dto.post.PostRequestDto;
+import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.group.GroupRepository;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.model.entity.user.UserRole;
+import com.hana4.ggumtle.repository.PostRepository;
+import com.hana4.ggumtle.service.PostService;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {

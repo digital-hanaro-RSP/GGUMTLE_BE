@@ -23,12 +23,16 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hana4.ggumtle.WithMockCustomUser;
 import com.hana4.ggumtle.config.TestSecurityConfig;
+import com.hana4.ggumtle.controller.PostController;
+import com.hana4.ggumtle.dto.post.PostRequestDto;
+import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.model.entity.user.UserRole;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.security.filter.JwtAuthFilter;
 import com.hana4.ggumtle.security.provider.JwtProvider;
 import com.hana4.ggumtle.service.CustomUserDetailsService;
+import com.hana4.ggumtle.service.PostService;
 
 @WebMvcTest(PostController.class)
 @WithMockCustomUser

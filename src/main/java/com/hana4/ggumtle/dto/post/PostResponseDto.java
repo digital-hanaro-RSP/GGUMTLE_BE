@@ -1,4 +1,7 @@
-package com.hana4.ggumtle.model.entity.post;
+package com.hana4.ggumtle.dto.post;
+
+import com.hana4.ggumtle.model.entity.post.Post;
+import com.hana4.ggumtle.model.entity.post.PostType;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
