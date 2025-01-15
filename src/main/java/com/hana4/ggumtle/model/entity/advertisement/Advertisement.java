@@ -46,5 +46,6 @@ public class Advertisement {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
+	@Builder.Default
 	private AdvertisementAdType adType = AdvertisementAdType.HANA;
 }

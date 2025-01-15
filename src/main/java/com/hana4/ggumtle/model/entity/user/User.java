@@ -59,6 +59,7 @@ public class User extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	@ColumnDefault("USER")
+	@Builder.Default
 	private UserRole role = UserRole.USER;
 
 	private String profileImageUrl;
