@@ -55,6 +55,9 @@ public class GroupController {
 		@RequestParam(defaultValue = "0") int offset,
 		@RequestParam(defaultValue = "10") int limit
 	) {
+		if (limit <= 0) {
+			throw new CustomException(ErrorCode.INVALID_PARAMETER);
+		}
 		Pageable pageable = PageRequest.of(offset / limit, limit);
 		Page<GroupResponseDto.Read> groups = groupService.getAllGroupsWithMemberCount(category, search, pageable);
 		return ResponseEntity.ok(groups);
