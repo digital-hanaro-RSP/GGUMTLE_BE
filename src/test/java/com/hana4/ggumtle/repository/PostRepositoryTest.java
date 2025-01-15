@@ -1,4 +1,4 @@
-package com.hana4.ggumtle.model.entity.post;
+package com.hana4.ggumtle.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -13,10 +13,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import com.hana4.ggumtle.dto.user.UserRequestDto;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
+import com.hana4.ggumtle.model.entity.post.Post;
+import com.hana4.ggumtle.model.entity.post.PostType;
 import com.hana4.ggumtle.model.entity.user.User;
-import com.hana4.ggumtle.repository.GroupRepository;
-import com.hana4.ggumtle.repository.PostRepository;
-import com.hana4.ggumtle.repository.UserRepository;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)

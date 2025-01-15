@@ -1,4 +1,4 @@
-package com.hana4.ggumtle.model.entity.post;
+package com.hana4.ggumtle.service;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -19,11 +19,12 @@ import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
+import com.hana4.ggumtle.model.entity.post.Post;
+import com.hana4.ggumtle.model.entity.post.PostType;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.model.entity.user.UserRole;
 import com.hana4.ggumtle.repository.GroupRepository;
 import com.hana4.ggumtle.repository.PostRepository;
-import com.hana4.ggumtle.service.PostService;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
