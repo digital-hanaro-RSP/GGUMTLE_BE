@@ -2,7 +2,9 @@ package com.hana4.ggumtle.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,8 @@ import com.hana4.ggumtle.dto.groupMember.GroupMemberRequestDto;
 import com.hana4.ggumtle.dto.groupMember.GroupMemberResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
+import com.hana4.ggumtle.model.entity.group.GroupCategory;
+import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.GroupService;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,10 +50,13 @@ public class GroupController {
 	// 모든 그룹 조회(그룹 내 멤버 count)
 	@GetMapping
 	public ResponseEntity<Page<GroupResponseDto.Read>> getAllGroups(
-		@RequestParam int page,
-		@RequestParam int size
+		@RequestParam(required = false) GroupCategory category,
+		@RequestParam(required = false) String search,
+		@RequestParam(defaultValue = "0") int offset,
+		@RequestParam(defaultValue = "10") int limit
 	) {
-		Page<GroupResponseDto.Read> groups = groupService.getAllGroupsWithMemberCount(PageRequest.of(page, size));
+		Pageable pageable = PageRequest.of(offset / limit, limit);
+		Page<GroupResponseDto.Read> groups = groupService.getAllGroupsWithMemberCount(category, search, pageable);
 		return ResponseEntity.ok(groups);
 	}
 
@@ -57,9 +64,9 @@ public class GroupController {
 	@PostMapping("/{groupId}/member")
 	public ResponseEntity<ApiResponse<GroupMemberResponseDto.JoinGroup>> joinGroup(@PathVariable Long groupId,
 		@RequestBody @Valid
-		GroupMemberRequestDto.Create request) {
+		GroupMemberRequestDto.Create request, @AuthenticationPrincipal CustomUserDetails userDetails) {
 		try {
-			GroupMemberResponseDto.JoinGroup response = groupService.joinGroup(groupId, request);
+			GroupMemberResponseDto.JoinGroup response = groupService.joinGroup(groupId, request, userDetails.getUser());
 			return ResponseEntity.ok(ApiResponse.success(response));
 		} catch (CustomException ce) {
 			throw new CustomException(ErrorCode.NOT_FOUND);

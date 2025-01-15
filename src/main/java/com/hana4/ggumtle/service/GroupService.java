@@ -3,6 +3,7 @@ package com.hana4.ggumtle.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.hana4.ggumtle.dto.group.GroupRequestDto;
 import com.hana4.ggumtle.dto.group.GroupResponseDto;
@@ -11,6 +12,7 @@ import com.hana4.ggumtle.dto.groupMember.GroupMemberResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.group.Group;
+import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.repository.GroupMemberRepository;
@@ -23,43 +25,52 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional
 public class GroupService {
 	private final GroupRepository groupRepository;
 	private final GroupMemberRepository groupMemberRepository;
 	private final UserRepository userRepository;
 
+	//그룹 생성
 	public GroupResponseDto.Create createGroup(GroupRequestDto.Create request) {
 		Group group = request.toEntity();
 
 		return GroupResponseDto.Create.from(groupRepository.save(group));
 	}
 
-	public GroupResponseDto.Read toReadDto(Group group) {
-		// 멤버 수를 계산하여 DTO에 포함
-		int memberCount = groupMemberRepository.countByGroup(group);
-		return GroupResponseDto.Read.from(group, memberCount);
-	}
+	//모든 그룹 조회(그룹 내 멤버 count)
+	public Page<GroupResponseDto.Read> getAllGroupsWithMemberCount(GroupCategory category, String search,
+		Pageable pageable) {
+		Page<Object[]> results = groupRepository.findGroupsWithMemberCount(category, search, pageable);
 
-	public Page<GroupResponseDto.Read> getAllGroupsWithMemberCount(Pageable pageable) {
-		// 페이징 처리된 Group 가져오기
-		Page<Group> groups = groupRepository.findAll(pageable);
+		System.out.println("results = " + results);
 
-		// 각 Group에 대해 DTO 변환 및 멤버 수 계산
-		return groups.map(group -> {
-			int memberCount = groupMemberRepository.countByGroup(group);
-			return GroupResponseDto.Read.from(group, memberCount);
+		// Object[] -> DTO 변환
+		return results.map(result -> {
+			Group group = (Group)result[0];
+			Long memberCount = (Long)result[1];
+
+			return GroupResponseDto.Read.from(group, memberCount.intValue());
 		});
 	}
 
+	//그룹 내 인원이 0명이면 그룹 자동 삭제
 	public void deleteGroup(Long groupId) {
-		groupRepository.deleteById(groupId);
-	}
-
-	public GroupMemberResponseDto.JoinGroup joinGroup(Long groupId, GroupMemberRequestDto.Create request) {
 		Group group = groupRepository.findById(groupId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
-		User user = userRepository.findById(String.valueOf(request.getUserId()))
+		int memberCount = groupMemberRepository.countByGroup(group);
+
+		if (memberCount == 0) {
+			groupRepository.deleteById(groupId);
+		} else {
+			throw new IllegalStateException(
+				"Cannot delete group with active members. Current member count: " + memberCount);
+		}
+	}
+
+	public GroupMemberResponseDto.JoinGroup joinGroup(Long groupId, GroupMemberRequestDto.Create request, User user) {
+		Group group = groupRepository.findById(groupId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
 		if (groupMemberRepository.existsByGroupAndUser(group, user)) {

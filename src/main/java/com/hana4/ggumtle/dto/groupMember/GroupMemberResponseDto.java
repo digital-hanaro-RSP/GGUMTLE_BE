@@ -22,6 +22,8 @@ public class GroupMemberResponseDto {
 				.id(groupMember.getId())
 				.groupId(groupMember.getGroup())
 				.userId(groupMember.getUser())
+				.createdAt(groupMember.getCreatedAt())
+				.updatedAt(groupMember.getUpdatedAt())
 				.build();
 		}
 	}

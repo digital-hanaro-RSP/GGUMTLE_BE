@@ -4,6 +4,7 @@ import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,7 +20,7 @@ public class GroupRequestDto {
 	public static class Create {
 		@NotEmpty(message = "그룹이름을 입력하세요.")
 		private String name;
-		@NotEmpty(message = "그룹 카테고리를 입력하세요.")
+		@NotNull(message = "그룹 카테고리를 입력하세요.")
 		private GroupCategory category;
 		@NotEmpty(message = "설명을 입력하세요.")
 		private String description;

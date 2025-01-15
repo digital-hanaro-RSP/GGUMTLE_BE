@@ -6,15 +6,15 @@ import com.hana4.ggumtle.model.entity.group.GroupCategory;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 public class GroupResponseDto {
 	@Getter
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor
-	@Builder
+	@SuperBuilder
 	public static class Create extends BaseDto {
 		private Long id;
 		private String name;
@@ -29,6 +29,8 @@ public class GroupResponseDto {
 				.category(group.getCategory())
 				.description(group.getDescription())
 				.imageUrl(group.getImageUrl())
+				.createdAt(group.getCreatedAt())
+				.updatedAt(group.getUpdatedAt())
 				.build();
 		}
 	}
@@ -36,14 +38,14 @@ public class GroupResponseDto {
 	@Getter
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor
-	@Builder
+	@SuperBuilder
 	public static class Read extends BaseDto {
 		private Long id;
 		private String name;
 		private GroupCategory category;
 		private String description;
 		private String imageUrl;
-		private int memberCount;    //count 쿼리 짜서 불러와야함.
+		private int memberCount;
 
 		public static Read from(Group group, int memberCount) {
 			return Read.builder()
@@ -53,6 +55,8 @@ public class GroupResponseDto {
 				.description(group.getDescription())
 				.imageUrl(group.getImageUrl())
 				.memberCount(memberCount)
+				.createdAt(group.getCreatedAt())
+				.updatedAt(group.getUpdatedAt())
 				.build();
 		}
 	}
