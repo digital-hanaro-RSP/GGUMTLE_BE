@@ -7,5 +7,5 @@ package com.hana4.ggumtle.model.entity.bucket;
  * HOLD - 보류
  */
 public enum BucketStatus {
-    DOING, DONE, HOLD
+	DOING, DONE, HOLD
 }
