@@ -1,11 +1,9 @@
-package com.hana4.ggumtle.model.entity.post;
+package com.hana4.ggumtle.controller;
 
 import static org.mockito.BDDMockito.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,11 +21,9 @@ import org.springframework.web.context.WebApplicationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hana4.ggumtle.WithMockCustomUser;
 import com.hana4.ggumtle.config.TestSecurityConfig;
-import com.hana4.ggumtle.controller.PostController;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
-import com.hana4.ggumtle.model.entity.user.User;
-import com.hana4.ggumtle.model.entity.user.UserRole;
+import com.hana4.ggumtle.model.entity.post.PostType;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.security.filter.JwtAuthFilter;
 import com.hana4.ggumtle.security.provider.JwtProvider;
@@ -71,19 +67,6 @@ class PostControllerTest {
 	void writePost() throws Exception {
 
 		// given
-		User user = new User(
-			"1", // id
-			"01012341234", // tel
-			"password", // password
-			"남인우", // name
-			(short)1, // permission
-			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
-			"M", // gender
-			UserRole.USER, // role
-			"https://example.com/profile.jpg", // profileImageUrl
-			"inwoo" // nickname
-		);
-
 		String imageUrls = "imageUrl";
 		String content = "content";
 		PostRequestDto.Write write = new PostRequestDto.Write(imageUrls, content, PostType.POST);

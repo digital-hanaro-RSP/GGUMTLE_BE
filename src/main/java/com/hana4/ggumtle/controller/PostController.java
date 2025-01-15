@@ -16,12 +16,10 @@ import com.hana4.ggumtle.service.PostService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/community/group/{groupId}")
-@Slf4j
 public class PostController {
 	private final PostService postService;
 
