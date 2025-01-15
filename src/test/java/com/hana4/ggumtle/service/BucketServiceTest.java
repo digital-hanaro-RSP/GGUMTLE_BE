@@ -16,8 +16,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.hana4.ggumtle.dto.bucketlist.BucketRequestDto;
-import com.hana4.ggumtle.dto.bucketlist.BucketResponseDto;
+import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
+import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
 import com.hana4.ggumtle.repository.BucketRepository;
 

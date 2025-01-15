@@ -16,8 +16,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.hana4.ggumtle.dto.bucketlist.BucketRequestDto;
-import com.hana4.ggumtle.dto.bucketlist.BucketResponseDto;
+import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
+import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
 import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
 import com.hana4.ggumtle.model.entity.bucket.BucketStatus;
 import com.hana4.ggumtle.model.entity.bucket.BucketTagType;

@@ -1,7 +1,8 @@
-package com.hana4.ggumtle.dto.bucketlist;
+package com.hana4.ggumtle.dto.bucketList;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
 import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
@@ -11,6 +12,7 @@ import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -34,6 +36,10 @@ public class BucketResponseDto {
 		private BucketStatus status;
 		private Boolean isRecommended;
 		private BigDecimal originId;
+		private BigDecimal safeBox;
+		private Long followers;
+
+		private List<Recommendation> recommendations;
 
 		public static BucketInfo form(Bucket bucket) {
 			return BucketInfo.builder()
@@ -51,7 +57,17 @@ public class BucketResponseDto {
 				.status(bucket.getStatus())
 				.isRecommended(bucket.getIsRecommended())
 				.originId(bucket.getOriginId())
+				.followers(bucket.getFollowers())
 				.build();
 		}
+	}
+
+	@Data
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@Builder
+	public static class Recommendation {
+		private Long followers;
+		private String title;
 	}
 }

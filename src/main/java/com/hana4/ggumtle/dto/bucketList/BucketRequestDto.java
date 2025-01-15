@@ -1,4 +1,4 @@
-package com.hana4.ggumtle.dto.bucketlist;
+package com.hana4.ggumtle.dto.bucketList;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -37,7 +37,7 @@ public class BucketRequestDto {
 	private Boolean isAutoAllocate;
 
 	private BigDecimal allocateAmount;
-
+	private Long followers;
 	@NotNull
 	private String cronCycle;
 
@@ -69,7 +69,8 @@ public class BucketRequestDto {
 		@JsonProperty("status") @NotNull BucketStatus status,
 		@JsonProperty("memo") String memo,
 		@JsonProperty("isRecommended") Boolean isRecommended,
-		@JsonProperty("originId") BigDecimal originId
+		@JsonProperty("originId") BigDecimal originId,
+		@JsonProperty("followers") Long followers
 	) {
 		this.title = title;
 		this.tagType = tagType;
@@ -85,6 +86,7 @@ public class BucketRequestDto {
 		this.memo = memo;
 		this.isRecommended = isRecommended;
 		this.originId = originId;
+		this.followers = followers;
 	}
 
 	public Bucket toEntity() {
@@ -102,6 +104,7 @@ public class BucketRequestDto {
 			.status(this.status)
 			.isRecommended(this.isRecommended)
 			.originId(this.originId)
+			.followers(this.followers)
 			.build();
 	}
 }

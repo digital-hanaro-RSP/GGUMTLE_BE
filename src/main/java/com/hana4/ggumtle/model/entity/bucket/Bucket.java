@@ -3,7 +3,7 @@ package com.hana4.ggumtle.model.entity.bucket;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.hana4.ggumtle.dto.bucketlist.BucketRequestDto;
+import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
 import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -97,5 +97,6 @@ public class Bucket extends BaseEntity {
 		this.status = dto.getStatus();
 		this.isRecommended = dto.getIsRecommended();
 		this.originId = dto.getOriginId();
+		this.followers = dto.getFollowers();
 	}
 }
