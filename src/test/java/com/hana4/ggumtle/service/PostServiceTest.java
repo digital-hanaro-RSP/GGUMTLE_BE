@@ -29,10 +29,10 @@ import com.hana4.ggumtle.repository.PostRepository;
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
 	@InjectMocks
-	private PostService postService; // 테스트 대상 Service 클래스
+	private PostService postService;
 
 	@Mock
-	private PostRepository postRepository; // Repository를 Mock 처리
+	private PostRepository postRepository;
 
 	@Mock
 	private GroupRepository groupRepository;
@@ -42,17 +42,27 @@ class PostServiceTest {
 		// given
 		String userId = "1";
 		Long groupId = 1L;
-		PostResponseDto.PostInfo expectedPostInfo = new PostResponseDto.PostInfo(
-			"1", groupId, 1L, null, "imageUrl", "content", PostType.POST
-		);
-
-		String imageUrls = "imageUrl";
+		String imageUrls = "imageUrls";
 		String content = "content";
-		PostRequestDto.Write write = new PostRequestDto.Write(imageUrls, content, PostType.POST);
-		PostResponseDto.PostInfo postInfo = new PostResponseDto.PostInfo("1", 1L, 1L, null, imageUrls, content,
-			PostType.POST);
+
+		PostResponseDto.PostInfo expectedPostInfo = PostResponseDto.PostInfo.builder()
+			.userId(userId)
+			.groupId(groupId)
+			.bucketId(1L)
+			.snapShot(null)
+			.imageUrls(imageUrls)
+			.content(content)
+			.postType(PostType.POST)
+			.build();
+
+		PostRequestDto.Write write = PostRequestDto.Write.builder()
+			.imageUrls(imageUrls)
+			.content(content)
+			.postType(PostType.POST)
+			.build();
 
 		Post post = new Post();
+
 		User user = new User(
 			"1", // id
 			"010-1234-5678", // tel
@@ -68,9 +78,9 @@ class PostServiceTest {
 
 		Group group = new Group(
 			1L, // id
-			"개발자 모임", // name
+			"여행자 모임", // name
 			GroupCategory.TRAVEL, // category (가정: GroupCategory.TECH)
-			"개발 관련 정보와 기술을 공유하는 모임입니다.", // description
+			"여행 관련 정보와 기술을 공유하는 모임입니다.", // description
 			"https://example.com/group-image.jpg" // imageUrl
 		);
 
@@ -93,7 +103,7 @@ class PostServiceTest {
 	}
 
 	@Test
-	void save_throwsException_whenGroupNotFound() {
+	void save_throwsException_그룹없음() {
 		// given
 		Long groupId = 1L;
 		String imageUrls = "imageUrl";
@@ -108,6 +118,6 @@ class PostServiceTest {
 			postService.save(groupId, user, postRequestDto);
 		});
 
-		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+		assertThat(ErrorCode.NOT_FOUND).isEqualTo(exception.getErrorCode());
 	}
 }

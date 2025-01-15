@@ -69,6 +69,7 @@ class PostRepositoryTest {
 		post.setContent("글 내용");
 		post.setPostType(PostType.POST);
 		Post savedPost = postRepository.save(post);
+
 		assertThat(savedPost.getId()).isNotNull();
 		assertThat(savedPost.getUser().getId()).isEqualTo(savedUser.getId());
 		assertThat(savedPost.getContent()).isEqualTo(post.getContent());
