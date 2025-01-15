@@ -8,9 +8,11 @@ import com.hana4.ggumtle.model.entity.user.UserRole;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Generated
 public class UserResponseDto {
 	@Getter
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)

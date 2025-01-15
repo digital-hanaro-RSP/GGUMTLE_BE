@@ -21,7 +21,7 @@ public class MyDataService {
 		return myDataRepository.save(myData);
 	}
 
-	private MyData generateRandomMyData(User user) {
+	protected MyData generateRandomMyData(User user) {
 		Random random = new Random();
 		return MyData.builder()
 			.user(user)

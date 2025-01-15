@@ -12,9 +12,11 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Generated
 public class UserRequestDto {
 	@Getter
 	@Builder(toBuilder = true) // 기존 필드 값은 유지하고 변경하려는 필드만 수정된 값으로 교체
