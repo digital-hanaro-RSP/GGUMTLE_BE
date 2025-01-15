@@ -1,6 +1,7 @@
 package com.hana4.ggumtle.model.entity.post;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
+import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -86,5 +89,24 @@ class PostServiceTest {
 
 		// verify
 		verify(postRepository, times(1)).save(any(Post.class));
+	}
+
+	@Test
+	void save_throwsException_whenGroupNotFound() {
+		// given
+		Long groupId = 1L;
+		String imageUrls = "imageUrl";
+		String content = "content";
+		User user = new User();
+		PostRequestDto.Write postRequestDto = new PostRequestDto.Write(imageUrls, content, PostType.POST);
+
+		when(groupRepository.findById(groupId)).thenReturn(Optional.empty());
+
+		// when, then
+		CustomException exception = assertThrows(CustomException.class, () -> {
+			postService.save(groupId, user, postRequestDto);
+		});
+
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
 	}
 }
