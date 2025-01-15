@@ -66,6 +66,7 @@ class PostControllerTest {
 		PostRequestDto.Write write = new PostRequestDto.Write(imageUrls, content, PostType.POST);
 
 		PostResponseDto.PostInfo post = new PostResponseDto.PostInfo(
+			1L,
 			"1", // userId
 			1L, // groupId
 			1L, // bucketId
