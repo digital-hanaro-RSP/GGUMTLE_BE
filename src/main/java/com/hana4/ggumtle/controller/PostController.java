@@ -2,6 +2,7 @@ package com.hana4.ggumtle.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,6 +30,13 @@ public class PostController {
 		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		return ResponseEntity.ok(
 			CustomApiResponse.success(postService.save(groupId, customUserDetails.getUser(), write)));
+	}
+
+	@GetMapping("/post/{postId}")
+	public ResponseEntity<CustomApiResponse<PostResponseDto.PostDetail>> getPost(@PathVariable("postId") Long postId,
+		@PathVariable Long groupId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		return ResponseEntity.ok(
+			CustomApiResponse.success(postService.getPost(customUserDetails.getUser(), groupId, postId)));
 	}
 }
 

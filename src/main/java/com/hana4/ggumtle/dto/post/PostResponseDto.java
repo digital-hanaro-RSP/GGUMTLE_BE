@@ -1,6 +1,7 @@
 package com.hana4.ggumtle.dto.post;
 
 import com.hana4.ggumtle.dto.BaseDto;
+import com.hana4.ggumtle.dto.user.UserResponseDto;
 import com.hana4.ggumtle.model.entity.post.Post;
 import com.hana4.ggumtle.model.entity.post.PostType;
 
@@ -39,6 +40,35 @@ public class PostResponseDto {
 				.imageUrls(post.getImageUrls())
 				.content(post.getContent())
 				.postType(post.getPostType())
+				.createdAt(post.getCreatedAt())
+				.updatedAt(post.getUpdatedAt())
+				.build();
+		}
+	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@ToString
+	@SuperBuilder
+	public static class PostDetail extends PostInfo {
+		private UserResponseDto.BriefInfo userBriefInfo;
+		private int likeCount;
+		private int commentCount;
+
+		public static PostDetail from(Post post, int likeCount, int commentCount) {
+			return PostDetail.builder()
+				.id(post.getId())
+				.userId(post.getUser().getId())
+				.groupId(post.getGroup().getId())
+				.bucketId(post.getBucketId())
+				.snapShot(post.getSnapshot())
+				.imageUrls(post.getImageUrls())
+				.content(post.getContent())
+				.postType(post.getPostType())
+				.userBriefInfo(UserResponseDto.BriefInfo.from(post.getUser()))
+				.likeCount(likeCount)
+				.commentCount(commentCount)
 				.createdAt(post.getCreatedAt())
 				.updatedAt(post.getUpdatedAt())
 				.build();

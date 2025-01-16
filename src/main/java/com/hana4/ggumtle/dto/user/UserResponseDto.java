@@ -89,4 +89,22 @@ public class UserResponseDto {
 		@Schema(description = "new refreshToken", example = "3eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
 		private String refreshToken;
 	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@Builder
+	public static class BriefInfo {
+		private String name;
+		private String profileImageUrl;
+		private String nickname;
+
+		public static BriefInfo from(User user) {
+			return BriefInfo.builder()
+				.name(user.getName())
+				.profileImageUrl(user.getProfileImageUrl())
+				.nickname(user.getNickname())
+				.build();
+		}
+	}
 }
