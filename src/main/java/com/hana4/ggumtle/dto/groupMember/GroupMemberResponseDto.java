@@ -10,9 +10,11 @@ import com.hana4.ggumtle.model.entity.user.User;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
+@Generated
 public class GroupMemberResponseDto {
 	private CustomApiResponse<JoinGroup> response;
 

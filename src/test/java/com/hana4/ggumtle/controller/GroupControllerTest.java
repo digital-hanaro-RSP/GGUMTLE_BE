@@ -1,11 +1,14 @@
 package com.hana4.ggumtle.controller;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +38,7 @@ import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
 import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.security.filter.JwtAuthFilter;
 import com.hana4.ggumtle.security.provider.JwtProvider;
 import com.hana4.ggumtle.service.CustomUserDetailsService;
@@ -177,6 +181,26 @@ class GroupControllerTest {
 	}
 
 	@Test
+	void getAllGroups_InvalidLimit() throws Exception {
+		// given
+		GroupCategory category = GroupCategory.HOBBY;
+		String search = "test";
+		int offset = 0;
+		int limit = 0;
+
+		// when & then
+		mockMvc.perform(get("/community/group")
+				.param("category", category.name())
+				.param("search", search)
+				.param("offset", String.valueOf(offset))
+				.param("limit", String.valueOf(limit)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(ErrorCode.INVALID_PARAMETER.getHttpStatus().value()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.INVALID_PARAMETER.getMessage()))
+			.andDo(print());
+	}
+
+	@Test
 	void joinGroup() throws Exception {
 		// given
 		Long groupId = 1L;
@@ -211,6 +235,68 @@ class GroupControllerTest {
 			.andExpect(jsonPath("$.data.groupId.name").value("Study Group"))
 			.andExpect(jsonPath("$.data.userId.id").value("user-uuid"))
 			.andExpect(jsonPath("$.data.userId.name").value("Test User"))
+			.andDo(print());
+
+		verify(groupService).joinGroup(eq(groupId), any(GroupMemberRequestDto.Create.class), any(User.class));
+	}
+
+	@Test
+	void joinGroup_from_ShouldMapCorrectly() {
+		// given
+		Group group = new Group();
+		group.setId(1L);
+		group.setName("Study Group");
+
+		User user = new User();
+		user.setId("user-uuid");
+		user.setName("Test User");
+
+		LocalDateTime now = LocalDateTime.now();
+		GroupMember groupMember = new GroupMember();
+		groupMember.setId(1L);
+		groupMember.setGroup(group);
+		groupMember.setUser(user);
+		groupMember.setCreatedAt(now);
+		groupMember.setUpdatedAt(now);
+
+		// when
+		GroupMemberResponseDto.JoinGroup result = GroupMemberResponseDto.JoinGroup.from(groupMember);
+
+		// then
+		assertNotNull(result);
+		assertEquals(1L, result.getId());
+		assertEquals(group, result.getGroupId());
+		assertEquals(user, result.getUserId());
+		assertEquals(now, result.getCreatedAt());
+		assertEquals(now, result.getUpdatedAt());
+	}
+
+	@Test
+	void joinGroup_NotFound() throws Exception {
+		// given
+		Long groupId = 1L;
+		GroupMemberRequestDto.Create request = new GroupMemberRequestDto.Create(groupId);
+
+		User user = User.builder()
+			.id("user-uuid")
+			.name("Test User")
+			.build();
+
+		CustomUserDetails userDetails = new CustomUserDetails(user);
+
+		given(customUserDetailsService.loadUserByUsername("testUser")).willReturn(userDetails);
+
+		given(groupService.joinGroup(eq(groupId), any(GroupMemberRequestDto.Create.class), any(User.class)))
+			.willThrow(new CustomException(ErrorCode.NOT_FOUND));
+
+		// when & then
+		mockMvc.perform(post("/community/group/{groupId}/member", groupId)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))
+				.with(user(userDetails)))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(ErrorCode.NOT_FOUND.getHttpStatus().value()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.NOT_FOUND.getMessage()))
 			.andDo(print());
 
 		verify(groupService).joinGroup(eq(groupId), any(GroupMemberRequestDto.Create.class), any(User.class));

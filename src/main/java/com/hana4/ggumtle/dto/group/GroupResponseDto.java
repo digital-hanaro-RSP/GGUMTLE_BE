@@ -7,12 +7,14 @@ import com.hana4.ggumtle.model.entity.group.GroupCategory;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Generated
 public class GroupResponseDto {
 	@Getter
 	@Setter

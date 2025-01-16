@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import com.hana4.ggumtle.dto.group.GroupRequestDto;
 import com.hana4.ggumtle.dto.group.GroupResponseDto;
@@ -340,6 +341,69 @@ public class GroupServiceTest {
 		CustomException exception = assertThrows(CustomException.class, () ->
 			groupService.joinGroup(groupId, request, mockUser));
 		assertEquals(ErrorCode.ALREADY_EXISTS, exception.getErrorCode());
+	}
+
+	@Test
+	@WithMockUser(username = "testUser")
+	void leaveGroup_그룹자동삭제() {
+		// Given
+		Long groupId = 1L;
+		Group group = new Group();
+		group.setId(groupId);
+
+		User user = new User();
+		user.setId("user-uuid");
+
+		GroupMember groupMember = new GroupMember();
+		groupMember.setGroup(group);
+		groupMember.setUser(user);
+
+		when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+		when(groupMemberRepository.findByGroupAndUser(group, user)).thenReturn(Optional.of(groupMember));
+		when(groupMemberRepository.countByGroup(group)).thenReturn(0); // 마지막 멤버 시뮬레이션
+
+		// When
+		GroupMemberResponseDto.LeaveGroup result = groupService.leaveGroup(groupId, user);
+
+		// Then
+		assertNotNull(result);
+		verify(groupMemberRepository).delete(groupMember);
+		verify(groupRepository).delete(group);
+		verify(groupMemberRepository).countByGroup(group);
+
+		// 추가 검증
+		verifyNoMoreInteractions(groupRepository, groupMemberRepository);
+	}
+
+	@Test
+	void leaveGroup_마지막멤버가_아닐경우() {
+		// Given
+		Long groupId = 1L;
+		Group group = new Group();
+		group.setId(groupId);
+
+		User user = new User();
+		user.setId("user-uuid");
+
+		GroupMember groupMember = new GroupMember();
+		groupMember.setGroup(group);
+		groupMember.setUser(user);
+
+		when(groupRepository.findById(groupId)).thenReturn(Optional.of(group));
+		when(groupMemberRepository.findByGroupAndUser(group, user)).thenReturn(Optional.of(groupMember));
+		when(groupMemberRepository.countByGroup(group)).thenReturn(1); // 마지막 멤버가 아님을 시뮬레이션
+
+		// When
+		GroupMemberResponseDto.LeaveGroup result = groupService.leaveGroup(groupId, user);
+
+		// Then
+		assertNotNull(result);
+		verify(groupMemberRepository).delete(groupMember);
+		verify(groupMemberRepository).countByGroup(group);
+		verify(groupRepository, never()).delete(group); // 그룹이 삭제되지 않아야 함
+
+		// 추가 검증
+		verifyNoMoreInteractions(groupRepository, groupMemberRepository);
 	}
 }
 
