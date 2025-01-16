@@ -43,9 +43,11 @@ public class GroupController {
 
 	@Operation(summary = "그룹 생성", description = "새로운 그룹을 생성합니다.")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "그룹 생성 성공",
-			content = @Content(schema = @Schema(implementation = GroupResponseDto.Create.class))),
-		@ApiResponse(responseCode = "500", description = "서버 내부 오류")
+		@ApiResponse(responseCode = "200", description = "그룹 생성 성공"),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 500, \"error\": \"Internal_Server_Error\", \"message\": \"그룹이 생성되지 않았어요!(내부 서버 오류)\" }"
+			)))
 	})
 	@PostMapping
 	public ResponseEntity<CustomApiResponse<GroupResponseDto.Create>> createGroup(
@@ -62,9 +64,11 @@ public class GroupController {
 
 	@Operation(summary = "모든 그룹 조회", description = "모든 그룹을 조회합니다. 그룹 내 멤버 수도 함께 제공됩니다.")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "그룹 조회 성공",
-			content = @Content(schema = @Schema(implementation = GroupResponseDto.Read.class))),
-		@ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
+		@ApiResponse(responseCode = "200", description = "그룹 조회 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 400, \"error\": \"BadRequest\", \"message\": \"해당 그룹이 존재하지 않습니다.\" }"
+			)))
 	})
 	@GetMapping
 	public ResponseEntity<Page<GroupResponseDto.Read>> getAllGroups(
@@ -83,9 +87,11 @@ public class GroupController {
 
 	@Operation(summary = "그룹 가입", description = "특정 커뮤니티 그룹에 가입합니다.")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "그룹 가입 성공",
-			content = @Content(schema = @Schema(implementation = GroupMemberResponseDto.JoinGroup.class))),
-		@ApiResponse(responseCode = "404", description = "그룹을 찾을 수 없음")
+		@ApiResponse(responseCode = "200", description = "그룹 가입 성공"),
+		@ApiResponse(responseCode = "404", description = "그룹을 찾을 수 없음",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"NotFound\", \"message\": \"가입 할 그룹이 존재하지 않습니다.\" }"
+			)))
 	})
 	@PostMapping("/{groupId}/member")
 	public ResponseEntity<CustomApiResponse<GroupMemberResponseDto.JoinGroup>> joinGroup(@PathVariable Long groupId,
@@ -101,9 +107,11 @@ public class GroupController {
 
 	@Operation(summary = "그룹 탈퇴", description = "그룹에서 탈퇴합니다. 마지막 멤버가 탈퇴하면 그룹이 자동으로 삭제됩니다.")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "그룹 탈퇴 성공",
-			content = @Content(schema = @Schema(implementation = GroupMemberResponseDto.LeaveGroup.class))),
-		@ApiResponse(responseCode = "404", description = "그룹을 찾을 수 없음")
+		@ApiResponse(responseCode = "200", description = "그룹 탈퇴 성공"),
+		@ApiResponse(responseCode = "404", description = "그룹을 찾을 수 없음",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 409, \"error\": \"NotFound\", \"message\": \"그룹이 존재하지 않습니다.\" }"
+			)))
 	})
 	@DeleteMapping("/{groupId}/member")
 	public ResponseEntity<CustomApiResponse<GroupMemberResponseDto.LeaveGroup>> leaveGroup(
