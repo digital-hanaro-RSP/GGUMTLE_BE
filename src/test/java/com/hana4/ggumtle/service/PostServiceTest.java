@@ -48,7 +48,6 @@ class PostServiceTest {
 		PostResponseDto.PostInfo expectedPostInfo = PostResponseDto.PostInfo.builder()
 			.userId(userId)
 			.groupId(groupId)
-			.bucketId(1L)
 			.snapShot(null)
 			.imageUrls(imageUrls)
 			.content(content)

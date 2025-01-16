@@ -24,7 +24,6 @@ public class PostResponseDto {
 		private Long id;
 		private String userId;
 		private Long groupId;
-		private Long bucketId;
 		private String snapShot;
 		private String imageUrls;
 		private String content;
@@ -36,7 +35,6 @@ public class PostResponseDto {
 				.id(post.getId())
 				.userId(post.getUser().getId())
 				.groupId(post.getGroup().getId())
-				.bucketId(post.getBucketId())
 				.snapShot(post.getSnapshot())
 				.imageUrls(post.getImageUrls())
 				.content(post.getContent())
@@ -64,7 +62,6 @@ public class PostResponseDto {
 				.id(post.getId())
 				.userId(post.getUser().getId())
 				.groupId(post.getGroup().getId())
-				.bucketId(post.getBucketId())
 				.snapShot(post.getSnapshot())
 				.imageUrls(post.getImageUrls())
 				.content(post.getContent())

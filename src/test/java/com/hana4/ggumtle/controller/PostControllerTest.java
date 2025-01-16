@@ -69,7 +69,6 @@ class PostControllerTest {
 			1L,
 			"1", // userId
 			1L, // groupId
-			1L, // bucketId
 			null, // snapShot
 			imageUrls, // imageUrls
 			content, // content
@@ -96,7 +95,6 @@ class PostControllerTest {
 			.andExpect(jsonPath("$.message").value("ok"))
 			.andExpect(jsonPath("$.data.userId").value(post.getUserId()))
 			.andExpect(jsonPath("$.data.groupId").value(post.getGroupId()))
-			.andExpect(jsonPath("$.data.bucketId").value(post.getBucketId()))
 			.andExpect(jsonPath("$.data.imageUrls").value(post.getImageUrls()))
 			.andExpect(jsonPath("$.data.content").value(post.getContent()))
 			.andExpect(jsonPath("$.data.postType").value(post.getPostType().name()))
