@@ -2,16 +2,21 @@ package com.hana4.ggumtle.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+@Schema(description = "API 응답")
 @Getter
 @RequiredArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL) // null인 필드는 응답에 포함되지 않음
 public class CustomApiResponse<T> {
-
+	@Schema(description = "응답 코드", example = "200")
 	private final int code;
+	// @Schema(description = "에러 메시지", example = "에러일때만 나옴 ex) Bad Request, Not Found")
+	@Schema(hidden = true)
 	private final String error;
+	@Schema(description = "응답 메시지", example = "ok")
 	private final String message;
 	private final T data;
 
