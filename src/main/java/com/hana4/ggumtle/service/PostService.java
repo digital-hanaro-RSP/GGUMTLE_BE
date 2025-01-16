@@ -74,4 +74,14 @@ public class PostService {
 		return PostResponseDto.PostInfo.from(postRepository.save(post),
 			postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId()).isPresent());
 	}
+
+	public void deletePost(Long groupId, Long postId, User user) {
+		Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
+			.orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
+
+		Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+		postRepository.deleteById(postId);
+	}
 }

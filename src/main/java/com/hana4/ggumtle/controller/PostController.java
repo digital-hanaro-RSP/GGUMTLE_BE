@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +60,15 @@ public class PostController {
 
 		return ResponseEntity.ok(
 			CustomApiResponse.success(postService.updatePost(groupId, postId, write, customUserDetails.getUser())));
+	}
+
+	@DeleteMapping("/post/{postId}")
+	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> deletePost(@PathVariable Long groupId,
+		@PathVariable Long postId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+		postService.deletePost(groupId, postId, customUserDetails.getUser());
+		return ResponseEntity.ok(
+			CustomApiResponse.success());
 	}
 }
 
