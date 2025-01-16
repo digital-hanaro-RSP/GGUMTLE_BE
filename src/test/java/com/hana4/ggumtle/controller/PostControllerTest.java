@@ -63,7 +63,8 @@ class PostControllerTest {
 		// given
 		String imageUrls = "imageUrl";
 		String content = "content";
-		PostRequestDto.Write write = new PostRequestDto.Write(imageUrls, content, PostType.POST);
+		String snapShot = "snapShot";
+		PostRequestDto.Write write = new PostRequestDto.Write(imageUrls, content, snapShot, PostType.POST);
 
 		PostResponseDto.PostInfo post = new PostResponseDto.PostInfo(
 			1L,

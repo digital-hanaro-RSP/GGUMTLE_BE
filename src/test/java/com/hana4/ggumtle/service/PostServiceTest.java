@@ -107,8 +107,9 @@ class PostServiceTest {
 		Long groupId = 1L;
 		String imageUrls = "imageUrl";
 		String content = "content";
+		String snapShot = "snapShot";
 		User user = new User();
-		PostRequestDto.Write postRequestDto = new PostRequestDto.Write(imageUrls, content, PostType.POST);
+		PostRequestDto.Write postRequestDto = new PostRequestDto.Write(imageUrls, content, snapShot, PostType.POST);
 
 		when(groupRepository.findById(groupId)).thenReturn(Optional.empty());
 

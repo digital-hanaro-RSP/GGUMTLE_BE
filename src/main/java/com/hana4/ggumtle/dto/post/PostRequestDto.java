@@ -28,6 +28,9 @@ public class PostRequestDto {
 		@NotEmpty(message = "내용을 입력하세요.")
 		private String content;
 
+		@NotEmpty(message = "스냅샷이 필요합니다.")
+		private String snapShot;
+
 		@NotNull(message = "글 타입을 입력하세요.")
 		@Builder.Default
 		private PostType postType = PostType.POST;
@@ -38,6 +41,7 @@ public class PostRequestDto {
 				.group(group)
 				.imageUrls(this.imageUrls)
 				.content(this.content)
+				.snapshot(this.snapShot)
 				.postType(this.postType)
 				.build();
 		}
