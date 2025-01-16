@@ -25,6 +25,11 @@ import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.GroupService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +41,12 @@ import lombok.RequiredArgsConstructor;
 public class GroupController {
 	private final GroupService groupService;
 
-	// 그룹 생성
+	@Operation(summary = "그룹 생성", description = "새로운 그룹을 생성합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "그룹 생성 성공",
+			content = @Content(schema = @Schema(implementation = GroupResponseDto.Create.class))),
+		@ApiResponse(responseCode = "500", description = "서버 내부 오류")
+	})
 	@PostMapping
 	public ResponseEntity<CustomApiResponse<GroupResponseDto.Create>> createGroup(
 		@RequestBody @Valid GroupRequestDto.Create request,
@@ -50,7 +60,12 @@ public class GroupController {
 		}
 	}
 
-	// 모든 그룹 조회(그룹 내 멤버 count)
+	@Operation(summary = "모든 그룹 조회", description = "모든 그룹을 조회합니다. 그룹 내 멤버 수도 함께 제공됩니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "그룹 조회 성공",
+			content = @Content(schema = @Schema(implementation = GroupResponseDto.Read.class))),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터")
+	})
 	@GetMapping
 	public ResponseEntity<Page<GroupResponseDto.Read>> getAllGroups(
 		@RequestParam(required = false) GroupCategory category,
@@ -66,7 +81,12 @@ public class GroupController {
 		return ResponseEntity.ok(groups);
 	}
 
-	// 커뮤니티 그룹 가입
+	@Operation(summary = "그룹 가입", description = "특정 커뮤니티 그룹에 가입합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "그룹 가입 성공",
+			content = @Content(schema = @Schema(implementation = GroupMemberResponseDto.JoinGroup.class))),
+		@ApiResponse(responseCode = "404", description = "그룹을 찾을 수 없음")
+	})
 	@PostMapping("/{groupId}/member")
 	public ResponseEntity<CustomApiResponse<GroupMemberResponseDto.JoinGroup>> joinGroup(@PathVariable Long groupId,
 		@RequestBody @Valid
@@ -79,7 +99,12 @@ public class GroupController {
 		}
 	}
 
-	// 커뮤니티 그룹 탈퇴(memberCount = 0 이면 자동으로 그룹 삭제.)
+	@Operation(summary = "그룹 탈퇴", description = "그룹에서 탈퇴합니다. 마지막 멤버가 탈퇴하면 그룹이 자동으로 삭제됩니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "그룹 탈퇴 성공",
+			content = @Content(schema = @Schema(implementation = GroupMemberResponseDto.LeaveGroup.class))),
+		@ApiResponse(responseCode = "404", description = "그룹을 찾을 수 없음")
+	})
 	@DeleteMapping("/{groupId}/member")
 	public ResponseEntity<CustomApiResponse<GroupMemberResponseDto.LeaveGroup>> leaveGroup(
 		@PathVariable Long groupId,
