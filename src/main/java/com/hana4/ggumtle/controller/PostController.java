@@ -67,8 +67,7 @@ public class PostController {
 		@PathVariable Long postId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
 		postService.deletePost(groupId, postId, customUserDetails.getUser());
-		return ResponseEntity.ok(
-			CustomApiResponse.success());
+		return ResponseEntity.ok(CustomApiResponse.success());
 	}
 }
 

@@ -33,26 +33,41 @@ public class PostService {
 	private final PostLikeRepository postLikeRepository;
 	private final CommentRepository commentRepository;
 
+	private boolean checkUserWithPost(User user, Post post) {
+		return !user.getId().equals(post.getUser().getId());
+	}
+
+	private boolean checkUserWithGroup(Long groupId, User user) {
+		Group group = groupRepository.findById(groupId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 그룹이 존재하지 않습니다."));
+		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
+			.orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED, "해당 그룹에 권한이 없습니다."));
+
+		return true;
+	}
+
 	public PostResponseDto.PostInfo save(Long groupId, PostRequestDto.Write postRequestDto, User user) {
-		Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+		Group group = groupRepository.findById(groupId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 그룹이 존재하지 않습니다."));
 		return PostResponseDto.PostInfo.from(postRepository.save(postRequestDto.toEntity(user, group)), false);
 	}
 
 	public PostResponseDto.PostDetail getPost(Long groupId, Long postId, User user) {
-		Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
-		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
-			.orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
+		if (!checkUserWithGroup(groupId, user)) {
+			return null;
+		}
 
 		return PostResponseDto.PostDetail.from(
-			postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND)),
+			postRepository.findById(postId)
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 글이 존재하지 않습니다.")),
 			postLikeRepository.findByPostIdAndUserId(postId, user.getId()).isPresent(),
 			postLikeRepository.countByPostId(postId), commentRepository.countByPostId(postId));
 	}
 
 	public List<PostResponseDto.PostInfo> getPostsByPage(Long groupId, int page, User user) {
-		Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
-		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
-			.orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
+		if (!checkUserWithGroup(groupId, user)) {
+			return null;
+		}
 
 		Pageable pageable = PageRequest.of(page, 10);
 		return postRepository.findAll(pageable)
@@ -63,11 +78,16 @@ public class PostService {
 
 	public PostResponseDto.PostInfo updatePost(Long groupId, Long postId, PostRequestDto.Write postRequestDto,
 		User user) {
-		Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
-		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
-			.orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
+		if (!checkUserWithGroup(groupId, user)) {
+			return null;
+		}
 
-		Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+		Post post = postRepository.findById(postId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 글이 존재하지 않습니다."));
+		if (checkUserWithPost(user, post)) {
+			throw new CustomException(ErrorCode.ACCESS_DENIED, "해당 글에 권한이 없습니다.");
+		}
+
 		post.setImageUrls(postRequestDto.getImageUrls());
 		post.setContent(postRequestDto.getContent());
 
@@ -76,11 +96,15 @@ public class PostService {
 	}
 
 	public void deletePost(Long groupId, Long postId, User user) {
-		Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
-		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
-			.orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
+		if (!checkUserWithGroup(groupId, user)) {
+			return;
+		}
 
 		Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+
+		if (checkUserWithPost(user, post)) {
+			throw new CustomException(ErrorCode.ACCESS_DENIED, "해당 글에 권한이 없습니다.");
+		}
 
 		postRepository.deleteById(postId);
 	}
