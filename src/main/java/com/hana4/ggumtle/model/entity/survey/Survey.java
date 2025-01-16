@@ -1,9 +1,13 @@
 package com.hana4.ggumtle.model.entity.survey;
 
+import java.util.List;
+
 import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.security.util.StringListConverter;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
@@ -21,7 +25,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
 public class Survey extends BaseEntity {
 	@Id
@@ -32,6 +36,7 @@ public class Survey extends BaseEntity {
 	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_Survey_userId_User"))
 	private User user;
 
-	@Column(columnDefinition = "json", nullable = false)
-	private String answers;
+	@Column(columnDefinition = "TEXT", nullable = false)
+	@Convert(converter = StringListConverter.class)
+	private List<Integer> answers;
 }

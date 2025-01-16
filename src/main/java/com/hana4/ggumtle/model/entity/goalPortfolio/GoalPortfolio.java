@@ -30,7 +30,7 @@ import lombok.Setter;
 public class GoalPortfolio extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Short id;
+	private Long id;
 
 	@OneToOne
 	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_GoalPortfolio_userId_User"))
