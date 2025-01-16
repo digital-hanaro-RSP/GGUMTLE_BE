@@ -49,7 +49,7 @@ public class UserService {
 		return UserResponseDto.UserInfo.from(user);
 	}
 
-	public UserResponseDto.Login login(UserRequestDto.Login userRequestDto) {
+	public UserResponseDto.TokensWithPermission login(UserRequestDto.Login userRequestDto) {
 		// 사용자 정보 조회
 		User userInfo = this.getUserByTel(userRequestDto.getTel());
 
@@ -67,14 +67,14 @@ public class UserService {
 		String refreshToken = jwtProvider.generateRefreshToken(userInfo.getId());
 		RefreshToken.putRefreshToken(refreshToken, userInfo.getId());
 
-		return UserResponseDto.Login.builder()
+		return UserResponseDto.TokensWithPermission.builder()
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
 			.permission(userInfo.getPermission())
 			.build();
 	}
 
-	public UserResponseDto.Refresh refresh(UserRequestDto.Refresh userRequestDto) {
+	public UserResponseDto.Tokens refresh(UserRequestDto.Refresh userRequestDto) {
 		// refresh token 유효성 검증
 		checkRefreshToken(userRequestDto.getRefreshToken());
 
@@ -91,7 +91,7 @@ public class UserService {
 		String newRefreshToken = jwtProvider.generateRefreshToken(id);
 		RefreshToken.putRefreshToken(newRefreshToken, id);
 
-		return UserResponseDto.Refresh.builder()
+		return UserResponseDto.Tokens.builder()
 			.accessToken(newAccessToken)
 			.refreshToken(newRefreshToken)
 			.build();

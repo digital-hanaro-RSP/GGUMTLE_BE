@@ -1,19 +1,36 @@
 package com.hana4.ggumtle.security;
 
+import java.util.Collection;
 import java.util.Collections;
 
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-public class CustomUserDetails extends org.springframework.security.core.userdetails.User {
-	private final com.hana4.ggumtle.model.entity.user.User user;
+import com.hana4.ggumtle.model.entity.user.User;
 
-	public CustomUserDetails(com.hana4.ggumtle.model.entity.user.User user) {
-		super(user.getTel(), user.getPassword(),
-			Collections.singleton(new SimpleGrantedAuthority(user.getRole().name())));
-		this.user = user;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+@Getter
+@Slf4j
+@AllArgsConstructor
+public class CustomUserDetails implements UserDetails {
+	private final User user;
+
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return Collections.singleton(new SimpleGrantedAuthority(user.getRole().name()));
 	}
 
-	public com.hana4.ggumtle.model.entity.user.User getUser() {
-		return user;
+	@Override
+	public String getPassword() {
+		return user.getPassword();
+	}
+
+	@Override
+	public String getUsername() {
+		return user.getTel();
 	}
 }
