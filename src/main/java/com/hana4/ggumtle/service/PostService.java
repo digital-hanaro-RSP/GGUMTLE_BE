@@ -12,6 +12,7 @@ import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
+import com.hana4.ggumtle.model.entity.post.Post;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.repository.CommentRepository;
 import com.hana4.ggumtle.repository.GroupMemberRepository;
@@ -58,5 +59,19 @@ public class PostService {
 			.map(post -> PostResponseDto.PostInfo.from(post,
 				postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId()).isPresent()))
 			.getContent();
+	}
+
+	public PostResponseDto.PostInfo updatePost(User user, Long groupId, Long postId,
+		PostRequestDto.Write postRequestDto) {
+		Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
+			.orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
+
+		Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+		post.setImageUrls(postRequestDto.getImageUrls());
+		post.setContent(postRequestDto.getContent());
+
+		return PostResponseDto.PostInfo.from(postRepository.save(post),
+			postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId()).isPresent());
 	}
 }

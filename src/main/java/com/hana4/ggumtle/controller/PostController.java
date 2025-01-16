@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,6 +50,15 @@ public class PostController {
 
 		return ResponseEntity.ok(
 			CustomApiResponse.success(postService.getPostsByPage(groupId, customUserDetails.getUser(), page)));
+	}
+
+	@PatchMapping("/post/{postId}")
+	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> updatePost(@PathVariable("postId") Long postId,
+		@PathVariable Long groupId, @RequestBody @Valid PostRequestDto.Write write,
+		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+		return ResponseEntity.ok(
+			CustomApiResponse.success(postService.updatePost(customUserDetails.getUser(), groupId, postId, write)));
 	}
 }
 
