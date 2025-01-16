@@ -15,7 +15,7 @@ public class GroupMemberRequestDto {
 	@AllArgsConstructor
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	public static class Create {
-		@NotNull(message = "그룹 이름을 입력하세요.")
+		@NotNull(message = "그룹 ID를 입력하세요.")
 		private Long groupId;
 
 		public GroupMember toEntity() {

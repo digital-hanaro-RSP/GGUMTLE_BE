@@ -1,4 +1,276 @@
 package com.hana4.ggumtle.controller;
 
-public class GroupControllerTest {
+import static org.mockito.BDDMockito.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hana4.ggumtle.WithMockCustomUser;
+import com.hana4.ggumtle.config.TestSecurityConfig;
+import com.hana4.ggumtle.dto.group.GroupRequestDto;
+import com.hana4.ggumtle.dto.group.GroupResponseDto;
+import com.hana4.ggumtle.dto.groupMember.GroupMemberRequestDto;
+import com.hana4.ggumtle.dto.groupMember.GroupMemberResponseDto;
+import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.global.error.ErrorCode;
+import com.hana4.ggumtle.model.entity.group.Group;
+import com.hana4.ggumtle.model.entity.group.GroupCategory;
+import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
+import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.security.filter.JwtAuthFilter;
+import com.hana4.ggumtle.security.provider.JwtProvider;
+import com.hana4.ggumtle.service.CustomUserDetailsService;
+import com.hana4.ggumtle.service.GroupService;
+
+@WebMvcTest(GroupController.class)
+@WithMockCustomUser
+@Import(TestSecurityConfig.class)
+class GroupControllerTest {
+	@MockitoBean
+	GroupService groupService;
+
+	@Autowired
+	MockMvc mockMvc;
+
+	@Autowired
+	ObjectMapper objectMapper;
+
+	@MockitoBean
+	JwtAuthFilter jwtAuthFilter;
+
+	@MockitoBean
+	JwtProvider jwtProvider;
+
+	@MockitoBean
+	CustomUserDetailsService customUserDetailsService;
+
+	@Autowired
+	WebApplicationContext webApplicationContext;
+
+	@BeforeEach
+	public void setup() {
+		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
+			.apply(springSecurity()) // Spring Security 통합
+			.build();
+	}
+
+	@Test
+	void createGroup() throws Exception {
+		// given
+		GroupRequestDto.Create request = GroupRequestDto.Create.builder()
+			.name("Study Group")
+			.category(GroupCategory.EDUCATION)
+			.description("A group for studying together")
+			.imageUrl("http://example.com/image.jpg")
+			.build();
+
+		GroupResponseDto.Create response = GroupResponseDto.Create.builder()
+			.id(1L)
+			.name("Study Group")
+			.category(GroupCategory.EDUCATION)
+			.description("A group for studying together")
+			.imageUrl("http://example.com/image.jpg")
+			.memberCount(1)
+			.build();
+
+		given(groupService.createGroup(any(GroupRequestDto.Create.class), any(User.class)))
+			.willReturn(response);
+
+		// when & then
+		mockMvc.perform(post("/community/group")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andExpect(jsonPath("$.data.id").value(1L))
+			.andExpect(jsonPath("$.data.name").value("Study Group"))
+			.andExpect(jsonPath("$.data.category").value("EDUCATION"))
+			.andExpect(jsonPath("$.data.description").value("A group for studying together"))
+			.andExpect(jsonPath("$.data.imageUrl").value("http://example.com/image.jpg"))
+			.andExpect(jsonPath("$.data.memberCount").value(1))
+			.andDo(print());
+
+		verify(groupService).createGroup(any(GroupRequestDto.Create.class), any(User.class));
+	}
+
+	@Test
+	void createGroup_내부서버오류() throws Exception {
+		// given
+		GroupRequestDto.Create request = GroupRequestDto.Create.builder()
+			.name("Study Group")
+			.category(GroupCategory.EDUCATION)
+			.description("A group for studying together")
+			.imageUrl("http://example.com/image.jpg")
+			.build();
+
+		given(groupService.createGroup(any(GroupRequestDto.Create.class), any(User.class)))
+			.willThrow(new CustomException(ErrorCode.INTERNAL_SERVER_ERROR));
+
+		// when & then
+		mockMvc.perform(post("/community/group")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isInternalServerError())
+			.andExpect(jsonPath("$.code").value(ErrorCode.INTERNAL_SERVER_ERROR.getHttpStatus().value()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.INTERNAL_SERVER_ERROR.getMessage()))
+			.andDo(print());
+
+		verify(groupService).createGroup(any(GroupRequestDto.Create.class), any(User.class));
+	}
+
+	@Test
+	void getAllGroups() throws Exception {
+		// given
+		GroupCategory category = GroupCategory.HOBBY;
+		String search = "test";
+		int offset = 0;
+		int limit = 10;
+
+		GroupResponseDto.Read groupDto = GroupResponseDto.Read.builder()
+			.id(1L)
+			.name("Test Group")
+			.category(category)
+			.description("Test Description")
+			.memberCount(5)
+			.build();
+
+		Page<GroupResponseDto.Read> groupPage = new PageImpl<>(List.of(groupDto));
+
+		given(groupService.getAllGroupsWithMemberCount(eq(category), eq(search), any(Pageable.class)))
+			.willReturn(groupPage);
+
+		// when & then
+		mockMvc.perform(get("/community/group")
+				.param("category", category.name())
+				.param("search", search)
+				.param("offset", String.valueOf(offset))
+				.param("limit", String.valueOf(limit)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.content[0].id").value(1L))
+			.andExpect(jsonPath("$.content[0].name").value("Test Group"))
+			.andExpect(jsonPath("$.content[0].category").value(category.name()))
+			.andExpect(jsonPath("$.content[0].description").value("Test Description"))
+			.andExpect(jsonPath("$.content[0].memberCount").value(5))
+			.andDo(print());
+
+		verify(groupService).getAllGroupsWithMemberCount(eq(category), eq(search), any(Pageable.class));
+
+	}
+
+	@Test
+	void joinGroup() throws Exception {
+		// given
+		Long groupId = 1L;
+		GroupMemberRequestDto.Create request = new GroupMemberRequestDto.Create(groupId);
+
+		Group group = new Group();
+		group.setId(groupId);
+		group.setName("Study Group");
+
+		User user = User.builder()
+			.id("user-uuid")
+			.name("Test User")
+			.build();
+
+		GroupMemberResponseDto.JoinGroup response = GroupMemberResponseDto.JoinGroup.builder()
+			.id(1L)
+			.groupId(group)
+			.userId(user)
+			.build();
+
+		given(groupService.joinGroup(eq(groupId), any(GroupMemberRequestDto.Create.class), any(User.class)))
+			.willReturn(response);
+
+		// when & then
+		mockMvc.perform(post("/community/group/{groupId}/member", groupId)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.data.id").value(1L))
+			.andExpect(jsonPath("$.data.groupId.id").value(groupId))
+			.andExpect(jsonPath("$.data.groupId.name").value("Study Group"))
+			.andExpect(jsonPath("$.data.userId.id").value("user-uuid"))
+			.andExpect(jsonPath("$.data.userId.name").value("Test User"))
+			.andDo(print());
+
+		verify(groupService).joinGroup(eq(groupId), any(GroupMemberRequestDto.Create.class), any(User.class));
+	}
+
+	@Test
+	void leaveGroup_성공() throws Exception {
+		// given
+		Long groupId = 1L;
+		User user = User.builder()
+			.id("user-uuid")
+			.name("Test User")
+			.build();
+
+		Group group = new Group();
+		group.setId(groupId);
+		group.setName("Test Group");
+
+		GroupMember groupMember = new GroupMember();
+		groupMember.setId(1L);
+		groupMember.setGroup(group);
+		groupMember.setUser(user);
+
+		GroupMemberResponseDto.LeaveGroup response = GroupMemberResponseDto.LeaveGroup.from(groupMember);
+
+		given(groupService.leaveGroup(eq(groupId), any(User.class)))
+			.willReturn(response);
+
+		// when & then
+		mockMvc.perform(delete("/community/group/{groupId}/member", groupId)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andExpect(jsonPath("$.data.id").value(1L))
+			.andExpect(jsonPath("$.data.groupId.id").value(groupId))
+			.andExpect(jsonPath("$.data.groupId.name").value("Test Group"))
+			.andExpect(jsonPath("$.data.userId.id").value("user-uuid"))
+			.andExpect(jsonPath("$.data.userId.name").value("Test User"))
+			.andDo(print());
+
+		verify(groupService).leaveGroup(eq(groupId), any(User.class));
+	}
+
+	@Test
+	void leaveGroup_그룹없음() throws Exception {
+		// given
+		Long groupId = 1L;
+
+		given(groupService.leaveGroup(eq(groupId), any(User.class)))
+			.willThrow(new CustomException(ErrorCode.NOT_FOUND));
+
+		// when & then
+		mockMvc.perform(delete("/community/group/{groupId}/member", groupId)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(ErrorCode.NOT_FOUND.getHttpStatus().value()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.NOT_FOUND.getMessage()))
+			.andDo(print());
+
+		verify(groupService).leaveGroup(eq(groupId), any(User.class));
+	}
 }
