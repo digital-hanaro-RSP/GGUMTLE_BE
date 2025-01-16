@@ -8,6 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -39,10 +40,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 			String jwtToken = token.substring(7);
 			String username = jwtProvider.getUsernameFromToken(jwtToken);
 			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-				UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-					userDetails, null, userDetails.getAuthorities());
-				SecurityContextHolder.getContext().setAuthentication(authToken);
+				try {
+					UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+					UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+						userDetails, null, userDetails.getAuthorities());
+					SecurityContextHolder.getContext().setAuthentication(authToken);
+				} catch (UsernameNotFoundException e) {
+					// 인증되지 않은 사용자에 대한 예외 처리
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증 실패: " + e.getMessage());
+					return; // 필터 체인을 중단
+				}
 			}
 		}
 
