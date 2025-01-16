@@ -4,15 +4,26 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import com.hana4.ggumtle.dto.group.GroupRequestDto;
 import com.hana4.ggumtle.dto.group.GroupResponseDto;
+import com.hana4.ggumtle.dto.groupMember.GroupMemberRequestDto;
+import com.hana4.ggumtle.dto.groupMember.GroupMemberResponseDto;
+import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
@@ -76,4 +87,259 @@ public class GroupServiceTest {
 		verify(groupRepository, times(1)).save(any(Group.class));
 		verify(groupMemberRepository, times(1)).save(any(GroupMember.class));
 	}
+
+	@Test
+	void getAllGroupsWithMemberCount_성공() {
+		// given
+		GroupCategory category = GroupCategory.HOBBY;
+		String search = null;  // 모든 그룹 조회를 위해 null로 설정
+		Pageable pageable = PageRequest.of(0, 10);
+
+		// mockGroup 생성
+		Group mockGroup = Group.builder()
+			.id(1L)
+			.name("부자왕")
+			.category(GroupCategory.INVESTMENT)
+			.description("노후자금을 불려봅시다!")
+			.imageUrl("http://example.com/image.png")
+			.build();
+
+		Object[] mockResult = new Object[] {mockGroup, 5L}; // 그룹과 멤버 수를 반환하는 결과
+		// Page<Object[]> mockPage = new PageImpl<Object[]>(List.of(mockResult), pageable, 1);
+		Page<Object[]> mockPage = new PageImpl<>(Collections.singletonList(mockResult), pageable, 1);
+
+		// stubbing
+		Mockito.when(groupRepository.findGroupsWithMemberCount(category, search, pageable))
+			.thenReturn(mockPage);
+
+		// when
+		Page<GroupResponseDto.Read> result = groupService.getAllGroupsWithMemberCount(category, search, pageable);
+
+		// then
+		assertNotNull(result);
+		assertEquals(1, result.getTotalElements());
+		GroupResponseDto.Read dto = result.getContent().get(0);
+		assertEquals(mockGroup.getName(), dto.getName());
+		assertEquals(mockGroup.getCategory(), dto.getCategory());
+		assertEquals(mockGroup.getDescription(), dto.getDescription());
+		assertEquals(5, dto.getMemberCount());
+	}
+
+	@Test
+	void leaveGroup_성공() {
+		// given
+		Long groupId = 1L;
+
+		User mockUser = User.builder()
+			.id("1")
+			.tel("010-5555-6666")
+			.password("password")
+			.name("김도희")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1996, 9, 9, 0, 0))
+			.gender("W")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile.jpg")
+			.nickname("telletobinana")
+			.build();
+
+		Group mockGroup = Group.builder()
+			.id(groupId)
+			.name("부자왕")
+			.category(GroupCategory.HOBBY)
+			.description("노후자금을 불려봅시다!")
+			.imageUrl("http://example.com/group-image.png")
+			.build();
+
+		GroupMember mockGroupMember = GroupMember.builder()
+			.id(1L)
+			.group(mockGroup)
+			.user(mockUser)
+			.build();
+
+		Mockito.when(groupRepository.findById(groupId))
+			.thenReturn(Optional.of(mockGroup));
+
+		Mockito.when(groupMemberRepository.findByGroupAndUser(mockGroup, mockUser))
+			.thenReturn(Optional.of(mockGroupMember));
+
+		Mockito.when(groupMemberRepository.countByGroup(mockGroup))
+			.thenReturn(0); // Remaining members are 0, so the group will be deleted
+
+		// when
+		GroupMemberResponseDto.LeaveGroup response = groupService.leaveGroup(groupId, mockUser);
+
+		// then
+		assertNotNull(response);
+		assertEquals(mockGroupMember.getGroup(), response.getGroupId());
+		assertEquals(mockGroupMember.getUser(), response.getUserId());
+
+		// verify that the group member was deleted
+		Mockito.verify(groupMemberRepository, Mockito.times(1))
+			.delete(mockGroupMember);
+
+		// verify that the group was deleted because remainingMembers == 0
+		Mockito.verify(groupRepository, Mockito.times(1))
+			.delete(mockGroup);
+	}
+
+	@Test
+	void leaveGroup_그룹없음_실패() {
+		// given
+		Long groupId = 1L;
+		User mockUser = User.builder()
+			.id("1")
+			.name("김도희")
+			.build();
+
+		when(groupRepository.findById(groupId)).thenReturn(Optional.empty());
+
+		// when & then
+		assertThrows(CustomException.class, () ->
+			groupService.leaveGroup(groupId, mockUser));
+	}
+
+	@Test
+	void leaveGroup_멤버없음_실패() {
+		// given
+		Long groupId = 1L;
+		User mockUser = User.builder()
+			.id("3")
+			.name("김희도")
+			.build();
+
+		Group mockGroup = Group.builder()
+			.id(groupId)
+			.name("부자왕")
+			.build();
+
+		when(groupRepository.findById(groupId)).thenReturn(Optional.of(mockGroup));
+		when(groupMemberRepository.findByGroupAndUser(mockGroup, mockUser))
+			.thenReturn(Optional.empty());
+
+		// when & then
+		assertThrows(CustomException.class, () ->
+			groupService.leaveGroup(groupId, mockUser));
+	}
+
+	@Test
+	void joinGroup_성공() {
+		// given
+		Long groupId = 1L;
+		User mockUser = new User(
+			"1",
+			"010-5555-6666",
+			"password",
+			"김도희",
+			(short)1,
+			LocalDateTime.of(1996, 9, 12, 0, 0),
+			"W",
+			UserRole.USER,
+			"https://example.com/profile.jpg",
+			"telletobinana"
+		);
+
+		Group mockGroup = Group.builder()
+			.id(groupId)
+			.name("부자왕")
+			.category(GroupCategory.INVESTMENT)
+			.description("노후자금을 불려봅시다!")
+			.imageUrl("http://example.com/image.png")
+			.build();
+
+		GroupMemberRequestDto.Create request = GroupMemberRequestDto.Create.builder()
+			.groupId(groupId)
+			.build();
+
+		GroupMember mockGroupMember = GroupMember.builder()
+			.id(1L)
+			.group(mockGroup)
+			.user(mockUser)
+			.build();
+
+		when(groupRepository.findById(groupId)).thenReturn(Optional.of(mockGroup));
+		when(groupMemberRepository.existsByGroupAndUser(mockGroup, mockUser)).thenReturn(false);
+		when(groupMemberRepository.save(any(GroupMember.class))).thenReturn(mockGroupMember);
+
+		// when
+		GroupMemberResponseDto.JoinGroup response = groupService.joinGroup(groupId, request, mockUser);
+
+		// then
+		assertNotNull(response);
+		assertEquals(mockGroupMember.getId(), response.getId());
+		assertEquals(mockGroup, response.getGroupId());
+		assertEquals(mockUser, response.getUserId());
+
+		verify(groupRepository, times(1)).findById(groupId);
+		verify(groupMemberRepository, times(1)).existsByGroupAndUser(mockGroup, mockUser);
+		verify(groupMemberRepository, times(1)).save(any(GroupMember.class));
+	}
+
+	@Test
+	void joinGroup_그룹없음_실패() {
+		// given
+		Long groupId = 1L;
+		User mockUser = new User(
+			"1",
+			"010-5555-6666",
+			"password",
+			"김도희",
+			(short)1,
+			LocalDateTime.of(1996, 9, 12, 0, 0),
+			"W",
+			UserRole.USER,
+			"https://example.com/profile.jpg",
+			"telletobinana"
+		);
+
+		GroupMemberRequestDto.Create request = GroupMemberRequestDto.Create.builder()
+			.groupId(groupId)
+			.build();
+
+		when(groupRepository.findById(groupId)).thenReturn(Optional.empty());
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class, () ->
+			groupService.joinGroup(groupId, request, mockUser));
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+	}
+
+	@Test
+	void joinGroup_이미존재하는멤버_실패() {
+		// given
+		Long groupId = 1L;
+		User mockUser = new User(
+			"1",
+			"010-5555-6666",
+			"password",
+			"김도희",
+			(short)1,
+			LocalDateTime.of(1996, 9, 12, 0, 0),
+			"W",
+			UserRole.USER,
+			"https://example.com/profile.jpg",
+			"telletobinana"
+		);
+
+		Group mockGroup = Group.builder()
+			.id(groupId)
+			.name("부자왕")
+			.category(GroupCategory.INVESTMENT)
+			.description("노후자금을 불려봅시다!")
+			.imageUrl("http://example.com/image.png")
+			.build();
+
+		GroupMemberRequestDto.Create request = GroupMemberRequestDto.Create.builder()
+			.groupId(groupId)
+			.build();
+
+		when(groupRepository.findById(groupId)).thenReturn(Optional.of(mockGroup));
+		when(groupMemberRepository.existsByGroupAndUser(mockGroup, mockUser)).thenReturn(true);
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class, () ->
+			groupService.joinGroup(groupId, request, mockUser));
+		assertEquals(ErrorCode.ALREADY_EXISTS, exception.getErrorCode());
+	}
 }
+

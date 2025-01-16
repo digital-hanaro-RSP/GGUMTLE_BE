@@ -16,6 +16,7 @@ import lombok.experimental.SuperBuilder;
 public class GroupMemberResponseDto {
 	private CustomApiResponse<JoinGroup> response;
 
+	@Getter
 	@SuperBuilder
 	public static class JoinGroup extends BaseDto {
 		private Long id;
