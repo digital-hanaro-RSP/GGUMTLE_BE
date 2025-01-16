@@ -30,35 +30,35 @@ public class PostController {
 
 	@PostMapping("/post")
 	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> writePost(
-		@RequestBody @Valid PostRequestDto.Write write, @PathVariable("groupId") Long groupId,
+		@PathVariable Long groupId, @RequestBody @Valid PostRequestDto.Write write,
 		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		return ResponseEntity.ok(
-			CustomApiResponse.success(postService.save(groupId, customUserDetails.getUser(), write)));
+			CustomApiResponse.success(postService.save(groupId, write, customUserDetails.getUser())));
 	}
 
 	@GetMapping("/post/{postId}")
-	public ResponseEntity<CustomApiResponse<PostResponseDto.PostDetail>> getPost(@PathVariable("postId") Long postId,
-		@PathVariable Long groupId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+	public ResponseEntity<CustomApiResponse<PostResponseDto.PostDetail>> getPost(@PathVariable Long groupId,
+		@PathVariable Long postId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		return ResponseEntity.ok(
-			CustomApiResponse.success(postService.getPost(customUserDetails.getUser(), groupId, postId)));
+			CustomApiResponse.success(postService.getPost(groupId, postId, customUserDetails.getUser())));
 	}
 
 	@GetMapping("/post")
 	public ResponseEntity<CustomApiResponse<List<PostResponseDto.PostInfo>>> getPostsByPage(
-		@PathVariable("groupId") Long groupId, @RequestParam(required = false, defaultValue = "0") int page,
+		@PathVariable Long groupId, @RequestParam(required = false, defaultValue = "0") int page,
 		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
 		return ResponseEntity.ok(
-			CustomApiResponse.success(postService.getPostsByPage(groupId, customUserDetails.getUser(), page)));
+			CustomApiResponse.success(postService.getPostsByPage(groupId, page, customUserDetails.getUser())));
 	}
 
 	@PatchMapping("/post/{postId}")
-	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> updatePost(@PathVariable("postId") Long postId,
-		@PathVariable Long groupId, @RequestBody @Valid PostRequestDto.Write write,
+	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> updatePost(@PathVariable Long groupId,
+		@PathVariable Long postId, @RequestBody @Valid PostRequestDto.Write write,
 		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
 		return ResponseEntity.ok(
-			CustomApiResponse.success(postService.updatePost(customUserDetails.getUser(), groupId, postId, write)));
+			CustomApiResponse.success(postService.updatePost(groupId, postId, write, customUserDetails.getUser())));
 	}
 }
 

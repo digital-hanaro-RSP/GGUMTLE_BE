@@ -29,11 +29,13 @@ public class PostRequestDto {
 		private String content;
 
 		@NotNull(message = "글 타입을 입력하세요.")
-		private PostType postType;
+		@Builder.Default
+		private PostType postType = PostType.POST;
 
 		public Post toEntity(User user, Group group) {
 			return Post.builder()
-				.user(user).group(group)
+				.user(user)
+				.group(group)
 				.imageUrls(this.imageUrls)
 				.content(this.content)
 				.postType(this.postType)

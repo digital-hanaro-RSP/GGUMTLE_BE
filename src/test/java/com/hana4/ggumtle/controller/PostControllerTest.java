@@ -73,14 +73,15 @@ class PostControllerTest {
 			null, // snapShot
 			imageUrls, // imageUrls
 			content, // content
-			PostType.POST // postType
+			PostType.POST, // postType
+			false
 		);
 
 		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
 			.getAuthentication()
 			.getPrincipal();
 		System.out.println("customUserDetails = " + customUserDetails.getUser());
-		given(postService.save(eq(1L), eq(customUserDetails.getUser()), eq(write))).willReturn(post);
+		given(postService.save(eq(1L), eq(write), eq(customUserDetails.getUser()))).willReturn(post);
 
 		// when
 		String reqBody = objectMapper.writeValueAsString(write);
@@ -101,6 +102,6 @@ class PostControllerTest {
 			.andExpect(jsonPath("$.data.postType").value(post.getPostType().name()))
 			.andDo(print());
 
-		verify(postService).save(1L, customUserDetails.getUser(), write);
+		verify(postService).save(1L, write, customUserDetails.getUser());
 	}
 }

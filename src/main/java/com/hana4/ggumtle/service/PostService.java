@@ -33,12 +33,12 @@ public class PostService {
 	private final PostLikeRepository postLikeRepository;
 	private final CommentRepository commentRepository;
 
-	public PostResponseDto.PostInfo save(Long groupId, User user, PostRequestDto.Write postRequestDto) {
+	public PostResponseDto.PostInfo save(Long groupId, PostRequestDto.Write postRequestDto, User user) {
 		Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 		return PostResponseDto.PostInfo.from(postRepository.save(postRequestDto.toEntity(user, group)), false);
 	}
 
-	public PostResponseDto.PostDetail getPost(User user, Long groupId, Long postId) {
+	public PostResponseDto.PostDetail getPost(Long groupId, Long postId, User user) {
 		Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
 			.orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
@@ -49,7 +49,7 @@ public class PostService {
 			postLikeRepository.countByPostId(postId), commentRepository.countByPostId(postId));
 	}
 
-	public List<PostResponseDto.PostInfo> getPostsByPage(Long groupId, User user, int page) {
+	public List<PostResponseDto.PostInfo> getPostsByPage(Long groupId, int page, User user) {
 		Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
 			.orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));
@@ -61,8 +61,8 @@ public class PostService {
 			.getContent();
 	}
 
-	public PostResponseDto.PostInfo updatePost(User user, Long groupId, Long postId,
-		PostRequestDto.Write postRequestDto) {
+	public PostResponseDto.PostInfo updatePost(Long groupId, Long postId, PostRequestDto.Write postRequestDto,
+		User user) {
 		Group group = groupRepository.findById(groupId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
 			.orElseThrow(() -> new CustomException(ErrorCode.ACCESS_DENIED));

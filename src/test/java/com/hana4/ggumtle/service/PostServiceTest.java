@@ -91,7 +91,7 @@ class PostServiceTest {
 		when(postRepository.save(any(Post.class))).thenReturn(post);
 
 		// when
-		PostResponseDto.PostInfo result = postService.save(groupId, user, write);
+		PostResponseDto.PostInfo result = postService.save(groupId, write, user);
 
 		// then
 		assertThat(result).isNotNull();
@@ -115,7 +115,7 @@ class PostServiceTest {
 
 		// when, then
 		CustomException exception = assertThrows(CustomException.class, () -> {
-			postService.save(groupId, user, postRequestDto);
+			postService.save(groupId, postRequestDto, user);
 		});
 
 		assertThat(ErrorCode.NOT_FOUND).isEqualTo(exception.getErrorCode());
