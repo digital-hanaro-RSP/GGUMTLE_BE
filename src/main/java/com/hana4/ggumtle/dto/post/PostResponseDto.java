@@ -29,8 +29,9 @@ public class PostResponseDto {
 		private String imageUrls;
 		private String content;
 		private PostType postType;
+		private boolean isLiked;
 
-		public static PostInfo from(Post post) {
+		public static PostInfo from(Post post, boolean isLiked) {
 			return PostInfo.builder()
 				.id(post.getId())
 				.userId(post.getUser().getId())
@@ -40,6 +41,7 @@ public class PostResponseDto {
 				.imageUrls(post.getImageUrls())
 				.content(post.getContent())
 				.postType(post.getPostType())
+				.isLiked(isLiked)
 				.createdAt(post.getCreatedAt())
 				.updatedAt(post.getUpdatedAt())
 				.build();
@@ -55,8 +57,9 @@ public class PostResponseDto {
 		private UserResponseDto.BriefInfo userBriefInfo;
 		private int likeCount;
 		private int commentCount;
+		private boolean isLiked;
 
-		public static PostDetail from(Post post, int likeCount, int commentCount) {
+		public static PostDetail from(Post post, boolean isLiked, int likeCount, int commentCount) {
 			return PostDetail.builder()
 				.id(post.getId())
 				.userId(post.getUser().getId())
@@ -69,6 +72,7 @@ public class PostResponseDto {
 				.userBriefInfo(UserResponseDto.BriefInfo.from(post.getUser()))
 				.likeCount(likeCount)
 				.commentCount(commentCount)
+				.isLiked(isLiked)
 				.createdAt(post.getCreatedAt())
 				.updatedAt(post.getUpdatedAt())
 				.build();
