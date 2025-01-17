@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Survey", description = "투자성향설문 API()")
+@Tag(name = "Survey", description = "투자성향설문 API")
 @RequestMapping("/survey")
 public class SurveyController {
 	public final SurveyService surveyService;
