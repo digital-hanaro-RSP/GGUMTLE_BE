@@ -49,9 +49,22 @@ public class GroupService {
 	//모든 그룹 조회(그룹 내 멤버 count)
 	public Page<GroupResponseDto.Read> getAllGroupsWithMemberCount(GroupCategory category, String search,
 		Pageable pageable) {
-		Page<Object[]> results = groupRepository.findGroupsWithMemberCount(category, search, pageable);
+		Page<Object[]> results = groupRepository.findGroupsWithFilters(null, category, search, pageable);
 
 		// Object[] -> DTO 변환
+		return results.map(result -> {
+			Group group = (Group)result[0];
+			Long memberCount = (Long)result[1];
+
+			return GroupResponseDto.Read.from(group, memberCount.intValue());
+		});
+	}
+
+	//내 그룹 조회
+	public Page<GroupResponseDto.Read> getMyGroupsWithMemberCount(String userId, GroupCategory category, String search,
+		Pageable pageable) {
+		Page<Object[]> results = groupRepository.findGroupsWithFilters(userId, category, search, pageable);
+
 		return results.map(result -> {
 			Group group = (Group)result[0];
 			Long memberCount = (Long)result[1];

@@ -13,11 +13,13 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 	@Query(
 		"SELECT g, COUNT(gm) " +
 			"FROM Group g LEFT JOIN GroupMember gm ON gm.group.id = g.id " +
-			"WHERE (:category IS NULL OR g.category = :category) " +
+			"WHERE (:userId IS NULL OR gm.user.id = :userId) " +  // 사용자 ID 조건 추가
+			"AND (:category IS NULL OR g.category = :category) " +
 			"AND (:search IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
 			"GROUP BY g.id, g.name, g.category, g.description, g.imageUrl"
 	)
-	Page<Object[]> findGroupsWithMemberCount(
+	Page<Object[]> findGroupsWithFilters(
+		@Param("userId") String userId,
 		@Param("category") GroupCategory category,
 		@Param("search") String search,
 		Pageable pageable
