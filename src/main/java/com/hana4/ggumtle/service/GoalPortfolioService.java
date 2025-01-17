@@ -2,6 +2,7 @@ package com.hana4.ggumtle.service;
 
 import org.springframework.stereotype.Service;
 
+import com.hana4.ggumtle.dto.goalPortfolio.GoalPortfolioResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.goalPortfolio.GoalPortfolio;
@@ -31,8 +32,8 @@ public class GoalPortfolioService {
 		return goalPortfolioRepository.save(goalPortfolio);
 	}
 
-	public GoalPortfolio getGoalPortfolioByUserId(String userId) {
-		return goalPortfolioRepository.findByUserId(userId)
-			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저의 목표 포트폴리오가 존재하지 않습니다."));
+	public GoalPortfolioResponseDto.Ratio getGoalPortfolioByUserId(String userId) {
+		return GoalPortfolioResponseDto.Ratio.from(goalPortfolioRepository.findByUserId(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저의 목표 포트폴리오가 존재하지 않습니다.")));
 	}
 }

@@ -5,6 +5,7 @@ import java.util.Random;
 
 import org.springframework.stereotype.Service;
 
+import com.hana4.ggumtle.dto.myData.MyDataResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.myData.MyData;
@@ -40,8 +41,8 @@ public class MyDataService {
 		return BigDecimal.valueOf((random.nextInt(1000) + 1) * 10000);
 	}
 
-	public MyData getMyDataByUserId(String userId) {
-		return myDataRepository.findByUserId(userId)
-			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저의 MyData가 연결되지 않았습니다."));
+	public MyDataResponseDto.CurrentPortfolio getMyDataByUserId(String userId) {
+		return MyDataResponseDto.CurrentPortfolio.from(myDataRepository.findByUserId(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저의 MyData가 연결되지 않았습니다.")));
 	}
 }

@@ -13,15 +13,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hana4.ggumtle.dto.bucket.BucketResponseDto;
-import com.hana4.ggumtle.dto.goalPortfolio.GoalPortfolioResponseDto;
-import com.hana4.ggumtle.dto.myData.MyDataResponseDto;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
-import com.hana4.ggumtle.model.entity.myData.MyData;
 import com.hana4.ggumtle.model.entity.post.Post;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.repository.PostRepository;
@@ -80,11 +77,8 @@ public class PostService {
 		snapShotResponse.put("bucketLists", bucketList);
 
 		if (portfolio) {
-			snapShotResponse.put("goalPortfolio",
-				GoalPortfolioResponseDto.Ratio.from(goalPortfolioService.getGoalPortfolioByUserId(user.getId())));
-			MyData myData = myDataService.getMyDataByUserId(user.getId());
-
-			snapShotResponse.put("currentPortfolio", MyDataResponseDto.CurrentPortfolio.from(myData));
+			snapShotResponse.put("goalPortfolio", goalPortfolioService.getGoalPortfolioByUserId(user.getId()));
+			snapShotResponse.put("currentPortfolio", myDataService.getMyDataByUserId(user.getId()));
 		}
 
 		postRequestDto.setSnapShot(objectMapper.writeValueAsString(snapShotResponse));
@@ -97,7 +91,7 @@ public class PostService {
 		}
 
 		return PostResponseDto.PostDetail.from(
-			getPost(postId),
+			getPostById(postId),
 			postLikeService.isAuthorLike(postId, user.getId()), postLikeService.countLikeByPostId(postId),
 			commentService.countCommentByPostId(postId));
 	}
@@ -119,7 +113,7 @@ public class PostService {
 			return null;
 		}
 
-		Post post = getPost(postId);
+		Post post = getPostById(postId);
 		if (checkUserWithPost(user, post)) {
 			throw new CustomException(ErrorCode.ACCESS_DENIED, "해당 글에 권한이 없습니다.");
 		}
@@ -145,7 +139,7 @@ public class PostService {
 		postRepository.deleteById(postId);
 	}
 
-	public Post getPost(Long postId) {
+	public Post getPostById(Long postId) {
 		return postRepository.findById(postId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 글이 존재하지 않습니다."));
 	}
