@@ -74,12 +74,10 @@ public class GroupService {
 	}
 
 	public GroupMemberResponseDto.LeaveGroup leaveGroup(Long groupId, User user) {
-		Group group = groupRepository.findById(groupId)
-			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+		Group group = getGroup(groupId);
 
 		// 그룹 멤버 삭제
-		GroupMember groupMember = groupMemberRepository.findByGroupAndUser(group, user)
-			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+		GroupMember groupMember = getGroupMember(user, group);
 
 		GroupMemberResponseDto.LeaveGroup response = GroupMemberResponseDto.LeaveGroup.from(groupMember);
 
@@ -95,8 +93,7 @@ public class GroupService {
 
 	public GroupMemberResponseDto.JoinGroup joinGroup(Long groupId, GroupMemberRequestDto.CreateGroupMember request,
 		User user) {
-		Group group = groupRepository.findById(groupId)
-			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+		Group group = getGroup(groupId);
 
 		if (groupMemberRepository.existsByGroupAndUser(group, user)) {
 			throw new CustomException(ErrorCode.ALREADY_EXISTS);
@@ -110,5 +107,15 @@ public class GroupService {
 			groupMemberRepository.save(groupMember));
 
 		return data;
+	}
+
+	public Group getGroup(Long groupId) {
+		return groupRepository.findById(groupId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 그룹이 존재하지 않습니다."));
+	}
+
+	public GroupMember getGroupMember(User user, Group group) {
+		return groupMemberRepository.findByGroupAndUser(group, user)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 그룹에 권한이 없습니다."));
 	}
 }

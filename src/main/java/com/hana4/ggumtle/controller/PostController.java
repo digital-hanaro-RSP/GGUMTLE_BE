@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
@@ -32,7 +33,7 @@ public class PostController {
 	@PostMapping("/post")
 	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> writePost(
 		@PathVariable Long groupId, @RequestBody @Valid PostRequestDto.Write write,
-		@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		@AuthenticationPrincipal CustomUserDetails customUserDetails) throws JsonProcessingException {
 		return ResponseEntity.ok(
 			CustomApiResponse.success(postService.save(groupId, write, customUserDetails.getUser())));
 	}
