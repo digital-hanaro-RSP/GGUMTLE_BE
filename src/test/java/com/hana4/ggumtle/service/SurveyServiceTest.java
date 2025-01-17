@@ -91,14 +91,14 @@ class SurveyServiceTest {
 		user.setPermission((short)3); // 퍼미션으로 인한 invalid user case
 		Survey mockSurvey = new Survey();
 		mockSurvey.setCreatedAt(LocalDateTime.now());
-		when(surveyRepository.findByUser(user)).thenReturn(Optional.of(mockSurvey));
+		when(surveyRepository.findByUserId(user.getId())).thenReturn(Optional.of(mockSurvey));
 
 		assertThrows(CustomException.class, () -> surveyService.createSurvey(surveyRequestDto, user));
 	}
 
 	@Test
 	void validateTarget_NoExistingSurvey_ReturnsTrue() {
-		when(surveyRepository.findByUser(user)).thenReturn(Optional.empty());
+		when(surveyRepository.findByUserId(user.getId())).thenReturn(Optional.empty());
 
 		assertTrue(surveyService.validateTarget(user));
 	}
@@ -107,7 +107,7 @@ class SurveyServiceTest {
 	void validateTarget_OldSurvey_ReturnsTrue() {
 		Survey oldSurvey = new Survey();
 		oldSurvey.setCreatedAt(LocalDateTime.now().minusMonths(7));
-		when(surveyRepository.findByUser(user)).thenReturn(Optional.of(oldSurvey));
+		when(surveyRepository.findByUserId(user.getId())).thenReturn(Optional.of(oldSurvey));
 
 		assertTrue(surveyService.validateTarget(user));
 	}
@@ -116,7 +116,7 @@ class SurveyServiceTest {
 	void validateTarget_RecentSurveyLowPermission_ReturnsTrue() {
 		Survey recentSurvey = new Survey();
 		recentSurvey.setCreatedAt(LocalDateTime.now().minusMonths(1));
-		when(surveyRepository.findByUser(user)).thenReturn(Optional.of(recentSurvey));
+		when(surveyRepository.findByUserId(user.getId())).thenReturn(Optional.of(recentSurvey));
 
 		assertTrue(surveyService.validateTarget(user));
 	}
@@ -126,7 +126,7 @@ class SurveyServiceTest {
 		user.setPermission((short)3);
 		Survey recentSurvey = new Survey();
 		recentSurvey.setCreatedAt(LocalDateTime.now().minusMonths(1));
-		when(surveyRepository.findByUser(user)).thenReturn(Optional.of(recentSurvey));
+		when(surveyRepository.findByUserId(user.getId())).thenReturn(Optional.of(recentSurvey));
 
 		assertFalse(surveyService.validateTarget(user));
 	}

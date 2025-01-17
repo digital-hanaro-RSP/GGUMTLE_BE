@@ -73,7 +73,7 @@ class GoalPortfolioRepositoryTest {
 		goalPortfolioRepository.save(goalPortfolio);
 
 		// Act
-		Optional<GoalPortfolio> foundGoalPortfolio = goalPortfolioRepository.findByUser(user);
+		Optional<GoalPortfolio> foundGoalPortfolio = goalPortfolioRepository.findByUserId(user.getId());
 
 		// Assert
 		assertThat(foundGoalPortfolio).isPresent();

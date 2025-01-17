@@ -46,7 +46,7 @@ class SurveyRepositoryTest {
 		surveyRepository.save(survey);
 
 		// Act
-		Optional<Survey> foundSurvey = surveyRepository.findByUser(user);
+		Optional<Survey> foundSurvey = surveyRepository.findByUserId(user.getId());
 
 		// Assert
 		assertThat(foundSurvey).isPresent();

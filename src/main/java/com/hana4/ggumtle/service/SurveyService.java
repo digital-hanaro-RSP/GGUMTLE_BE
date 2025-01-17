@@ -45,7 +45,7 @@ public class SurveyService {
 	}
 
 	public Boolean validateTarget(User user) {
-		Survey survey = surveyRepository.findByUser(user).orElse(null);
+		Survey survey = surveyRepository.findByUserId(user.getId()).orElse(null);
 
 		// 서베이 응답이 없는 경우 대상자로 간주
 		if (survey == null) {
