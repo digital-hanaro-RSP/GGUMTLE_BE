@@ -12,7 +12,6 @@ import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.portfolioTemplate.PortfolioTemplate;
 import com.hana4.ggumtle.model.entity.survey.Survey;
 import com.hana4.ggumtle.model.entity.user.User;
-import com.hana4.ggumtle.repository.PortfolioTemplateRepository;
 import com.hana4.ggumtle.repository.SurveyRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -22,9 +21,10 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class SurveyService {
 	private final SurveyRepository surveyRepository;
-	private final PortfolioTemplateRepository portfolioTemplateRepository;
+
 	private final GoalPortfolioService goalPortfolioService;
 	private final UserService userService;
+	private final PortfolioTemplateService portfolioTemplateService;
 
 	public SurveyResponseDto.CreateResponse createSurvey(SurveyRequestDto.Create surveyRequestDto, User user) {
 
@@ -32,24 +32,22 @@ public class SurveyService {
 			throw new CustomException(ErrorCode.ALREADY_EXISTS, "서베이 대상자가 아닙니다.");
 		}
 
-		PortfolioTemplate template = portfolioTemplateRepository.findByName(
-				surveyRequestDto.getInvestmentType().toUpperCase())
-			.orElseThrow(() -> new CustomException(
-				ErrorCode.NOT_FOUND, "investmentType을 찾을 수 없습니다."));
+		PortfolioTemplate template = portfolioTemplateService.findByName(
+			surveyRequestDto.getInvestmentType().toUpperCase());
 
 		// PortfolioTemplate을 GoalPortfolio로 변환하여 저장
 		goalPortfolioService.createGoalPortfolioAndSave(template, user);
 
 		// user permission 3으로 update
-		userService.updatePermission(user, (short)(user.getPermission() + 2));
+		User updatedUser = userService.updatePermission(user, (short)(user.getPermission() + 2));
 
-		return SurveyResponseDto.CreateResponse.from(surveyRepository.save(surveyRequestDto.toEntity(user)));
+		return SurveyResponseDto.CreateResponse.from(surveyRepository.save(surveyRequestDto.toEntity(updatedUser)));
 	}
 
-	Boolean validateTarget(User user) {
+	public Boolean validateTarget(User user) {
 		Survey survey = surveyRepository.findByUser(user).orElse(null);
 
-		// GoalPortfolio가 없는 경우 대상자로 간주
+		// 서베이 응답이 없는 경우 대상자로 간주
 		if (survey == null) {
 			return true;
 		}
@@ -60,6 +58,6 @@ public class SurveyService {
 		}
 
 		// 이진수의 십의 자리 1인지 확인
-		return (user.getPermission() & 2) != 0;
+		return (user.getPermission() & 2) == 0;
 	}
 }

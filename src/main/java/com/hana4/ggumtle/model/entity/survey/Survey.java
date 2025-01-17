@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.user.User;
-import com.hana4.ggumtle.security.util.StringListConverter;
+import com.hana4.ggumtle.util.StringListConverter;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
