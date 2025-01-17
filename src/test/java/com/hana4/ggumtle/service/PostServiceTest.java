@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +24,9 @@ import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
+import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
+import com.hana4.ggumtle.model.entity.bucket.BucketStatus;
+import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.post.Post;
@@ -95,20 +99,42 @@ class PostServiceTest {
 			"https://example.com/group-image.jpg" // imageUrl
 		);
 
+		Bucket bucket = Bucket.builder()
+			.id(1L) // ID는 보통 DB에서 자동 생성되므로 테스트에서는 생략할 수 있음
+			.dreamAccount(null) // DreamAccount 객체
+			.user(user) // User 객체
+			.title("Save for vacation") // 필수 값
+			.tagType(BucketTagType.DO) // 예시: BucketTagType enum
+			.dueDate(LocalDateTime.of(2025, 12, 31, 23, 59, 59)) // 필수값
+			.isDueSet(true) // 필수값
+			.memo("Save for a trip to Japan") // 선택 값
+			.howTo(BucketHowTo.EFFORT) // 예시: BucketHowTo enum
+			.goalAmount(new BigDecimal("5000.00")) // 예시 값
+			.followers(50L) // 예시 값
+			.status(BucketStatus.DOING) // 예시: BucketStatus enum
+			.isAutoAllocate(false) // 예시 값
+			.allocateAmount(new BigDecimal("1000.00")) // 예시 값
+			.cronCycle("0 0 0 * * ?") // 예시 값
+			.safeBox(new BigDecimal("1000.00")) // 예시 값
+			.isRecommended(true) // 예시 값
+			.build();
+
 		post.setUser(user);
 		post.setGroup(group);
 		post.setContent("content");
-
+		List<Integer> bucketIds = List.of(1, 2, 3);
 		Map<String, Object> snapshot = new HashMap<>();
-		snapshot.put("bucketId", List.of(1, 2, 3));
+		snapshot.put("bucketId", bucketIds);
 		snapshot.put("portfolio", false);
+
 		when(groupService.getGroup(1L)).thenReturn(group);
 		when(postRepository.save(any(Post.class))).thenReturn(post);
-		when(objectMapper.readValue(eq(write.getSnapShot()),
-			any(TypeReference.class))).thenReturn(snapshot);
-		when(bucketService.getBucket(eq(1L))).thenReturn(new Bucket());
-		when(bucketService.getBucket(eq(2L))).thenReturn(new Bucket());
-		when(bucketService.getBucket(eq(3L))).thenReturn(new Bucket());
+		when(objectMapper.readValue(eq(write.getSnapShot()), any(TypeReference.class))).thenReturn(snapshot);
+		when(objectMapper.convertValue(eq(snapshot.get("bucketId")), any(TypeReference.class))).thenReturn(bucketIds);
+		when(objectMapper.convertValue(eq(snapshot.get("portfolio")), any(TypeReference.class))).thenReturn(false);
+		when(bucketService.getBucket(eq(1L))).thenReturn(bucket);
+		when(bucketService.getBucket(eq(2L))).thenReturn(bucket);
+		when(bucketService.getBucket(eq(3L))).thenReturn(bucket);
 
 		// when
 		PostResponseDto.PostInfo result = postService.save(groupId, write, user);

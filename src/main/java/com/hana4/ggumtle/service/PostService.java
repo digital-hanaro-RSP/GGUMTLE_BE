@@ -1,6 +1,5 @@
 package com.hana4.ggumtle.service;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,11 +12,13 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hana4.ggumtle.dto.bucket.BucketResponseDto;
+import com.hana4.ggumtle.dto.goalPortfolio.GoalPortfolioResponseDto;
+import com.hana4.ggumtle.dto.myData.MyDataResponseDto;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
-import com.hana4.ggumtle.model.entity.bucket.Bucket;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
 import com.hana4.ggumtle.model.entity.myData.MyData;
@@ -54,51 +55,36 @@ public class PostService {
 	public PostResponseDto.PostInfo save(Long groupId, PostRequestDto.Write postRequestDto, User user) throws
 		JsonProcessingException {
 		Group group = groupService.getGroup(groupId);
+		Map<String, Object> snapShotResponse = new HashMap<>();
+		List<BucketResponseDto.BriefInfo> bucketList = new ArrayList<>();
 
 		Map<String, Object> snapShot = objectMapper.readValue(postRequestDto.getSnapShot(),
-			new TypeReference<Map<String, Object>>() {
+			new TypeReference<>() {
 			});
-		Map<String, Object> snapShotResponse = new HashMap<>();
-		List<Integer> bucketId = (List<Integer>)snapShot.get("bucketId");
-		List<Bucket> bucketList = new ArrayList<>();
 
-		for (int bucket : bucketId) {
-			bucketList.add(bucketService.getBucket((long)bucket));
+		List<Integer> bucketIds = objectMapper.convertValue(snapShot.get("bucketId"),
+			new TypeReference<>() {
+			});
+
+		Boolean portfolio = objectMapper.convertValue(snapShot.get("portfolio"), new TypeReference<>() {
+		});
+
+		if (bucketIds == null || portfolio == null) {
+			throw new CustomException(ErrorCode.INVALID_PARAMETER, "snapshot 데이터에 문제가 있습니다.");
+		}
+
+		for (int bucketId : bucketIds) {
+			bucketList.add(BucketResponseDto.BriefInfo.from(bucketService.getBucket((long)bucketId)));
 		}
 
 		snapShotResponse.put("bucketLists", bucketList);
-		if ((Boolean)snapShot.get("portfolio")) {
-			snapShotResponse.put("goalPortfolio", goalPortfolioService.getGoalPortfolioByUserId(user.getId()));
-			class CurrentPortfolio {
-				private final BigDecimal depositWithdrawalRatio;
-				private final BigDecimal savingTimeDepositRatio;
-				private final BigDecimal investmentRatio;
-				private final BigDecimal foreignCurrencyRatio;
-				private final BigDecimal pensionRatio;
-				private final BigDecimal etcRatio;
 
-				public CurrentPortfolio(com.hana4.ggumtle.model.entity.myData.MyData mydata) {
-					BigDecimal sum =
-						mydata.getDepositWithdrawal()
-							.add(mydata.getSavingTimeDeposit())
-							.add(mydata.getInvestment())
-							.add(mydata.getForeignCurrency())
-							.add(mydata.getPension())
-							.add(mydata.getEtc());
-
-					this.depositWithdrawalRatio = mydata.getDepositWithdrawal()
-						.divide(sum, 4, BigDecimal.ROUND_HALF_UP);
-					this.savingTimeDepositRatio = mydata.getSavingTimeDeposit()
-						.divide(sum, 4, BigDecimal.ROUND_HALF_UP);
-					this.investmentRatio = mydata.getInvestment().divide(sum, 4, BigDecimal.ROUND_HALF_UP);
-					this.foreignCurrencyRatio = mydata.getForeignCurrency().divide(sum, 4, BigDecimal.ROUND_HALF_UP);
-					this.pensionRatio = mydata.getPension().divide(sum, 4, BigDecimal.ROUND_HALF_UP);
-					this.etcRatio = mydata.getEtc().divide(sum, 4, BigDecimal.ROUND_HALF_UP);
-				}
-			}
+		if (portfolio) {
+			snapShotResponse.put("goalPortfolio",
+				GoalPortfolioResponseDto.Ratio.from(goalPortfolioService.getGoalPortfolioByUserId(user.getId())));
 			MyData myData = myDataService.getMyDataByUserId(user.getId());
 
-			snapShotResponse.put("currentPortfolio", new CurrentPortfolio(myData));
+			snapShotResponse.put("currentPortfolio", MyDataResponseDto.CurrentPortfolio.from(myData));
 		}
 
 		postRequestDto.setSnapShot(objectMapper.writeValueAsString(snapShotResponse));
