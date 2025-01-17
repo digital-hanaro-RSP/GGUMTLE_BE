@@ -51,6 +51,12 @@ dependencies {
 
     // SwaggerUI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3'
+
+    //aws
+    implementation platform('software.amazon.awssdk:bom:2.20.83')
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-secrets-manager:3.0.1'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.0.1'       //AWS Secrets Manager와의 통합 지원
 }
 
 tasks.named('test') {
