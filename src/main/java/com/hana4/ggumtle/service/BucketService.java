@@ -77,14 +77,14 @@ public class BucketService {
 
 	}
 
-	public BucketResponseDto.BucketInfo deleteBucket(Long bucketId) {
+	public void deleteBucket(Long bucketId) {
 		Bucket bucket = bucketRepository.findById(bucketId)
 			.orElseThrow(() -> new IllegalArgumentException("버킷을 찾을 수 없습니다."));
 
 		bucketRepository.delete(bucket);
 		System.out.println("버킷이 삭제되었습니다");
 
-		return BucketResponseDto.BucketInfo.form(bucket);
+		BucketResponseDto.BucketInfo.form(bucket);
 	}
 
 	public List<BucketResponseDto.BucketInfo> getAllBuckets() {

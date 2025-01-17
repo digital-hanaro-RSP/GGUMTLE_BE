@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +23,7 @@ public class BucketRequestDto {
 	@Builder(toBuilder = true) // 기존 필드 값은 유지하고 변경하려는 필드만 수정된 값으로 교체
 	@AllArgsConstructor
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@EqualsAndHashCode
 	public static class Create {
 		@NotEmpty(message = "제목을 입력하세요.")
 		private String title;
