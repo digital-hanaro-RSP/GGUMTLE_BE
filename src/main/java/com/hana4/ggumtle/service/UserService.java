@@ -106,9 +106,14 @@ public class UserService {
 	}
 
 	public UserResponseDto.UserInfo updatePermission(User user) {
-		System.out.println("user = " + user);
-		user.setPermission((short)1);
-		// Transactional이라 save할 필요없는듯
+		user.setPermission((short)(user.getPermission() + 1));
+		userRepository.save(user);
 		return UserResponseDto.UserInfo.from(user);
+	}
+
+	public User updatePermission(User user, short permission) {
+		user.setPermission(permission);
+		userRepository.save(user);
+		return user;
 	}
 }

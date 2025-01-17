@@ -231,4 +231,20 @@ class UserServiceTest {
 			.isInstanceOf(CustomException.class)
 			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.TOKEN_INVALID);
 	}
+
+	@Test
+	void checkUpdatePermission() {
+		// given
+		User mockUser = new User();
+		mockUser.setPermission((short)1); // initial permission
+		short newPermission = 3;
+		when(userRepository.save(any(User.class))).thenReturn(mockUser);
+
+		// when
+		User updatedUser = userService.updatePermission(mockUser, newPermission);
+
+		// then
+		assertThat(updatedUser.getPermission()).isEqualTo(newPermission);
+		verify(userRepository).save(mockUser);
+	}
 }
