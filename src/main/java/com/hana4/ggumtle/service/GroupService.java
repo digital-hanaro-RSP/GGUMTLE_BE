@@ -93,7 +93,8 @@ public class GroupService {
 		return response;
 	}
 
-	public GroupMemberResponseDto.JoinGroup joinGroup(Long groupId, GroupMemberRequestDto.Create request, User user) {
+	public GroupMemberResponseDto.JoinGroup joinGroup(Long groupId, GroupMemberRequestDto.CreateGroupMember request,
+		User user) {
 		Group group = groupRepository.findById(groupId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
 
