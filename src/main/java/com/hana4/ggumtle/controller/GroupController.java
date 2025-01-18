@@ -71,7 +71,7 @@ public class GroupController {
 			)))
 	})
 	@GetMapping
-	public ResponseEntity<Page<GroupResponseDto.Read>> getAllGroups(
+	public ResponseEntity<CustomApiResponse<Page<GroupResponseDto.Read>>> getAllGroups(
 		@RequestParam(required = false) GroupCategory category,
 		@RequestParam(required = false) String search,
 		@RequestParam(defaultValue = "0") int offset,
@@ -82,7 +82,7 @@ public class GroupController {
 		}
 		Pageable pageable = PageRequest.of(offset / limit, limit);
 		Page<GroupResponseDto.Read> groups = groupService.getAllGroupsWithMemberCount(category, search, pageable);
-		return ResponseEntity.ok(groups);
+		return ResponseEntity.ok(CustomApiResponse.success(groups));
 	}
 
 	@Operation(summary = "그룹 가입", description = "특정 커뮤니티 그룹에 가입합니다.")
@@ -118,7 +118,7 @@ public class GroupController {
 			)))
 	})
 	@GetMapping("/my-group")
-	public ResponseEntity<Page<GroupResponseDto.Read>> getMyGroups(
+	public ResponseEntity<CustomApiResponse<Page<GroupResponseDto.Read>>> getMyGroups(
 		@RequestParam(required = false) GroupCategory category,
 		@RequestParam(required = false) String search,
 		@RequestParam(defaultValue = "0") int offset,
@@ -132,7 +132,7 @@ public class GroupController {
 		String userId = userDetails.getUser().getId();
 		Page<GroupResponseDto.Read> groups = groupService.getMyGroupsWithMemberCount(userId, category, search,
 			pageable);
-		return ResponseEntity.ok(groups);
+		return ResponseEntity.ok(CustomApiResponse.success(groups));
 	}
 
 	@Operation(summary = "그룹 탈퇴", description = "그룹에서 탈퇴합니다. 마지막 멤버가 탈퇴하면 그룹이 자동으로 삭제됩니다.")

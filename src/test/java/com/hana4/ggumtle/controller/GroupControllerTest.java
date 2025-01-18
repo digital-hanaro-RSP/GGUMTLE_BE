@@ -154,6 +154,7 @@ class GroupControllerTest {
 			.name("Test Group")
 			.category(category)
 			.description("Test Description")
+			.imageUrl("http://example.com/image.jpg")
 			.memberCount(5)
 			.build();
 
@@ -169,11 +170,12 @@ class GroupControllerTest {
 				.param("offset", String.valueOf(offset))
 				.param("limit", String.valueOf(limit)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.content[0].id").value(1L))
-			.andExpect(jsonPath("$.content[0].name").value("Test Group"))
-			.andExpect(jsonPath("$.content[0].category").value(category.name()))
-			.andExpect(jsonPath("$.content[0].description").value("Test Description"))
-			.andExpect(jsonPath("$.content[0].memberCount").value(5))
+			.andExpect(jsonPath("$.data.content[0].id").value(1L))
+			.andExpect(jsonPath("$.data.content[0].name").value("Test Group"))
+			.andExpect(jsonPath("$.data.content[0].category").value(category.name()))
+			.andExpect(jsonPath("$.data.content[0].description").value("Test Description"))
+			.andExpect(jsonPath("$.data.content[0].imageUrl").value("http://example.com/image.jpg"))
+			.andExpect(jsonPath("$.data.content[0].memberCount").value(5))
 			.andDo(print());
 
 		verify(groupService).getAllGroupsWithMemberCount(eq(category), eq(search), any(Pageable.class));
@@ -233,11 +235,12 @@ class GroupControllerTest {
 				.param("limit", String.valueOf(limit))
 				.with(user(userDetails)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.content[0].id").value(1L))
-			.andExpect(jsonPath("$.content[0].name").value("투자 모임"))
-			.andExpect(jsonPath("$.content[0].category").value(category.name()))
-			.andExpect(jsonPath("$.content[0].description").value("투자 정보 공유"))
-			.andExpect(jsonPath("$.content[0].memberCount").value(5))
+			.andExpect(jsonPath("$.data.content[0].id").value(1L))
+			.andExpect(jsonPath("$.data.content[0].name").value("투자 모임"))
+			.andExpect(jsonPath("$.data.content[0].category").value(category.name()))
+			.andExpect(jsonPath("$.data.content[0].description").value("투자 정보 공유"))
+			.andExpect(jsonPath("$.data.content[0].imageUrl").value("http://example.com/image.jpg"))
+			.andExpect(jsonPath("$.data.content[0].memberCount").value(5))
 			.andDo(print());
 
 	}
@@ -265,7 +268,7 @@ class GroupControllerTest {
 			.andExpect(jsonPath("$.message").value(ErrorCode.INVALID_PARAMETER.getMessage()))
 			.andDo(print());
 	}
-	
+
 	@Test
 	void joinGroup() throws Exception {
 		// given
