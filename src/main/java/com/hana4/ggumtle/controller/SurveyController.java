@@ -56,7 +56,8 @@ public class SurveyController {
 	})
 	@PostMapping
 	public ResponseEntity<CustomApiResponse<SurveyResponseDto.CreateResponse>> createSurvey(
-		@RequestBody @Valid SurveyRequestDto.Create request, @AuthenticationPrincipal CustomUserDetails userDetail) {
+		@RequestBody @Valid SurveyRequestDto.CreateSurvey request,
+		@AuthenticationPrincipal CustomUserDetails userDetail) {
 		return ResponseEntity.ok(CustomApiResponse.success(surveyService.createSurvey(request, userDetail.getUser())));
 	}
 }

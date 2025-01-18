@@ -42,7 +42,7 @@ class SurveyServiceTest {
 	private SurveyService surveyService;
 
 	private User user;
-	private SurveyRequestDto.Create surveyRequestDto;
+	private SurveyRequestDto.CreateSurvey surveyRequestDto;
 	private PortfolioTemplate portfolioTemplate;
 
 	@BeforeEach
@@ -63,7 +63,7 @@ class SurveyServiceTest {
 		user.setPermission((short)1);
 
 		// surveyRequestDto = new SurveyRequestDto.Create().toBuilder().build()
-		surveyRequestDto = SurveyRequestDto.Create.builder()
+		surveyRequestDto = SurveyRequestDto.CreateSurvey.builder()
 			.answers(List.of(1, 2, 3, 4, 5))
 			.investmentType("BALANCED")
 			.build();

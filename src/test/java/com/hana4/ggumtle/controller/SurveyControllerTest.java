@@ -62,7 +62,7 @@ public class SurveyControllerTest {
 	@WithMockCustomUser
 	public void testCreateSurvey() throws Exception {
 		// Arrange
-		SurveyRequestDto.Create requestDto = SurveyRequestDto.Create.builder()
+		SurveyRequestDto.CreateSurvey requestDto = SurveyRequestDto.CreateSurvey.builder()
 			.answers(List.of(1, 2, 3, 4, 5))
 			.investmentType("BALANCED")
 			.build();
@@ -73,7 +73,7 @@ public class SurveyControllerTest {
 			.answers(List.of(1, 2, 3, 4, 5))
 			.build();
 
-		when(surveyService.createSurvey(any(SurveyRequestDto.Create.class), any(User.class)))
+		when(surveyService.createSurvey(any(SurveyRequestDto.CreateSurvey.class), any(User.class)))
 			.thenReturn(responseDto);
 
 		// Act & Assert
