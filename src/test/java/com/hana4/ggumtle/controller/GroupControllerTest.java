@@ -273,7 +273,7 @@ class GroupControllerTest {
 	void joinGroup() throws Exception {
 		// given
 		Long groupId = 1L;
-		GroupMemberRequestDto.Create request = new GroupMemberRequestDto.Create(groupId);
+		GroupMemberRequestDto.CreateGroupMember request = new GroupMemberRequestDto.CreateGroupMember(groupId);
 
 		Group group = new Group();
 		group.setId(groupId);
@@ -290,7 +290,7 @@ class GroupControllerTest {
 			.userId(user)
 			.build();
 
-		given(groupService.joinGroup(eq(groupId), any(GroupMemberRequestDto.Create.class), any(User.class)))
+		given(groupService.joinGroup(eq(groupId), any(GroupMemberRequestDto.CreateGroupMember.class), any(User.class)))
 			.willReturn(response);
 
 		// when & then
@@ -306,7 +306,8 @@ class GroupControllerTest {
 			.andExpect(jsonPath("$.data.userId.name").value("Test User"))
 			.andDo(print());
 
-		verify(groupService).joinGroup(eq(groupId), any(GroupMemberRequestDto.Create.class), any(User.class));
+		verify(groupService).joinGroup(eq(groupId), any(GroupMemberRequestDto.CreateGroupMember.class),
+			any(User.class));
 	}
 
 	@Test
@@ -344,7 +345,7 @@ class GroupControllerTest {
 	void joinGroup_NotFound() throws Exception {
 		// given
 		Long groupId = 1L;
-		GroupMemberRequestDto.Create request = new GroupMemberRequestDto.Create(groupId);
+		GroupMemberRequestDto.CreateGroupMember request = new GroupMemberRequestDto.CreateGroupMember(groupId);
 
 		User user = User.builder()
 			.id("user-uuid")
@@ -355,7 +356,7 @@ class GroupControllerTest {
 
 		given(customUserDetailsService.loadUserByUsername("testUser")).willReturn(userDetails);
 
-		given(groupService.joinGroup(eq(groupId), any(GroupMemberRequestDto.Create.class), any(User.class)))
+		given(groupService.joinGroup(eq(groupId), any(GroupMemberRequestDto.CreateGroupMember.class), any(User.class)))
 			.willThrow(new CustomException(ErrorCode.NOT_FOUND));
 
 		// when & then
@@ -368,7 +369,8 @@ class GroupControllerTest {
 			.andExpect(jsonPath("$.message").value(ErrorCode.NOT_FOUND.getMessage()))
 			.andDo(print());
 
-		verify(groupService).joinGroup(eq(groupId), any(GroupMemberRequestDto.Create.class), any(User.class));
+		verify(groupService).joinGroup(eq(groupId), any(GroupMemberRequestDto.CreateGroupMember.class),
+			any(User.class));
 	}
 
 	@Test

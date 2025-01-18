@@ -17,8 +17,8 @@ public class GroupMemberRequestDto {
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
-	public static class Create {
-		@Schema(description = "가입 할 그룹 ID", example = "group123")
+	public static class CreateGroupMember {
+		@Schema(description = "가입 할 그룹 ID", example = "1")
 		@NotNull(message = "그룹 ID를 입력하세요.")
 		private Long groupId;
 

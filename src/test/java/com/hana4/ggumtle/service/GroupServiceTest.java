@@ -283,7 +283,7 @@ public class GroupServiceTest {
 			.imageUrl("http://example.com/image.png")
 			.build();
 
-		GroupMemberRequestDto.Create request = GroupMemberRequestDto.Create.builder()
+		GroupMemberRequestDto.CreateGroupMember request = GroupMemberRequestDto.CreateGroupMember.builder()
 			.groupId(groupId)
 			.build();
 
@@ -328,7 +328,7 @@ public class GroupServiceTest {
 			"telletobinana"
 		);
 
-		GroupMemberRequestDto.Create request = GroupMemberRequestDto.Create.builder()
+		GroupMemberRequestDto.CreateGroupMember request = GroupMemberRequestDto.CreateGroupMember.builder()
 			.groupId(groupId)
 			.build();
 
@@ -365,7 +365,7 @@ public class GroupServiceTest {
 			.imageUrl("http://example.com/image.png")
 			.build();
 
-		GroupMemberRequestDto.Create request = GroupMemberRequestDto.Create.builder()
+		GroupMemberRequestDto.CreateGroupMember request = GroupMemberRequestDto.CreateGroupMember.builder()
 			.groupId(groupId)
 			.build();
 

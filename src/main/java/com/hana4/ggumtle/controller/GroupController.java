@@ -96,7 +96,7 @@ public class GroupController {
 	@PostMapping("/{groupId}/member")
 	public ResponseEntity<CustomApiResponse<GroupMemberResponseDto.JoinGroup>> joinGroup(@PathVariable Long groupId,
 		@RequestBody @Valid
-		GroupMemberRequestDto.Create request, @AuthenticationPrincipal CustomUserDetails userDetails) {
+		GroupMemberRequestDto.CreateGroupMember request, @AuthenticationPrincipal CustomUserDetails userDetails) {
 		try {
 			GroupMemberResponseDto.JoinGroup response = groupService.joinGroup(groupId, request, userDetails.getUser());
 			return ResponseEntity.ok(CustomApiResponse.success(response));
