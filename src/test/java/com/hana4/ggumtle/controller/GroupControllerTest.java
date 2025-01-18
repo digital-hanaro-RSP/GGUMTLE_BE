@@ -86,7 +86,7 @@ class GroupControllerTest {
 			.imageUrl("http://example.com/image.jpg")
 			.build();
 
-		GroupResponseDto.Create response = GroupResponseDto.Create.builder()
+		GroupResponseDto.CreateGroup response = GroupResponseDto.CreateGroup.builder()
 			.id(1L)
 			.name("Study Group")
 			.category(GroupCategory.EDUCATION)

@@ -31,7 +31,7 @@ public class GroupService {
 
 	//그룹 생성
 	@Transactional
-	public GroupResponseDto.Create createGroup(GroupRequestDto.Create request, User user) {
+	public GroupResponseDto.CreateGroup createGroup(GroupRequestDto.Create request, User user) {
 		Group group = request.toEntity();
 		Group savedGroup = groupRepository.save(group);
 
@@ -43,7 +43,7 @@ public class GroupService {
 		groupMemberRepository.save(groupMember);
 
 		// memberCount가 1인 상태로 응답 반환
-		return GroupResponseDto.Create.from(savedGroup, 1);
+		return GroupResponseDto.CreateGroup.from(savedGroup, 1);
 	}
 
 	//모든 그룹 조회(그룹 내 멤버 count)

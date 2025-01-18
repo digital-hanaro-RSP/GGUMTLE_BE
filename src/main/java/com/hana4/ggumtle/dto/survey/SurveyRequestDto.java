@@ -22,7 +22,7 @@ public class SurveyRequestDto {
 	@Builder(toBuilder = true)
 	@AllArgsConstructor
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
-	public static class Create {
+	public static class CreateSurvey {
 		@Schema(description = "서베이 응답 답변 배열", example = "[1,2,3,4,5,4,3]", requiredMode = Schema.RequiredMode.REQUIRED)
 		@NotNull(message = "답변 배열을 입력하세요.")
 		@NotEmpty(message = "답변 배열은 비어있을 수 없습니다.")

@@ -22,7 +22,7 @@ public class GroupResponseDto {
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor
 	@SuperBuilder
-	public static class Create extends BaseDto {
+	public static class CreateGroup extends BaseDto {
 		@Schema(description = "그룹 ID", example = "1")
 		private Long id;
 
@@ -41,8 +41,8 @@ public class GroupResponseDto {
 		@Schema(description = "그룹 멤버 수", example = "2")
 		private int memberCount;
 
-		public static Create from(Group group, int memberCount) {
-			return Create.builder()
+		public static CreateGroup from(Group group, int memberCount) {
+			return CreateGroup.builder()
 				.id(group.getId())
 				.name(group.getName())
 				.category(group.getCategory())

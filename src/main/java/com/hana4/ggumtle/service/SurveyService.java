@@ -26,7 +26,7 @@ public class SurveyService {
 	private final UserService userService;
 	private final PortfolioTemplateService portfolioTemplateService;
 
-	public SurveyResponseDto.CreateResponse createSurvey(SurveyRequestDto.Create surveyRequestDto, User user) {
+	public SurveyResponseDto.CreateResponse createSurvey(SurveyRequestDto.CreateSurvey surveyRequestDto, User user) {
 
 		if (!validateTarget(user)) {
 			throw new CustomException(ErrorCode.ALREADY_EXISTS, "서베이 대상자가 아닙니다.");

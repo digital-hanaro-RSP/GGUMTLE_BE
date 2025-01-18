@@ -74,8 +74,8 @@ public class GroupServiceTest {
 		when(groupRepository.save(any(Group.class))).thenReturn(mockGroup);
 
 		// when
-		GroupResponseDto.Create expectedResponse = GroupResponseDto.Create.from(mockGroup, 1);
-		GroupResponseDto.Create actualResponse = groupService.createGroup(request, mockUser);
+		GroupResponseDto.CreateGroup expectedResponse = GroupResponseDto.CreateGroup.from(mockGroup, 1);
+		GroupResponseDto.CreateGroup actualResponse = groupService.createGroup(request, mockUser);
 
 		// then
 		assertNotNull(actualResponse);
@@ -441,4 +441,3 @@ public class GroupServiceTest {
 		verifyNoMoreInteractions(groupRepository, groupMemberRepository);
 	}
 }
-
