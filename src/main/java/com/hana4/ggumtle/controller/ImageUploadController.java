@@ -14,7 +14,7 @@ import com.hana4.ggumtle.service.PresignedUrlService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("image")
+@RequestMapping("imageUpload")
 @Tag(name = "ImageUpload", description = "s3 Image 업로드 관련 API")
 public class ImageUploadController {
 
