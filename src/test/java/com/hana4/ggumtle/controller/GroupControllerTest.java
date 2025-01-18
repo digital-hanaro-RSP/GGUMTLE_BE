@@ -154,6 +154,7 @@ class GroupControllerTest {
 			.name("Test Group")
 			.category(category)
 			.description("Test Description")
+			.imageUrl("http://example.com/image.jpg")
 			.memberCount(5)
 			.build();
 
@@ -169,11 +170,12 @@ class GroupControllerTest {
 				.param("offset", String.valueOf(offset))
 				.param("limit", String.valueOf(limit)))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.content[0].id").value(1L))
-			.andExpect(jsonPath("$.content[0].name").value("Test Group"))
-			.andExpect(jsonPath("$.content[0].category").value(category.name()))
-			.andExpect(jsonPath("$.content[0].description").value("Test Description"))
-			.andExpect(jsonPath("$.content[0].memberCount").value(5))
+			.andExpect(jsonPath("$.data.content[0].id").value(1L))
+			.andExpect(jsonPath("$.data.content[0].name").value("Test Group"))
+			.andExpect(jsonPath("$.data.content[0].category").value(category.name()))
+			.andExpect(jsonPath("$.data.content[0].description").value("Test Description"))
+			.andExpect(jsonPath("$.data.content[0].imageUrl").value("http://example.com/image.jpg"))
+			.andExpect(jsonPath("$.data.content[0].memberCount").value(5))
 			.andDo(print());
 
 		verify(groupService).getAllGroupsWithMemberCount(eq(category), eq(search), any(Pageable.class));
@@ -194,6 +196,73 @@ class GroupControllerTest {
 				.param("search", search)
 				.param("offset", String.valueOf(offset))
 				.param("limit", String.valueOf(limit)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(ErrorCode.INVALID_PARAMETER.getHttpStatus().value()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.INVALID_PARAMETER.getMessage()))
+			.andDo(print());
+	}
+
+	@Test
+	void getMyGroups_성공() throws Exception {
+		// given
+		String userId = "1";
+		GroupCategory category = GroupCategory.HOBBY;
+		String search = "투자";
+		int offset = 0;
+		int limit = 20;
+
+		GroupResponseDto.Read dto = GroupResponseDto.Read.builder()
+			.id(1L)
+			.name("투자 모임")
+			.category(GroupCategory.HOBBY)
+			.description("투자 정보 공유")
+			.imageUrl("http://example.com/image.jpg")
+			.memberCount(5)
+			.build();
+
+		Page<GroupResponseDto.Read> page = new PageImpl<>(List.of(dto));
+
+		when(groupService.getMyGroupsWithMemberCount(eq(userId), eq(category), eq(search), any(Pageable.class)))
+			.thenReturn(page);
+
+		CustomUserDetails userDetails = new CustomUserDetails(User.builder().id(userId).build());
+
+		// when & then
+		mockMvc.perform(get("/community/group/my-group")
+				.param("category", category.name())
+				.param("search", search)
+				.param("offset", String.valueOf(offset))
+				.param("limit", String.valueOf(limit))
+				.with(user(userDetails)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.content[0].id").value(1L))
+			.andExpect(jsonPath("$.data.content[0].name").value("투자 모임"))
+			.andExpect(jsonPath("$.data.content[0].category").value(category.name()))
+			.andExpect(jsonPath("$.data.content[0].description").value("투자 정보 공유"))
+			.andExpect(jsonPath("$.data.content[0].imageUrl").value("http://example.com/image.jpg"))
+			.andExpect(jsonPath("$.data.content[0].memberCount").value(5))
+			.andDo(print());
+
+	}
+
+	@Test
+	void getMyGroups_InvalidLimit() throws Exception {
+		// given
+		String userId = "1";
+		GroupCategory category = GroupCategory.HOBBY;
+		String search = "투자";
+		int offset = 0;
+		int limit = 0;
+
+		CustomUserDetails userDetails = new CustomUserDetails(User.builder().id(userId).build());
+
+		// when & then
+		mockMvc.perform(get("/community/group/my-group")
+				.param("category", category.name())
+				.param("search", search)
+				.param("offset", String.valueOf(offset))
+				.param("limit", String.valueOf(limit))
+				.with(user(userDetails)))
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.code").value(ErrorCode.INVALID_PARAMETER.getHttpStatus().value()))
 			.andExpect(jsonPath("$.message").value(ErrorCode.INVALID_PARAMETER.getMessage()))

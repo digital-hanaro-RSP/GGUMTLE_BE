@@ -71,7 +71,7 @@ public class GroupController {
 			)))
 	})
 	@GetMapping
-	public ResponseEntity<Page<GroupResponseDto.Read>> getAllGroups(
+	public ResponseEntity<CustomApiResponse<Page<GroupResponseDto.Read>>> getAllGroups(
 		@RequestParam(required = false) GroupCategory category,
 		@RequestParam(required = false) String search,
 		@RequestParam(defaultValue = "0") int offset,
@@ -82,7 +82,7 @@ public class GroupController {
 		}
 		Pageable pageable = PageRequest.of(offset / limit, limit);
 		Page<GroupResponseDto.Read> groups = groupService.getAllGroupsWithMemberCount(category, search, pageable);
-		return ResponseEntity.ok(groups);
+		return ResponseEntity.ok(CustomApiResponse.success(groups));
 	}
 
 	@Operation(summary = "그룹 가입", description = "특정 커뮤니티 그룹에 가입합니다.")
@@ -103,6 +103,36 @@ public class GroupController {
 		} catch (CustomException ce) {
 			throw new CustomException(ErrorCode.NOT_FOUND);
 		}
+	}
+
+	@Operation(summary = "내가 가입한 그룹 조회", description = "현재 로그인한 사용자가 가입한 그룹을 조회합니다. 그룹 내 멤버 수도 함께 제공됩니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "그룹 조회 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 400, \"error\": \"BadRequest\", \"message\": \"잘못된 파라미터입니다.\" }"
+			))),
+		@ApiResponse(responseCode = "401", description = "인증되지 않은 사용자",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 401, \"error\": \"Unauthorized\", \"message\": \"인증이 필요합니다.\" }"
+			)))
+	})
+	@GetMapping("/my-group")
+	public ResponseEntity<CustomApiResponse<Page<GroupResponseDto.Read>>> getMyGroups(
+		@RequestParam(required = false) GroupCategory category,
+		@RequestParam(required = false) String search,
+		@RequestParam(defaultValue = "0") int offset,
+		@RequestParam(defaultValue = "20") int limit,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		if (limit <= 0) {
+			throw new CustomException(ErrorCode.INVALID_PARAMETER);
+		}
+		Pageable pageable = PageRequest.of(offset / limit, limit);
+		String userId = userDetails.getUser().getId();
+		Page<GroupResponseDto.Read> groups = groupService.getMyGroupsWithMemberCount(userId, category, search,
+			pageable);
+		return ResponseEntity.ok(CustomApiResponse.success(groups));
 	}
 
 	@Operation(summary = "그룹 탈퇴", description = "그룹에서 탈퇴합니다. 마지막 멤버가 탈퇴하면 그룹이 자동으로 삭제됩니다.")

@@ -1,5 +1,6 @@
 package com.hana4.ggumtle.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -110,7 +111,7 @@ public class GroupServiceTest {
 		Page<Object[]> mockPage = new PageImpl<>(Collections.singletonList(mockResult), pageable, 1);
 
 		// stubbing
-		Mockito.when(groupRepository.findGroupsWithMemberCount(category, search, pageable))
+		Mockito.when(groupRepository.findGroupsWithFilters(null, category, search, pageable))
 			.thenReturn(mockPage);
 
 		// when
@@ -124,6 +125,40 @@ public class GroupServiceTest {
 		assertEquals(mockGroup.getCategory(), dto.getCategory());
 		assertEquals(mockGroup.getDescription(), dto.getDescription());
 		assertEquals(5, dto.getMemberCount());
+	}
+
+	@Test
+	void getMyGroupsWithMemberCount_성공() {
+		// given
+		String userId = "test-user-id";
+		GroupCategory category = GroupCategory.INVESTMENT;
+		String search = "투자";
+		Pageable pageable = PageRequest.of(0, 10);
+
+		Group group = Group.builder()
+			.id(1L)
+			.name("투자 모임")
+			.category(GroupCategory.INVESTMENT)
+			.description("투자 정보 공유")
+			.imageUrl("http://example.com/image.jpg")
+			.build();
+
+		Object[] mockResult = new Object[] {group, 1L};
+		Page<Object[]> mockPage = new PageImpl<>(Collections.singletonList(mockResult), pageable, 1);
+
+		when(groupRepository.findGroupsWithFilters(userId, category, search, pageable)).thenReturn(mockPage);
+
+		// when
+		Page<GroupResponseDto.Read> result = groupService.getMyGroupsWithMemberCount(userId, category, search,
+			pageable);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.getTotalElements()).isEqualTo(1);
+		GroupResponseDto.Read dto = result.getContent().get(0);
+		assertThat(dto.getId()).isEqualTo(group.getId());
+		assertThat(dto.getName()).isEqualTo(group.getName());
+		assertThat(dto.getMemberCount()).isEqualTo(1);
 	}
 
 	@Test
