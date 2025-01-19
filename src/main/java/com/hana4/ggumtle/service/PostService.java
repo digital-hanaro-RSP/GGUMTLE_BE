@@ -18,7 +18,6 @@ import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.group.Group;
-import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
 import com.hana4.ggumtle.model.entity.post.Post;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.repository.PostRepository;
@@ -45,8 +44,7 @@ public class PostService {
 
 	private boolean checkUserWithGroup(Long groupId, User user) {
 		Group group = groupService.getGroup(groupId);
-		GroupMember groupMember = groupService.getGroupMember(user, group);
-		return true;
+		return groupService.isMatchedGroupUser(user, group);
 	}
 
 	public PostResponseDto.PostInfo save(Long groupId, PostRequestDto.Write postRequestDto, User user) throws
@@ -87,7 +85,7 @@ public class PostService {
 
 	public PostResponseDto.PostDetail getPost(Long groupId, Long postId, User user) {
 		if (!checkUserWithGroup(groupId, user)) {
-			return null;
+			throw new CustomException(ErrorCode.NOT_FOUND, "해당 그룹에 권한이 없습니다.");
 		}
 
 		return PostResponseDto.PostDetail.from(
@@ -98,7 +96,7 @@ public class PostService {
 
 	public List<PostResponseDto.PostInfo> getPostsByPage(Long groupId, int page, User user) {
 		if (!checkUserWithGroup(groupId, user)) {
-			return null;
+			throw new CustomException(ErrorCode.NOT_FOUND, "해당 그룹에 권한이 없습니다.");
 		}
 
 		Pageable pageable = PageRequest.of(page, 10);
@@ -110,7 +108,7 @@ public class PostService {
 	public PostResponseDto.PostInfo updatePost(Long groupId, Long postId, PostRequestDto.Write postRequestDto,
 		User user) {
 		if (!checkUserWithGroup(groupId, user)) {
-			return null;
+			throw new CustomException(ErrorCode.NOT_FOUND, "해당 그룹에 권한이 없습니다.");
 		}
 
 		Post post = getPostById(postId);
@@ -127,10 +125,10 @@ public class PostService {
 
 	public void deletePost(Long groupId, Long postId, User user) {
 		if (!checkUserWithGroup(groupId, user)) {
-			return;
+			throw new CustomException(ErrorCode.NOT_FOUND, "해당 그룹에 권한이 없습니다.");
 		}
 
-		Post post = postRepository.findById(postId).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND));
+		Post post = getPostById(postId);
 
 		if (checkUserWithPost(user, post)) {
 			throw new CustomException(ErrorCode.ACCESS_DENIED, "해당 글에 권한이 없습니다.");
