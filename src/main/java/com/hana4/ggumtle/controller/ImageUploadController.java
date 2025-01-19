@@ -29,7 +29,6 @@ public class ImageUploadController {
 			URL presignedUrl = presignedUrlService.generatePresignedUrl(objectKey, expirationMinutes);
 			return ResponseEntity.ok(presignedUrl.toString());
 		} catch (Exception e) {
-			// 오류 발생 시 적절한 HTTP 상태 코드와 메시지 반환
 			return ResponseEntity.status(500).body("Error generating presigned URL: " + e.getMessage());
 		}
 	}

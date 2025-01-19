@@ -6,6 +6,9 @@ import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.global.error.ErrorCode;
+
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -15,40 +18,35 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
 @Service
 public class PresignedUrlService {
 
-	@Value("${aws.s3.bucket-name}")
-	private String bucketName;
+	private final String bucketName;
+	private final S3Presigner s3Presigner;
 
-	@Value("${aws.s3.region}")
-	private String region;
+	public PresignedUrlService(@Value("${aws.s3.bucket-name}") String bucketName,
+		@Value("${aws.s3.region}") String regionString) {
+		Region region = Region.of(regionString);
+		this.bucketName = bucketName;
+		this.s3Presigner = S3Presigner.builder()
+			.region(region)
+			.build();
+	}
 
-	/**
-	 * Presigned URL을 생성하여 반환
-	 *
-	 * @param objectKey        업로드할 파일의 키 (경로)
-	 * @param expirationMinutes Presigned URL의 유효 시간 (분)
-	 * @return Presigned URL
-	 */
 	public URL generatePresignedUrl(String objectKey, int expirationMinutes) {
-		// S3 Presigner 생성 (IAM 역할 사용)
-		S3Presigner presigner = S3Presigner.builder()
-			.region(Region.of(region)) // AWS 리전을 설정
-			.build();
+		try {
+			PutObjectRequest objectRequest = PutObjectRequest.builder()
+				.bucket(bucketName)
+				.key(objectKey)
+				.build();
 
-		// PutObjectRequest 생성
-		PutObjectRequest objectRequest = PutObjectRequest.builder()
-			.bucket(bucketName)
-			.key(objectKey)
-			.build();
+			PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+				.signatureDuration(Duration.ofMinutes(expirationMinutes))
+				.putObjectRequest(objectRequest)
+				.build();
 
-		// Presigned URL 생성 요청
-		PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-			.signatureDuration(Duration.ofMinutes(expirationMinutes)) // URL 만료 시간
-			.putObjectRequest(objectRequest)
-			.build();
+			PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
 
-		PresignedPutObjectRequest presignedRequest = presigner.presignPutObject(presignRequest);
-
-		// Presigned URL 반환
-		return presignedRequest.url();
+			return presignedRequest.url();
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
 	}
 }
