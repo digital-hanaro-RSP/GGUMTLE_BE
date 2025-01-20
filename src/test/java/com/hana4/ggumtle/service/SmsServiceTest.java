@@ -67,7 +67,7 @@ class SmsServiceTest {
 			if (!message.getTo().equals(userTel))
 				return false;
 			assert message.getText() != null;
-			return message.getText().equals("[꿈틀] 귀하의 인증번호는" + verificationCode + "입니다.");
+			return message.getText().equals("[꿈틀] 귀하의 인증번호는 " + verificationCode + " 입니다.");
 		}));
 	}
 }
