@@ -145,7 +145,6 @@ public class UserService {
 			log.error("Error sending SMS or creating certification", e);
 			throw new CustomException(ErrorCode.SMS_FAILURE, "SMS 발송 또는 인증 생성에 실패했습니다.");
 		}
-		System.out.println("Verification code sent to: " + userTel + ", code: " + verificationCode); // 지우기지우기
 	}
 
 	public void validateVerificationCode(UserRequestDto.Validation request) {
