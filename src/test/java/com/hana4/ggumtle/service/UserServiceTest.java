@@ -1,6 +1,7 @@
 package com.hana4.ggumtle.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -12,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.hana4.ggumtle.dto.user.UserRequestDto;
@@ -19,6 +21,7 @@ import com.hana4.ggumtle.dto.user.UserResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.repository.TelCodeValidationRepository;
 import com.hana4.ggumtle.repository.UserRepository;
 import com.hana4.ggumtle.security.provider.JwtProvider;
 import com.hana4.ggumtle.vo.RefreshToken;
@@ -40,6 +43,12 @@ class UserServiceTest {
 
 	@InjectMocks
 	private UserService userService;
+
+	@Mock
+	private TelCodeValidationRepository telCodeValidationRepository;
+
+	@Mock
+	private SmsService smsService;
 
 	// @BeforeEach
 	// void setUp() {
@@ -246,5 +255,137 @@ class UserServiceTest {
 		// then
 		assertThat(updatedUser.getPermission()).isEqualTo(newPermission);
 		verify(userRepository).save(mockUser);
+	}
+
+	@Test
+	void testSendVerificationCode_Success() {
+		// Given
+		String userTel = "01012341234";
+		when(telCodeValidationRepository.hasKey(userTel)).thenReturn(false);
+		when(telCodeValidationRepository.incrementDailyRequestCount(userTel)).thenReturn(true);
+
+		// When
+		assertDoesNotThrow(() -> userService.sendVerificationCode(userTel));
+
+		// Then
+		verify(smsService).sendOne(eq(userTel), anyString());
+		verify(telCodeValidationRepository).createSmsCertification(eq(userTel), anyString());
+	}
+
+	@Test
+	void testSendVerificationCode_AlreadySent() {
+		// Given
+		String userTel = "01012341234";
+		when(telCodeValidationRepository.hasKey(userTel)).thenReturn(true);
+
+		// When & Then
+		assertThatThrownBy(() -> userService.sendVerificationCode(userTel))
+			.isInstanceOf(CustomException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.SMS_ALREADY_SENT);
+	}
+
+	@Test
+	void testSendVerificationCode_DailyLimitExceeded() {
+		// Given
+		String userTel = "01012341234";
+		when(telCodeValidationRepository.hasKey(userTel)).thenReturn(false);
+		when(telCodeValidationRepository.incrementDailyRequestCount(userTel)).thenReturn(false);
+
+		// When & Then
+		assertThatThrownBy(() -> userService.sendVerificationCode(userTel))
+			.isInstanceOf(CustomException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.DAILY_LIMIT_EXCEEDED);
+	}
+
+	@Test
+	void testSendVerificationCode_RedisConnectionFailure() {
+		// Given
+		String userTel = "01012341234";
+		when(telCodeValidationRepository.hasKey(userTel)).thenReturn(false);
+		when(telCodeValidationRepository.incrementDailyRequestCount(userTel)).thenReturn(true);
+		doThrow(new RedisConnectionFailureException("Redis connection failed"))
+			.when(telCodeValidationRepository).createSmsCertification(eq(userTel), anyString());
+
+		// When & Then
+		assertThatThrownBy(() -> userService.sendVerificationCode(userTel))
+			.isInstanceOf(CustomException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.REDIS_CONNECTION_FAILURE);
+	}
+
+	@Test
+	void testSendVerificationCode_SmsFailure() {
+		// Arrange
+		String userTel = "01012341234";
+		when(telCodeValidationRepository.hasKey(userTel)).thenReturn(false);
+		when(telCodeValidationRepository.incrementDailyRequestCount(userTel)).thenReturn(true);
+		doThrow(new RuntimeException("SMS sending failed")).when(smsService).sendOne(eq(userTel), anyString());
+
+		// Act & Assert
+		assertThatThrownBy(() -> userService.sendVerificationCode(userTel))
+			.isInstanceOf(CustomException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.SMS_FAILURE);
+	}
+
+	@Test
+	void testValidateVerificationCode_Success() {
+		// Given
+		UserRequestDto.Validation request = new UserRequestDto.Validation("01012341234", "123456");
+		when(telCodeValidationRepository.getSmsCertification(request.getTel())).thenReturn("123456");
+
+		// When
+		assertDoesNotThrow(() -> userService.validateVerificationCode(request));
+
+		// Then
+		verify(telCodeValidationRepository).removeSmsCertification(request.getTel());
+	}
+
+	@Test
+	void testValidateVerificationCode_CodeNotFound() {
+		// Given
+		UserRequestDto.Validation request = new UserRequestDto.Validation("01012341234", "123456");
+		when(telCodeValidationRepository.getSmsCertification(request.getTel())).thenReturn(null);
+
+		// When & Then
+		assertThatThrownBy(() -> userService.validateVerificationCode(request))
+			.isInstanceOf(CustomException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND);
+	}
+
+	@Test
+	void testValidateVerificationCode_CodeMismatch() {
+		// Given
+		UserRequestDto.Validation request = new UserRequestDto.Validation("01012341234", "123456");
+		when(telCodeValidationRepository.getSmsCertification(request.getTel())).thenReturn("654321");
+
+		// When & Then
+		assertThatThrownBy(() -> userService.validateVerificationCode(request))
+			.isInstanceOf(CustomException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.SMS_VALIDATION_FAILURE);
+	}
+
+	@Test
+	void testValidateVerificationCode_RedisConnectionFailure() {
+		// Given
+		UserRequestDto.Validation request = new UserRequestDto.Validation("01012341234", "123456");
+		when(telCodeValidationRepository.getSmsCertification(request.getTel()))
+			.thenThrow(new RedisConnectionFailureException("Redis connection failed"));
+
+		// When & Then
+		assertThatThrownBy(() -> userService.validateVerificationCode(request))
+			.isInstanceOf(CustomException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.REDIS_CONNECTION_FAILURE);
+	}
+
+	@Test
+	void testValidateVerificationCode_UnexpectedError() {
+		// Given
+		UserRequestDto.Validation request = new UserRequestDto.Validation("01012341234", "123456");
+		when(telCodeValidationRepository.getSmsCertification(request.getTel()))
+			.thenThrow(new RuntimeException("Unexpected error"));
+
+		// When & Then
+		assertThatThrownBy(() -> userService.validateVerificationCode(request))
+			.isInstanceOf(CustomException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.SMS_FAILURE);
 	}
 }

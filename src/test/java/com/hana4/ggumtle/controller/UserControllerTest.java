@@ -259,4 +259,62 @@ public class UserControllerTest {
 		verify(userService, times(1)).updatePermission(any(User.class));
 	}
 
+	@Test
+	public void testSendVerificationCode() throws Exception {
+		UserRequestDto.VerificationCode request = new UserRequestDto.VerificationCode("01012341234");
+
+		doNothing().when(userService).sendVerificationCode(anyString());
+
+		mockMvc.perform(post("/verification-code")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andExpect(jsonPath("$.data").doesNotExist());
+
+		verify(userService, times(1)).sendVerificationCode("01012341234");
+	}
+
+	@Test
+	public void testValidateVerificationCode() throws Exception {
+		UserRequestDto.Validation request = new UserRequestDto.Validation("01012341234", "123456");
+
+		doNothing().when(userService).validateVerificationCode(any(UserRequestDto.Validation.class));
+
+		mockMvc.perform(post("/verification-code/validation")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andExpect(jsonPath("$.data").doesNotExist());
+
+		verify(userService, times(1)).validateVerificationCode(any(UserRequestDto.Validation.class));
+	}
+
+	@Test
+	public void testSendVerificationCodeWithInvalidRequest() throws Exception {
+		UserRequestDto.VerificationCode request = new UserRequestDto.VerificationCode("");
+
+		mockMvc.perform(post("/verification-code")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(userService, never()).sendVerificationCode(anyString());
+	}
+
+	@Test
+	public void testValidateVerificationCodeWithInvalidRequest() throws Exception {
+		UserRequestDto.Validation request = new UserRequestDto.Validation("", "");
+
+		mockMvc.perform(post("/verification-code/validation")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isBadRequest());
+
+		verify(userService, never()).validateVerificationCode(any(UserRequestDto.Validation.class));
+	}
+
 }
