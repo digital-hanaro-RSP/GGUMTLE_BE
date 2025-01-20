@@ -14,10 +14,12 @@ import lombok.EqualsAndHashCode;
 import lombok.Generated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Generated
 public class PostRequestDto {
 	@Getter
+	@Setter
 	@AllArgsConstructor
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	@Builder
@@ -28,14 +30,20 @@ public class PostRequestDto {
 		@NotEmpty(message = "내용을 입력하세요.")
 		private String content;
 
+		@NotEmpty(message = "스냅샷이 필요합니다.")
+		private String snapShot;
+
 		@NotNull(message = "글 타입을 입력하세요.")
-		private PostType postType;
+		@Builder.Default
+		private PostType postType = PostType.POST;
 
 		public Post toEntity(User user, Group group) {
 			return Post.builder()
-				.user(user).group(group)
+				.user(user)
+				.group(group)
 				.imageUrls(this.imageUrls)
 				.content(this.content)
+				.snapshot(this.snapShot)
 				.postType(this.postType)
 				.build();
 		}

@@ -440,4 +440,10 @@ public class GroupServiceTest {
 		// 추가 검증
 		verifyNoMoreInteractions(groupRepository, groupMemberRepository);
 	}
+
+	@Test
+	void isMatchedGroupUser() {
+		when(groupMemberRepository.findByGroupAndUser(any(), any())).thenReturn(Optional.empty());
+		assertThat(groupService.isMatchedGroupUser(new User(), new Group())).isEqualTo(false);
+	}
 }

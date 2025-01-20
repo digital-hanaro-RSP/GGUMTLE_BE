@@ -1,9 +1,11 @@
 package com.hana4.ggumtle.service;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +14,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.goalPortfolio.GoalPortfolio;
 import com.hana4.ggumtle.model.entity.portfolioTemplate.PortfolioTemplate;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -71,5 +75,39 @@ class GoalPortfolioServiceTest {
 		assertEquals(BigDecimal.valueOf(0.05), result.getEtcRatio());
 
 		verify(goalPortfolioRepository).save(any(GoalPortfolio.class));
+	}
+
+	@Test
+	void getGoalPortfolio_성공() {
+		User user = new User();
+		user.setId("1");
+		GoalPortfolio goalPortfolio = GoalPortfolio.builder()
+			.id(1L)
+			.depositWithdrawalRatio(BigDecimal.ONE)
+			.savingTimeDepositRatio(BigDecimal.ONE)
+			.investmentRatio(BigDecimal.ONE)
+			.foreignCurrencyRatio(BigDecimal.ONE)
+			.pensionRatio(BigDecimal.ONE)
+			.etcRatio(BigDecimal.ONE)
+			.template(template)
+			.user(user)
+			.build();
+		when(goalPortfolioRepository.findByUserId("1")).thenReturn(Optional.of(goalPortfolio));
+		assertThat(goalPortfolioService.getGoalPortfolioByUserId("1").getDepositWithdrawalRatio()).isEqualTo(
+			goalPortfolio.getDepositWithdrawalRatio());
+	}
+
+	@Test
+	void getGoalPortfolio_실패() {
+		User user = new User();
+		user.setId("1");
+
+		CustomException exception = assertThrows(CustomException.class, () -> {
+			goalPortfolioService.getGoalPortfolioByUserId(user.getId());
+		});
+
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+		assertEquals("해당 유저의 목표 포트폴리오가 존재하지 않습니다.", exception.getMessage());
+		verify(goalPortfolioRepository).findByUserId(user.getId());
 	}
 }
