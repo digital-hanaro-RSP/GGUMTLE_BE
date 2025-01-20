@@ -65,7 +65,7 @@ public class PostController {
 		@ApiResponse(responseCode = "200", description = "게시물 조회 성공"),
 		@ApiResponse(responseCode = "404", description = "게시물 조회 실패",
 			content = @Content(mediaType = "application/json", schema = @Schema(
-				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹에 권한이 없습니다.\" }"
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"글이 해당 그룹에 있지 않습니다.\" }"
 			)))
 	})
 	@GetMapping("/post/{postId}")
@@ -78,13 +78,7 @@ public class PostController {
 	}
 
 	@Operation(summary = "게시물 목록 조회", description = "페이지별로 게시물 목록을 조회합니다.")
-	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "게시물 목록 조회 성공"),
-		@ApiResponse(responseCode = "404", description = "게시물 목록 조회 실패",
-			content = @Content(mediaType = "application/json", schema = @Schema(
-				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹에 권한이 없습니다.\" }"
-			)))
-	})
+	@ApiResponse(responseCode = "200", description = "게시물 목록 조회 성공")
 	@GetMapping("/post")
 	public ResponseEntity<CustomApiResponse<List<PostResponseDto.PostInfo>>> getPostsByPage(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,

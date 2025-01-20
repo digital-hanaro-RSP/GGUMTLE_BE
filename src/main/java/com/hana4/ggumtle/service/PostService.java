@@ -84,23 +84,17 @@ public class PostService {
 	}
 
 	public PostResponseDto.PostDetail getPost(Long groupId, Long postId, User user) {
-		if (!checkUserWithGroup(groupId, user)) {
-			throw new CustomException(ErrorCode.NOT_FOUND, "해당 그룹에 권한이 없습니다.");
+		Post post = getPostById(postId);
+		if (!post.getGroup().getId().equals(groupId)) {
+			throw new CustomException(ErrorCode.NOT_FOUND, "글이 해당 그룹에 있지 않습니다.");
 		}
-
-		return PostResponseDto.PostDetail.from(
-			getPostById(postId),
-			postLikeService.isAuthorLike(postId, user.getId()), postLikeService.countLikeByPostId(postId),
-			commentService.countCommentByPostId(postId));
+		return PostResponseDto.PostDetail.from(post, postLikeService.isAuthorLike(postId, user.getId()),
+			postLikeService.countLikeByPostId(postId), commentService.countCommentByPostId(postId));
 	}
 
 	public List<PostResponseDto.PostInfo> getPostsByPage(Long groupId, int page, User user) {
-		if (!checkUserWithGroup(groupId, user)) {
-			throw new CustomException(ErrorCode.NOT_FOUND, "해당 그룹에 권한이 없습니다.");
-		}
-
 		Pageable pageable = PageRequest.of(page, 10);
-		return postRepository.findAll(pageable)
+		return postRepository.findAllByGroupId(groupId, pageable)
 			.map(post -> PostResponseDto.PostInfo.from(post, postLikeService.isAuthorLike(post.getId(), user.getId())))
 			.getContent();
 	}

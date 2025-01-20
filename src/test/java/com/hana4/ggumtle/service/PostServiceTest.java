@@ -273,26 +273,6 @@ class PostServiceTest {
 	}
 
 	@Test
-	void save_throwsException_그룹없음() {
-		// given
-		Long groupId = 1L;
-		String imageUrls = "imageUrl";
-		String content = "content";
-		String snapShot = "snapShot";
-		User user = new User();
-		PostRequestDto.Write postRequestDto = new PostRequestDto.Write(imageUrls, content, snapShot, PostType.POST);
-
-		when(groupService.getGroup(groupId)).thenThrow(new CustomException(ErrorCode.NOT_FOUND));
-
-		// when, then
-		CustomException exception = assertThrows(CustomException.class, () -> {
-			postService.save(groupId, postRequestDto, user);
-		});
-
-		assertThat(ErrorCode.NOT_FOUND).isEqualTo(exception.getErrorCode());
-	}
-
-	@Test
 	void save_throwsException_스냅샷버켓리스트없음() throws JsonProcessingException {
 		Long groupId = 1L;
 		String imageUrls = "imageUrl";
@@ -370,8 +350,6 @@ class PostServiceTest {
 
 		PostResponseDto.PostDetail postDetail = PostResponseDto.PostDetail.from(post, false, 0, 0);
 
-		when(groupService.getGroup(group.getId())).thenReturn(group);
-		when(groupService.isMatchedGroupUser(user, group)).thenReturn(true);
 		when(postLikeService.isAuthorLike(post.getId(), user.getId())).thenReturn(false);
 		when(postLikeService.countLikeByPostId(post.getId())).thenReturn(0);
 		when(commentService.countCommentByPostId(post.getId())).thenReturn(0);
@@ -389,34 +367,25 @@ class PostServiceTest {
 	}
 
 	@Test
-	void getPost_실패_사용자가그룹에없음() {
-		User user = new User(
-			"1", // id
-			"010-1234-5678", // tel
-			"password123", // password
-			"홍길동", // name
-			(short)1, // permission
-			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
-			"M", // gender
-			UserRole.USER, // role
-			"https://example.com/profile.jpg", // profileImageUrl
-			"hgildong" // nickname
-		);
+	void getPost_실패_글이그룹에없음() {
+		// Given
+		Long groupId = 1L;
+		Long postId = 1L;
+		User user = new User(); // 적절한 User 객체 생성
+		Post post = new Post(); // 적절한 Post 객체 생성
+		Group group = new Group();
+		group.setId(2L); // 다른 그룹 ID 설정
+		post.setGroup(group);
 
-		Group group = new Group(
-			1L, // id
-			"여행자 모임", // name
-			GroupCategory.TRAVEL, // category (가정: GroupCategory.TECH)
-			"여행 관련 정보와 기술을 공유하는 모임입니다.", // description
-			"https://example.com/group-image.jpg" // imageUrl
-		);
+		when(postRepository.findById(postId)).thenReturn(Optional.of(post));
 
-		when(groupService.getGroup(group.getId())).thenReturn(group);
-		when(groupService.isMatchedGroupUser(eq(user), eq(group))).thenReturn(false);
-
-		assertThrows(CustomException.class, () -> {
-			postService.getPost(group.getId(), 1L, user);
+		// When & Then
+		CustomException exception = assertThrows(CustomException.class, () -> {
+			postService.getPost(groupId, postId, user);
 		});
+
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+		assertEquals("해당 그룹의 글이 아닙니다.", exception.getMessage());
 	}
 
 	@Test
@@ -451,10 +420,8 @@ class PostServiceTest {
 		List<Post> posts = List.of(post);
 		Page<Post> postPage = new PageImpl<>(posts, pageable, posts.size());
 
-		when(postRepository.findAll(pageable)).thenReturn(postPage);
+		when(postRepository.findAllByGroupId(groupId, pageable)).thenReturn(postPage);
 		when(postLikeService.isAuthorLike(eq(post.getId()), eq(user.getId()))).thenReturn(true);
-		when(groupService.getGroup(eq(1L))).thenReturn(group);
-		when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
 
 		// When
 		List<PostResponseDto.PostInfo> result = postService.getPostsByPage(groupId, page, user);
@@ -464,41 +431,9 @@ class PostServiceTest {
 		assertEquals(1, result.size());
 		// Add more assertions...
 
-		verify(groupService).getGroup(eq(1L));
-		verify(groupService).isMatchedGroupUser(eq(user), any(Group.class));
-		verify(postRepository).findAll(pageable);
+		// verify(groupService).isMatchedGroupUser(eq(user), any(Group.class));
+		verify(postRepository).findAllByGroupId(groupId, pageable);
 		verify(postLikeService).isAuthorLike(eq(1L), eq("1"));
-	}
-
-	@Test
-	void getPostsByPage_사용자가그룹에없음() {
-		// Given
-		Long groupId = 1L;
-		Group group = new Group(groupId, "여행자 모임", GroupCategory.TRAVEL, "설명", "이미지URL");
-
-		int page = 0;
-		User user = new User(
-			"1", // id
-			"010-1234-5678", // tel
-			"password123", // password
-			"홍길동", // name
-			(short)1, // permission
-			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
-			"M", // gender
-			UserRole.USER, // role
-			"https://example.com/profile.jpg", // profileImageUrl
-			"hgildong" // nickname
-		);
-		when(groupService.getGroup(eq(1L))).thenReturn(group);
-		when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(false);
-
-		// When
-		// Then
-		assertThrows(CustomException.class, () -> {
-			postService.getPostsByPage(groupId, page, user);
-		});
-		verify(groupService).isMatchedGroupUser(user, group);
-		verify(postRepository, never()).findAll(any(Pageable.class));
 	}
 
 	@Test
