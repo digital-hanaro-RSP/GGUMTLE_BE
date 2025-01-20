@@ -1,13 +1,28 @@
 package com.hana4.ggumtle.model.entity.bucket;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.user.User;
-import jakarta.persistence.*;
-import lombok.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -17,52 +32,52 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "Bucket")
 public class Bucket extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "dreamAccountId", nullable = false, foreignKey = @ForeignKey(name = "fk_Bucket_dreamAccountId_DreamAccount"))
-    private DreamAccount dreamAccount;
+	@ManyToOne
+	@JoinColumn(name = "dreamAccountId", nullable = false, foreignKey = @ForeignKey(name = "fk_Bucket_dreamAccountId_DreamAccount"))
+	private DreamAccount dreamAccount;
 
-    @ManyToOne
-    @JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_Bucket_userId_User"))
-    private User user;
+	@ManyToOne
+	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_Bucket_userId_User"))
+	private User user;
 
-    @Column(nullable = false)
-    private String title;
+	@Column(nullable = false)
+	private String title;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private BucketTagType tagType;
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private BucketTagType tagType;
 
-    private LocalDateTime dueDate;
+	private LocalDateTime dueDate;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean isDueSet;
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private boolean isDueSet;
 
-    private String memo;
+	private String memo;
 
-    @Enumerated(EnumType.STRING)
-    private BucketHowTo howTo;
+	@Enumerated(EnumType.STRING)
+	private BucketHowTo howTo;
 
-    private BigDecimal goalAmount;
+	private BigDecimal goalAmount;
 
-    private Long followers;
+	private Long followers;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private BucketStatus status;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private BucketStatus status;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean isAutoAllocate;
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private boolean isAutoAllocate;
 
-    private BigDecimal allocateAmount;
+	private BigDecimal allocateAmount;
 
-    private String cronCycle;
+	private String cronCycle;
 
-    private BigDecimal safeBox;
+	private BigDecimal safeBox;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean isRecommended;
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private boolean isRecommended;
 }

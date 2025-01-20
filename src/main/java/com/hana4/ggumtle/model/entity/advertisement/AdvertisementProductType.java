@@ -8,5 +8,5 @@ package com.hana4.ggumtle.model.entity.advertisement;
  * PENSION          - 연금
  */
 public enum AdvertisementProductType {
-    SAVING_TIME_DEPOSIT,INVESTMENT,FOREIGN_CURRENCY,PENSION
+	SAVING_TIME_DEPOSIT, INVESTMENT, FOREIGN_CURRENCY, PENSION
 }

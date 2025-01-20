@@ -6,5 +6,5 @@ package com.hana4.ggumtle.model.entity.advertisement;
  * COMMUNITY- 커뮤니티 화면
  */
 public enum AdvertisementLocationType {
-    MAIN,COMMUNITY
+	MAIN, COMMUNITY
 }
