@@ -113,14 +113,14 @@ public class UserService {
 			throw new CustomException(ErrorCode.TOKEN_INVALID);
 	}
 
-	public UserResponseDto.UserInfo updatePermission(User user) {
-		user.setPermission((short)(user.getPermission() + 1));
+	public UserResponseDto.UserInfo addMyDataPermission(User user) {
+		user.addPermission(User.PERMISSION_MYDATA);
 		userRepository.save(user);
 		return UserResponseDto.UserInfo.from(user);
 	}
 
-	public User updatePermission(User user, short permission) {
-		user.setPermission(permission);
+	public User addSurveyPermission(User user) {
+		user.addPermission(User.PERMISSION_SURVEY);
 		userRepository.save(user);
 		return user;
 	}

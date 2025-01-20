@@ -39,7 +39,7 @@ public class SurveyService {
 		goalPortfolioService.createGoalPortfolioAndSave(template, user);
 
 		// user permission 3으로 update
-		User updatedUser = userService.updatePermission(user, (short)(user.getPermission() + 2));
+		User updatedUser = userService.addSurveyPermission(user);
 
 		return SurveyResponseDto.CreateResponse.from(surveyRepository.save(surveyRequestDto.toEntity(updatedUser)));
 	}

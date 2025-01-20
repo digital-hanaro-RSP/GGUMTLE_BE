@@ -127,7 +127,7 @@ public class UserController {
 	@PatchMapping("/mydata/permission")
 	public ResponseEntity<CustomApiResponse<UserResponseDto.UserInfo>> updatePermission(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return ResponseEntity.ok(CustomApiResponse.success(userService.updatePermission(userDetails.getUser())));
+		return ResponseEntity.ok(CustomApiResponse.success(userService.addMyDataPermission(userDetails.getUser())));
 	}
 
 	@Operation(summary = "인증번호 코드 요청", description = "휴대폰 인증번호를 문자로 발송합니다. 같은 번호로 하루 10번 이상 불가.")
