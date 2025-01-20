@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -64,7 +63,6 @@ class SurveyServiceTest {
 
 		// surveyRequestDto = new SurveyRequestDto.Create().toBuilder().build()
 		surveyRequestDto = SurveyRequestDto.CreateSurvey.builder()
-			.answers(List.of(1, 2, 3, 4, 5))
 			.investmentType("BALANCED")
 			.build();
 
