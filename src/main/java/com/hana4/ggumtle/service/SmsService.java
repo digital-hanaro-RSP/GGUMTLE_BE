@@ -26,7 +26,7 @@ public class SmsService {
 		Message message = new Message();
 		message.setFrom(sender);
 		message.setTo(userTel);
-		message.setText("[꿈틀] 귀하의 인증번호는" + verificationCode + "입니다.");
+		message.setText("[꿈틀] 귀하의 인증번호는 " + verificationCode + " 입니다.");
 
 		return this.messageService.sendOne(new SingleMessageSendingRequest(message));
 	}
