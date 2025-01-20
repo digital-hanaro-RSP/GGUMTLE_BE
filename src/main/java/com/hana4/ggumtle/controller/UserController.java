@@ -129,4 +129,19 @@ public class UserController {
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		return ResponseEntity.ok(CustomApiResponse.success(userService.updatePermission(userDetails.getUser())));
 	}
+
+	@PostMapping("/verification-code")
+	public ResponseEntity<CustomApiResponse<Void>> sendVerificationCode(
+		@RequestBody @Valid UserRequestDto.VerificationCode request) {
+		userService.sendVerificationCode(request.getTel());
+		return ResponseEntity.ok(CustomApiResponse.success());
+	}
+
+	@PostMapping("/verification-code/validation")
+	public ResponseEntity<CustomApiResponse<Void>> validateVerificationCode(
+		@RequestBody @Valid UserRequestDto.Validation request
+	) {
+		userService.validateVerificationCode(request);
+		return ResponseEntity.ok(CustomApiResponse.success());
+	}
 }

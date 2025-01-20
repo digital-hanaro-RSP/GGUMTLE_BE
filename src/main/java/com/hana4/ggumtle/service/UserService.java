@@ -1,5 +1,7 @@
 package com.hana4.ggumtle.service;
 
+import java.util.Random;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -9,6 +11,7 @@ import com.hana4.ggumtle.dto.user.UserResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.repository.TelCodeValidationRepository;
 import com.hana4.ggumtle.repository.UserRepository;
 import com.hana4.ggumtle.security.provider.JwtProvider;
 import com.hana4.ggumtle.vo.RefreshToken;
@@ -23,6 +26,8 @@ public class UserService {
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final JwtProvider jwtProvider;
 	private final MyDataService myDataService;
+	private final SmsService smsService;
+	private final TelCodeValidationRepository telCodeValidationRepository;
 
 	public User getUserByTel(String tel) {
 		return userRepository.findUserByTel(tel)
@@ -115,5 +120,27 @@ public class UserService {
 		user.setPermission(permission);
 		userRepository.save(user);
 		return user;
+	}
+
+	public void sendVerificationCode(String userTel) {
+		// 레디스에 있으면 인증 못하게 처리
+		String verificationCode = String.format("%06d", new Random().nextInt(1000000));
+		try {
+			// smsService.sendOne(userTel, verificationCode);
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.SMS_SEND_FAILURE);
+		}
+		System.out.println("Calling createSmsCertification with: " + userTel + ", " + verificationCode);
+		telCodeValidationRepository.createSmsCertification(userTel, verificationCode);
+	}
+
+	public void validateVerificationCode(UserRequestDto.Validation request) {
+		String storedCode = telCodeValidationRepository.getSmsCertification(request.getTel());
+
+		if (storedCode == null || !storedCode.equals(request.getCode())) {
+			throw new CustomException(ErrorCode.SMS_VALIDATION_FAILURE);
+		}
+
+		telCodeValidationRepository.removeSmsCertification(request.getTel());
 	}
 }

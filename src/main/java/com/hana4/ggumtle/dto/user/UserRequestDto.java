@@ -93,4 +93,30 @@ public class UserRequestDto {
 		@NotEmpty(message = "refreshToken을 입력하세요.")
 		private String refreshToken;
 	}
+
+	@Schema(description = "인증번호 요청 DTO")
+	@Getter
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	public static class VerificationCode {
+		@Schema(description = "인증번호를 발송할 전화번호", example = "\"01012341234\"", requiredMode = Schema.RequiredMode.REQUIRED)
+		@NotEmpty(message = "전화번호을 입력하세요.")
+		private String tel;
+	}
+
+	@Schema(description = "인증번호 확인 요청 DTO")
+	@Getter
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	public static class Validation {
+		@Schema(description = "인증번호를 발송할 전화번호", example = "\"01012341234\"", requiredMode = Schema.RequiredMode.REQUIRED)
+		@NotEmpty(message = "전화번호를 입력하세요.")
+		private String tel;
+
+		@Schema(description = "사용자가 입력한 인증번호", example = "123456", requiredMode = Schema.RequiredMode.REQUIRED)
+		@NotEmpty(message = "전화번호를 입력하세요.")
+		private String code;
+	}
 }

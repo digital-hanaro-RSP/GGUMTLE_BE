@@ -51,6 +51,12 @@ dependencies {
 
     // SwaggerUI
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3'
+
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // sms
+    implementation 'net.nurigo:sdk:4.3.2'
 }
 
 tasks.named('test') {
