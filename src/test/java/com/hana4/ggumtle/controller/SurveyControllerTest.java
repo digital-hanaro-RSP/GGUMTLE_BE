@@ -6,8 +6,6 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +25,7 @@ import com.hana4.ggumtle.WithMockCustomUser;
 import com.hana4.ggumtle.config.TestSecurityConfig;
 import com.hana4.ggumtle.dto.survey.SurveyRequestDto;
 import com.hana4.ggumtle.dto.survey.SurveyResponseDto;
+import com.hana4.ggumtle.model.entity.survey.SurveyType;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.service.SurveyService;
 
@@ -63,14 +62,13 @@ public class SurveyControllerTest {
 	public void testCreateSurvey() throws Exception {
 		// Arrange
 		SurveyRequestDto.CreateSurvey requestDto = SurveyRequestDto.CreateSurvey.builder()
-			.answers(List.of(1, 2, 3, 4, 5))
 			.investmentType("BALANCED")
 			.build();
 
 		SurveyResponseDto.CreateResponse responseDto = SurveyResponseDto.CreateResponse.builder()
 			.id(1L)
 			.userId("testUser")
-			.answers(List.of(1, 2, 3, 4, 5))
+			.surveyType(SurveyType.INVESTMENT_RISK_TOLERANCE)
 			.build();
 
 		when(surveyService.createSurvey(any(SurveyRequestDto.CreateSurvey.class), any(User.class)))
@@ -83,11 +81,6 @@ public class SurveyControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.id").value(1L))
 			.andExpect(jsonPath("$.data.userId").value("testUser"))
-			.andExpect(jsonPath("$.data.answers").isArray())
-			.andExpect(jsonPath("$.data.answers[0]").value(1))
-			.andExpect(jsonPath("$.data.answers[1]").value(2))
-			.andExpect(jsonPath("$.data.answers[2]").value(3))
-			.andExpect(jsonPath("$.data.answers[3]").value(4))
-			.andExpect(jsonPath("$.data.answers[4]").value(5));
+			.andExpect(jsonPath("$.data.surveyType").value("INVESTMENT_RISK_TOLERANCE"));
 	}
 }

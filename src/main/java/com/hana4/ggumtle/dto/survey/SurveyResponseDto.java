@@ -1,9 +1,8 @@
 package com.hana4.ggumtle.dto.survey;
 
-import java.util.List;
-
 import com.hana4.ggumtle.dto.BaseDto;
 import com.hana4.ggumtle.model.entity.survey.Survey;
+import com.hana4.ggumtle.model.entity.survey.SurveyType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -25,14 +24,14 @@ public class SurveyResponseDto {
 		Long id;
 		@Schema(description = "userId", example = "5b7de176-83f2-490a-b8d1-5ec4cbced4e8")
 		String userId;
-		@Schema(description = "answers", example = "[1,2,3,4,5,4,3]")
-		List<Integer> answers;
+		@Schema(description = "answers", example = "INVESTMENT_RISK_TOLERANCE")
+		SurveyType surveyType;
 
 		public static CreateResponse from(Survey survey) {
 			return CreateResponse.builder()
 				.id(survey.getId())
 				.userId(survey.getUser().getId())
-				.answers(survey.getAnswers())
+				.surveyType(survey.getSurveyType())
 				.createdAt(survey.getCreatedAt())
 				.updatedAt(survey.getUpdatedAt())
 				.build();
