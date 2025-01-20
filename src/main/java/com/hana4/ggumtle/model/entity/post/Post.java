@@ -39,8 +39,6 @@ public class Post extends BaseEntity {
 	@JoinColumn(name = "groupId", nullable = false, foreignKey = @ForeignKey(name = "fk_Post_groupId_Group"))
 	private Group group;
 
-	private Long bucketId;
-
 	@Column(columnDefinition = "json")
 	private String snapshot;
 

@@ -63,7 +63,6 @@ class PostRepositoryTest {
 		Post post = new Post();
 		post.setUser(savedUser);
 		post.setGroup(savedGroup);
-		post.setBucketId(1L);
 		post.setSnapshot("snapShot");
 		post.setImageUrls("https://example.com/image.jpg");
 		post.setContent("글 내용");

@@ -47,9 +47,8 @@ public class PostService {
 		return groupService.isMatchedGroupUser(user, group);
 	}
 
-	public PostResponseDto.PostInfo save(Long groupId, PostRequestDto.Write postRequestDto, User user) throws
+	private String makeSnapShot(PostRequestDto.Write postRequestDto, User user) throws
 		JsonProcessingException {
-		Group group = groupService.getGroup(groupId);
 		Map<String, Object> snapShotResponse = new HashMap<>();
 		List<BucketResponseDto.BriefInfo> bucketList = new ArrayList<>();
 
@@ -79,7 +78,14 @@ public class PostService {
 			snapShotResponse.put("currentPortfolio", myDataService.getMyDataByUserId(user.getId()));
 		}
 
-		postRequestDto.setSnapShot(objectMapper.writeValueAsString(snapShotResponse));
+		return objectMapper.writeValueAsString(snapShotResponse);
+	}
+
+	public PostResponseDto.PostInfo save(Long groupId, PostRequestDto.Write postRequestDto, User user) throws
+		JsonProcessingException {
+		Group group = groupService.getGroup(groupId);
+
+		postRequestDto.setSnapShot(makeSnapShot(postRequestDto, user));
 		return PostResponseDto.PostInfo.from(postRepository.save(postRequestDto.toEntity(user, group)), false);
 	}
 
@@ -100,7 +106,7 @@ public class PostService {
 	}
 
 	public PostResponseDto.PostInfo updatePost(Long groupId, Long postId, PostRequestDto.Write postRequestDto,
-		User user) {
+		User user) throws JsonProcessingException {
 		if (!checkUserWithGroup(groupId, user)) {
 			throw new CustomException(ErrorCode.NOT_FOUND, "해당 그룹에 권한이 없습니다.");
 		}
@@ -112,6 +118,7 @@ public class PostService {
 
 		post.setImageUrls(postRequestDto.getImageUrls());
 		post.setContent(postRequestDto.getContent());
+		post.setSnapshot(makeSnapShot(postRequestDto, user));
 
 		return PostResponseDto.PostInfo.from(postRepository.save(post),
 			postLikeService.isAuthorLike(post.getId(), user.getId()));

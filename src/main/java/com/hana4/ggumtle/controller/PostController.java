@@ -24,6 +24,7 @@ import com.hana4.ggumtle.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -64,15 +65,17 @@ public class PostController {
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "게시물 조회 성공"),
 		@ApiResponse(responseCode = "404", description = "게시물 조회 실패",
-			content = @Content(mediaType = "application/json", schema = @Schema(
-				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"글이 해당 그룹에 있지 않습니다.\" }"
-			)))
+			content = @Content(mediaType = "application/json", examples = {
+				@ExampleObject(name = "글 없음", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 글이 존재하지 않습니다.\" }"),
+				@ExampleObject(name = "그룹 내 글 없음", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"글이 해당 그룹에 있지 않습니다.\" }")
+			}))
 	})
 	@GetMapping("/post/{postId}")
 	public ResponseEntity<CustomApiResponse<PostResponseDto.PostDetail>> getPost(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
 		@Parameter(description = "게시물 ID") @PathVariable Long postId,
 		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
 		return ResponseEntity.ok(
 			CustomApiResponse.success(postService.getPost(groupId, postId, customUserDetails.getUser())));
 	}
@@ -96,16 +99,19 @@ public class PostController {
 				example = "{ \"code\": 401, \"error\": \"Unauthorized\", \"message\": \"해당 글에 권한이 없습니다.\" }"
 			))),
 		@ApiResponse(responseCode = "404", description = "게시물 수정 실패",
-			content = @Content(mediaType = "application/json", schema = @Schema(
-				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹에 권한이 없습니다.\" }"
-			)))
+			content = @Content(mediaType = "application/json", examples = {
+				@ExampleObject(name = "", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 글이 존재하지 않습니다.\" }"),
+				@ExampleObject(name = "", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹에 권한이 없습니다.\" }")
+			}))
 	})
 	@PatchMapping("/post/{postId}")
 	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> updatePost(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
 		@Parameter(description = "게시물 ID") @PathVariable Long postId,
 		@Parameter(description = "수정할 게시물 내용") @RequestBody @Valid PostRequestDto.Write write,
-		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) throws
+		JsonProcessingException {
+
 		return ResponseEntity.ok(
 			CustomApiResponse.success(postService.updatePost(groupId, postId, write, customUserDetails.getUser())));
 	}
@@ -118,15 +124,17 @@ public class PostController {
 				example = "{ \"code\": 401, \"error\": \"Unauthorized\", \"message\": \"해당 글에 권한이 없습니다.\" }"
 			))),
 		@ApiResponse(responseCode = "404", description = "게시물 삭제 실패",
-			content = @Content(mediaType = "application/json", schema = @Schema(
-				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 글이 존재하지 않습니다.\" }"
-			))),
+			content = @Content(mediaType = "application/json", examples = {
+				@ExampleObject(name = "글 없음", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 글이 존재하지 않습니다.\" }"),
+				@ExampleObject(name = "그룹 권한 없음", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹에 권한이 없습니다.\" }")
+			}))
 	})
 	@DeleteMapping("/post/{postId}")
 	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> deletePost(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
 		@Parameter(description = "게시물 ID") @PathVariable Long postId,
 		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
 		postService.deletePost(groupId, postId, customUserDetails.getUser());
 		return ResponseEntity.ok(CustomApiResponse.success());
 	}

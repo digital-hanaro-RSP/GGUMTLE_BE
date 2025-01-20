@@ -79,12 +79,54 @@ class PostServiceTest {
 		Long groupId = 1L;
 		String imageUrls = "imageUrls";
 		String content = "content";
-
+		String snapshot = "{\"bucketId\":[1,2,3],\"portfolio\":false}";
+		String snapshotResponse = "{\"bucketLists\":[{\"createdAt\":\"2025-01-16T19:34:47.057385\",\"updatedAt\":"
+			+ "\"2025-01-16T19:34:47.057385\",\"id\":2,\"dreamAccount\":{\"createdAt\":\"2025-01-16T19:33:24.542526\","
+			+ "\"updatedAt\":\"2025-01-16T19:33:24.542526\",\"id\":2,\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\","
+			+ "\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":"
+			+ "\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":"
+			+ "\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"balance\":10000.00,\"total\":10000.00},"
+			+ "\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\","
+			+ "\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\","
+			+ "\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\","
+			+ "\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"title\":\"title\",\"tagType\":\"DO\","
+			+ "\"dueDate\":null,\"memo\":null,\"howTo\":null,\"goalAmount\":null,\"followers\":null,\"status\":\"HOLD\","
+			+ "\"allocateAmount\":null,\"cronCycle\":null,\"safeBox\":null,\"autoAllocate\":false,\"recommended\":false,"
+			+ "\"dueSet\":false},{\"createdAt\":\"2025-01-16T19:35:31.891711\",\"updatedAt\":\"2025-01-16T19:35:31.891711\","
+			+ "\"id\":4,\"dreamAccount\":{\"createdAt\":\"2025-01-16T19:33:24.542526\","
+			+ "\"updatedAt\":\"2025-01-16T19:33:24.542526\",\"id\":2,\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\","
+			+ "\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\","
+			+ "\"tel\":\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\","
+			+ "\"name\":\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"balance\":10000.00,\"total\":10000.00},"
+			+ "\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\","
+			+ "\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\","
+			+ "\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\","
+			+ "\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"title\":\"title\",\"tagType\":\"DO\",\"dueDate\":null,"
+			+ "\"memo\":null,\"howTo\":null,\"goalAmount\":null,\"followers\":null,\"status\":\"HOLD\","
+			+ "\"allocateAmount\":null,\"cronCycle\":null,\"safeBox\":null,\"autoAllocate\":false,\"recommended\":false,"
+			+ "\"dueSet\":false},{\"createdAt\":\"2025-01-16T19:35:33.42489\",\"updatedAt\":\"2025-01-16T19:35:33.42489\","
+			+ "\"id\":5,\"dreamAccount\":{\"createdAt\":\"2025-01-16T19:33:24.542526\","
+			+ "\"updatedAt\":\"2025-01-16T19:33:24.542526\",\"id\":2,\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\","
+			+ "\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\","
+			+ "\"tel\":\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\","
+			+ "\"name\":\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"balance\":10000.00,\"total\":10000.00},"
+			+ "\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\","
+			+ "\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\","
+			+ "\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\","
+			+ "\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"title\":\"title\",\"tagType\":\"DO\",\"dueDate\":null,"
+			+ "\"memo\":null,\"howTo\":null,\"goalAmount\":null,\"followers\":null,\"status\":\"HOLD\","
+			+ "\"allocateAmount\":null,\"cronCycle\":null,\"safeBox\":null,\"autoAllocate\":false,\"recommended\":false,"
+			+ "\"dueSet\":false}]}";
 		PostResponseDto.PostInfo expectedPostInfo = PostResponseDto.PostInfo.builder()
 			.userId(userId)
 			.groupId(groupId)
-			.snapShot(
-				"{\"bucketLists\":[{\"createdAt\":\"2025-01-16T19:34:47.057385\",\"updatedAt\":\"2025-01-16T19:34:47.057385\",\"id\":2,\"dreamAccount\":{\"createdAt\":\"2025-01-16T19:33:24.542526\",\"updatedAt\":\"2025-01-16T19:33:24.542526\",\"id\":2,\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\",\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"balance\":10000.00,\"total\":10000.00},\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\",\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"title\":\"title\",\"tagType\":\"DO\",\"dueDate\":null,\"memo\":null,\"howTo\":null,\"goalAmount\":null,\"followers\":null,\"status\":\"HOLD\",\"allocateAmount\":null,\"cronCycle\":null,\"safeBox\":null,\"autoAllocate\":false,\"recommended\":false,\"dueSet\":false},{\"createdAt\":\"2025-01-16T19:35:31.891711\",\"updatedAt\":\"2025-01-16T19:35:31.891711\",\"id\":4,\"dreamAccount\":{\"createdAt\":\"2025-01-16T19:33:24.542526\",\"updatedAt\":\"2025-01-16T19:33:24.542526\",\"id\":2,\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\",\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"balance\":10000.00,\"total\":10000.00},\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\",\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"title\":\"title\",\"tagType\":\"DO\",\"dueDate\":null,\"memo\":null,\"howTo\":null,\"goalAmount\":null,\"followers\":null,\"status\":\"HOLD\",\"allocateAmount\":null,\"cronCycle\":null,\"safeBox\":null,\"autoAllocate\":false,\"recommended\":false,\"dueSet\":false},{\"createdAt\":\"2025-01-16T19:35:33.42489\",\"updatedAt\":\"2025-01-16T19:35:33.42489\",\"id\":5,\"dreamAccount\":{\"createdAt\":\"2025-01-16T19:33:24.542526\",\"updatedAt\":\"2025-01-16T19:33:24.542526\",\"id\":2,\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\",\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"balance\":10000.00,\"total\":10000.00},\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\",\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"title\":\"title\",\"tagType\":\"DO\",\"dueDate\":null,\"memo\":null,\"howTo\":null,\"goalAmount\":null,\"followers\":null,\"status\":\"HOLD\",\"allocateAmount\":null,\"cronCycle\":null,\"safeBox\":null,\"autoAllocate\":false,\"recommended\":false,\"dueSet\":false}]}")
+			.snapShot(snapshotResponse)
 			.imageUrls(imageUrls)
 			.content(content)
 			.postType(PostType.POST)
@@ -144,15 +186,15 @@ class PostServiceTest {
 		post.setGroup(group);
 		post.setContent("content");
 		List<Integer> bucketIds = List.of(1, 2, 3);
-		Map<String, Object> snapshot = new HashMap<>();
-		snapshot.put("bucketId", bucketIds);
-		snapshot.put("portfolio", false);
+		Map<String, Object> snapshots = new HashMap<>();
+		snapshots.put("bucketId", bucketIds);
+		snapshots.put("portfolio", false);
 
 		when(groupService.getGroup(1L)).thenReturn(group);
 		when(postRepository.save(any(Post.class))).thenReturn(post);
-		when(objectMapper.readValue(eq(write.getSnapShot()), any(TypeReference.class))).thenReturn(snapshot);
-		when(objectMapper.convertValue(eq(snapshot.get("bucketId")), any(TypeReference.class))).thenReturn(bucketIds);
-		when(objectMapper.convertValue(eq(snapshot.get("portfolio")), any(TypeReference.class))).thenReturn(false);
+		when(objectMapper.readValue(eq(write.getSnapShot()), any(TypeReference.class))).thenReturn(snapshots);
+		when(objectMapper.convertValue(eq(snapshots.get("bucketId")), any(TypeReference.class))).thenReturn(bucketIds);
+		when(objectMapper.convertValue(eq(snapshots.get("portfolio")), any(TypeReference.class))).thenReturn(false);
 		when(bucketService.getBucket(eq(1L))).thenReturn(bucket);
 		when(bucketService.getBucket(eq(2L))).thenReturn(bucket);
 		when(bucketService.getBucket(eq(3L))).thenReturn(bucket);
@@ -385,7 +427,7 @@ class PostServiceTest {
 		});
 
 		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
-		assertEquals("해당 그룹의 글이 아닙니다.", exception.getMessage());
+		assertEquals("글이 해당 그룹에 있지 않습니다.", exception.getMessage());
 	}
 
 	@Test
@@ -437,12 +479,57 @@ class PostServiceTest {
 	}
 
 	@Test
-	void updatePost_성공() {
+	void updatePost_성공() throws JsonProcessingException {
 		Long groupId = 1L;
 		Group group = new Group(groupId, "여행자 모임", GroupCategory.TRAVEL, "설명", "이미지URL");
 		String newContent = "newContent";
 		String newImageUrl = "newImageUrl";
-		int page = 0;
+
+		String snapshot = "{\"bucketId\":[1,2,3],\"portfolio\":false}";
+		String snapshotResponse = "{\"bucketLists\":[{\"createdAt\":\"2025-01-16T19:34:47.057385\",\"updatedAt\":"
+			+ "\"2025-01-16T19:34:47.057385\",\"id\":2,\"dreamAccount\":{\"createdAt\":\"2025-01-16T19:33:24.542526\","
+			+ "\"updatedAt\":\"2025-01-16T19:33:24.542526\",\"id\":2,\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\","
+			+ "\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":"
+			+ "\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":"
+			+ "\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"balance\":10000.00,\"total\":10000.00},"
+			+ "\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\","
+			+ "\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\","
+			+ "\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\","
+			+ "\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"title\":\"title\",\"tagType\":\"DO\","
+			+ "\"dueDate\":null,\"memo\":null,\"howTo\":null,\"goalAmount\":null,\"followers\":null,\"status\":\"HOLD\","
+			+ "\"allocateAmount\":null,\"cronCycle\":null,\"safeBox\":null,\"autoAllocate\":false,\"recommended\":false,"
+			+ "\"dueSet\":false},{\"createdAt\":\"2025-01-16T19:35:31.891711\",\"updatedAt\":\"2025-01-16T19:35:31.891711\","
+			+ "\"id\":4,\"dreamAccount\":{\"createdAt\":\"2025-01-16T19:33:24.542526\","
+			+ "\"updatedAt\":\"2025-01-16T19:33:24.542526\",\"id\":2,\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\","
+			+ "\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\","
+			+ "\"tel\":\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\","
+			+ "\"name\":\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"balance\":10000.00,\"total\":10000.00},"
+			+ "\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\","
+			+ "\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\","
+			+ "\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\","
+			+ "\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"title\":\"title\",\"tagType\":\"DO\",\"dueDate\":null,"
+			+ "\"memo\":null,\"howTo\":null,\"goalAmount\":null,\"followers\":null,\"status\":\"HOLD\","
+			+ "\"allocateAmount\":null,\"cronCycle\":null,\"safeBox\":null,\"autoAllocate\":false,\"recommended\":false,"
+			+ "\"dueSet\":false},{\"createdAt\":\"2025-01-16T19:35:33.42489\",\"updatedAt\":\"2025-01-16T19:35:33.42489\","
+			+ "\"id\":5,\"dreamAccount\":{\"createdAt\":\"2025-01-16T19:33:24.542526\","
+			+ "\"updatedAt\":\"2025-01-16T19:33:24.542526\",\"id\":2,\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\","
+			+ "\"updatedAt\":\"2025-01-16T19:27:54.168613\",\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\","
+			+ "\"tel\":\"01012341235\",\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\","
+			+ "\"name\":\"문서아\",\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"balance\":10000.00,\"total\":10000.00},"
+			+ "\"user\":{\"createdAt\":\"2025-01-16T19:27:54.168575\",\"updatedAt\":\"2025-01-16T19:27:54.168613\","
+			+ "\"id\":\"099583a9-0add-4f28-9ab7-8a3b74e2d0e4\",\"tel\":\"01012341235\","
+			+ "\"password\":\"$2a$10$aX9/XJDk1BxlaSKKHa961expG2zUh0cvvn9uZkyE1ErWszaW2GbZu\",\"name\":\"문서아\","
+			+ "\"permission\":0,\"birthDate\":\"2000-01-01T00:00:00\",\"gender\":\"f\",\"role\":\"USER\","
+			+ "\"profileImageUrl\":null,\"nickname\":\"익명의고라니\"},\"title\":\"title\",\"tagType\":\"DO\",\"dueDate\":null,"
+			+ "\"memo\":null,\"howTo\":null,\"goalAmount\":null,\"followers\":null,\"status\":\"HOLD\","
+			+ "\"allocateAmount\":null,\"cronCycle\":null,\"safeBox\":null,\"autoAllocate\":false,\"recommended\":false,"
+			+ "\"dueSet\":false}]}";
+
 		User user = new User(
 			"1", // id
 			"010-1234-5678", // tel
@@ -455,22 +542,33 @@ class PostServiceTest {
 			"https://example.com/profile.jpg", // profileImageUrl
 			"hgildong" // nickname
 		);
+		Map<String, Object> realsnap = new HashMap<>();
+		realsnap.put("bucketId", List.of(1, 2, 3));
+		realsnap.put("portfolio", false);
 
 		PostRequestDto.Write write = PostRequestDto.Write.builder()
 			.content(newContent)
 			.imageUrls(newImageUrl)
+			.snapShot(snapshot)
 			.build();
 		Post post = new Post();
 		when(groupService.getGroup(eq(1L))).thenReturn(group);
 		when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
 		when(postRepository.findById(eq(1L))).thenReturn(Optional.of(post));
-		Post newPost = new Post();
-		newPost.setImageUrls(newImageUrl);
+		post.setImageUrls(newImageUrl);
 		post.setContent(newContent);
 		when(postLikeService.isAuthorLike(eq(post.getId()), eq(user.getId()))).thenReturn(true);
+		when(objectMapper.readValue(eq(write.getSnapShot()), any(TypeReference.class))).thenReturn(realsnap);
+		when(objectMapper.convertValue(eq(realsnap.get("bucketId")), any(TypeReference.class))).thenReturn(
+			List.of(1, 2, 3));
+		when(objectMapper.convertValue(eq(realsnap.get("portfolio")), any(TypeReference.class))).thenReturn(false);
+		when(bucketService.getBucket(1L)).thenReturn(new Bucket());
+		when(bucketService.getBucket(2L)).thenReturn(new Bucket());
+		when(bucketService.getBucket(3L)).thenReturn(new Bucket());
 		when(postRepository.save(post)).thenReturn(post);
 		post.setUser(user);
 		post.setGroup(group);
+		post.setSnapshot(snapshotResponse);
 		user.setId(post.getUser().getId());
 		PostResponseDto.PostInfo postInfo = postService.updatePost(groupId, 1L, write, user);
 
