@@ -62,7 +62,7 @@ class UserServiceTest {
 		mockUser.setPermission((short)0); // initial permission
 
 		// when
-		UserResponseDto.UserInfo result = userService.updatePermission(mockUser);
+		UserResponseDto.UserInfo result = userService.addMyDataPermission(mockUser);
 
 		// then
 		assertThat(result).isNotNull();
@@ -250,7 +250,7 @@ class UserServiceTest {
 		when(userRepository.save(any(User.class))).thenReturn(mockUser);
 
 		// when
-		User updatedUser = userService.updatePermission(mockUser, newPermission);
+		User updatedUser = userService.addSurveyPermission(mockUser);
 
 		// then
 		assertThat(updatedUser.getPermission()).isEqualTo(newPermission);

@@ -66,4 +66,22 @@ public class User extends BaseEntity {
 
 	@Column(nullable = false)
 	private String nickname;
+
+	// 권한을 상수로 정의
+	public static final short PERMISSION_MYDATA = 0b0001;  // 1
+	public static final short PERMISSION_SURVEY = 0b0010;  // 2
+
+	// 비트 연산을 위한 메서드들
+	public void addPermission(short newPermission) {
+		this.permission |= newPermission;
+	}
+
+	public boolean hasPermission(short permissionToCheck) {
+		return (this.permission & permissionToCheck) == permissionToCheck;
+	}
+
+	public void removePermission(short permissionToRemove) {
+		this.permission &= (short)~permissionToRemove;
+	}
+
 }

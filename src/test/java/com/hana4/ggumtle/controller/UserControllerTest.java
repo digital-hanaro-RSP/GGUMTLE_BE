@@ -239,7 +239,7 @@ public class UserControllerTest {
 			.nickname(mockUser.getNickname())
 			.build();
 
-		when(userService.updatePermission(any(User.class))).thenReturn(updatedUserInfo);
+		when(userService.addMyDataPermission(any(User.class))).thenReturn(updatedUserInfo);
 
 		mockMvc.perform(
 				patch("/mydata/permission")
@@ -256,7 +256,7 @@ public class UserControllerTest {
 			.andExpect(jsonPath("$.data.role").value("USER"))
 			.andExpect(jsonPath("$.data.nickname").value("테스트계정"));
 
-		verify(userService, times(1)).updatePermission(any(User.class));
+		verify(userService, times(1)).addMyDataPermission(any(User.class));
 	}
 
 	@Test

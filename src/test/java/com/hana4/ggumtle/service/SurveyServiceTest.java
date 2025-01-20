@@ -81,7 +81,7 @@ class SurveyServiceTest {
 
 		assertNotNull(response);
 		verify(goalPortfolioService).createGoalPortfolioAndSave(portfolioTemplate, user);
-		verify(userService).updatePermission(user, (short)3);
+		verify(userService).addSurveyPermission(user);
 	}
 
 	@Test
