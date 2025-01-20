@@ -2,6 +2,7 @@ package com.hana4.ggumtle.service;
 
 import java.util.Random;
 
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,10 +18,12 @@ import com.hana4.ggumtle.security.provider.JwtProvider;
 import com.hana4.ggumtle.vo.RefreshToken;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class UserService {
 	private final UserRepository userRepository;
 	private final BCryptPasswordEncoder passwordEncoder;
@@ -123,24 +126,49 @@ public class UserService {
 	}
 
 	public void sendVerificationCode(String userTel) {
-		// 레디스에 있으면 인증 못하게 처리
+		if (telCodeValidationRepository.hasKey(userTel)) {
+			throw new CustomException(ErrorCode.SMS_ALREADY_SENT, "인증 코드가 이미 발송되었습니다. 잠시 후 다시 시도해주세요.");
+		}
+
+		if (!telCodeValidationRepository.incrementDailyRequestCount(userTel)) {
+			throw new CustomException(ErrorCode.DAILY_LIMIT_EXCEEDED, "일일 SMS 인증 요청 한도를 초과했습니다. 내일 다시 시도해주세요.");
+		}
+
 		String verificationCode = String.format("%06d", new Random().nextInt(1000000));
 		try {
-			// smsService.sendOne(userTel, verificationCode);
+			smsService.sendOne(userTel, verificationCode);
+			telCodeValidationRepository.createSmsCertification(userTel, verificationCode);
+		} catch (RedisConnectionFailureException e) {
+			log.error("Failed to connect to Redis", e);
+			throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILURE, "Redis 연결에 실패했습니다.");
 		} catch (Exception e) {
-			throw new CustomException(ErrorCode.SMS_SEND_FAILURE);
+			log.error("Error sending SMS or creating certification", e);
+			throw new CustomException(ErrorCode.SMS_FAILURE, "SMS 발송 또는 인증 생성에 실패했습니다.");
 		}
-		System.out.println("Calling createSmsCertification with: " + userTel + ", " + verificationCode);
-		telCodeValidationRepository.createSmsCertification(userTel, verificationCode);
+		System.out.println("Verification code sent to: " + userTel + ", code: " + verificationCode); // 지우기지우기
 	}
 
 	public void validateVerificationCode(UserRequestDto.Validation request) {
-		String storedCode = telCodeValidationRepository.getSmsCertification(request.getTel());
+		try {
+			String storedCode = telCodeValidationRepository.getSmsCertification(request.getTel());
 
-		if (storedCode == null || !storedCode.equals(request.getCode())) {
-			throw new CustomException(ErrorCode.SMS_VALIDATION_FAILURE);
+			if (storedCode == null) {
+				throw new CustomException(ErrorCode.NOT_FOUND, "인증 코드를 찾을 수 없습니다.");
+			}
+
+			if (!storedCode.equals(request.getCode())) {
+				throw new CustomException(ErrorCode.SMS_VALIDATION_FAILURE, "인증 코드가 일치하지 않습니다.");
+			}
+
+			telCodeValidationRepository.removeSmsCertification(request.getTel());
+		} catch (RedisConnectionFailureException e) {
+			log.error("Failed to connect to Redis", e);
+			throw new CustomException(ErrorCode.REDIS_CONNECTION_FAILURE, "Redis 연결에 실패했습니다.");
+		} catch (CustomException e) {
+			throw e;
+		} catch (Exception e) {
+			log.error("Error validating verification code", e);
+			throw new CustomException(ErrorCode.SMS_FAILURE, "인증 코드 검증 중 오류가 발생했습니다.");
 		}
-
-		telCodeValidationRepository.removeSmsCertification(request.getTel());
 	}
 }

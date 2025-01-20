@@ -130,6 +130,22 @@ public class UserController {
 		return ResponseEntity.ok(CustomApiResponse.success(userService.updatePermission(userDetails.getUser())));
 	}
 
+	@Operation(summary = "인증번호 코드 요청", description = "휴대폰 인증번호를 문자로 발송합니다. 같은 번호로 하루 10번 이상 불가.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "인증 문자 발송 성공"),
+		@ApiResponse(responseCode = "400", description = "인증 코드가 이미 발송됨. 3분 뒤에 다시 시도 가능.",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 400, \"error\": \"Bad Request\", \"message\": \"인증 코드가 이미 발송되었습니다. 잠시 후 다시 시도해주세요.\" }"
+			))),
+		@ApiResponse(responseCode = "429", description = "일일 한도 10회 초과",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 429, \"error\": \"Too Many Requests\", \"message\": \"일일 SMS 인증 요청 한도를 초과했습니다. 내일 다시 시도해주세요.\" }"
+			))),
+		@ApiResponse(responseCode = "500", description = "서버 오류",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 500, \"error\": \"Internal Server Error\", \"message\": \"내부 서버 오류\" }"
+			)))
+	})
 	@PostMapping("/verification-code")
 	public ResponseEntity<CustomApiResponse<Void>> sendVerificationCode(
 		@RequestBody @Valid UserRequestDto.VerificationCode request) {
@@ -137,6 +153,22 @@ public class UserController {
 		return ResponseEntity.ok(CustomApiResponse.success());
 	}
 
+	@Operation(summary = "인증번호 검증", description = "발송된 인증번호의 유효성을 검증합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "인증번호 검증 성공"),
+		@ApiResponse(responseCode = "404", description = "인증번호를 찾을 수 없음",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"인증 코드를 찾을 수 없습니다.\" }"
+			))),
+		@ApiResponse(responseCode = "400", description = "인증번호 불일치",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 400, \"error\": \"Bad Request\", \"message\": \"인증 코드가 일치하지 않습니다.\" }"
+			))),
+		@ApiResponse(responseCode = "500", description = "서버 오류",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 500, \"error\": \"Internal Server Error\", \"message\": \"인증 코드 검증 중 오류가 발생했습니다.\" }"
+			)))
+	})
 	@PostMapping("/verification-code/validation")
 	public ResponseEntity<CustomApiResponse<Void>> validateVerificationCode(
 		@RequestBody @Valid UserRequestDto.Validation request
