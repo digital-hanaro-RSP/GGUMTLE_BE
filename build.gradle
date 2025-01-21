@@ -57,6 +57,7 @@ dependencies {
 
     // sms
     implementation 'net.nurigo:sdk:4.3.2'
+    
     //aws
     implementation platform('software.amazon.awssdk:bom:2.20.83')
     implementation 'software.amazon.awssdk:s3'
