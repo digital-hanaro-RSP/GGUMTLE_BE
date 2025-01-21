@@ -73,6 +73,9 @@ class PostControllerTest {
 		String imageUrls = "imageUrl";
 		String content = "content";
 		String snapShot = "snapShot";
+		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
+			.getAuthentication()
+			.getPrincipal();
 		PostRequestDto.Write write = new PostRequestDto.Write(imageUrls, content, snapShot, PostType.POST);
 
 		PostResponseDto.PostInfo post = new PostResponseDto.PostInfo(
@@ -83,12 +86,10 @@ class PostControllerTest {
 			imageUrls, // imageUrls
 			content, // content
 			PostType.POST, // postType
+			UserResponseDto.BriefInfo.from(customUserDetails.getUser()),
 			false
 		);
 
-		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
-			.getAuthentication()
-			.getPrincipal();
 		System.out.println("customUserDetails = " + customUserDetails.getUser());
 		given(postService.save(eq(1L), eq(write), eq(customUserDetails.getUser()))).willReturn(post);
 
