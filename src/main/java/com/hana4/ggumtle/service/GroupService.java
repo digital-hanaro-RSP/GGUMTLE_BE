@@ -114,19 +114,16 @@ public class GroupService {
 	 * 사용자가 특정 그룹의 멤버인지 여부를 확인합니다.
 	 *
 	 * @param groupId 확인할 그룹의 ID
-	 * @param id 확인할 사용자의 ID
+	 * @param userId 확인할 사용자의 ID
 	 * @return 사용자가 그룹의 멤버이면 true, 아니면 false
 	 * @throws CustomException 그룹을 찾을 수 없을 경우 GROUP_NOT_FOUND 에러 코드와 함께 발생
 	 */
-	public boolean isMemberOfGroup(Long groupId, String id) {
-		Group group = groupRepository.findById(groupId)
-			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "찾는 그룹이 없습니다."));
+	public boolean isMemberOfGroup(Long groupId, String userId) {
+		if (!groupRepository.existsById(groupId)) {
+			throw new CustomException(ErrorCode.NOT_FOUND, "찾는 그룹이 없습니다.");
+		}
 
-		//todo User조회 안하고 id 사용해서? -> 이거 상의하고 push 다시 날리기.(이전브랜치 삭제)
-		User user = new User();
-		user.setId(id);
-
-		return groupMemberRepository.existsByGroupAndUser(group, user);
+		return groupMemberRepository.existsByGroupIdAndUserId(groupId, userId);    //엔티티보다는 ID를 사용해서 조회하도록 수정해줘.
 	}
 
 	public Group getGroup(Long groupId) {
