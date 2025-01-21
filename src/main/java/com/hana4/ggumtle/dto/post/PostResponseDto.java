@@ -32,8 +32,9 @@ public class PostResponseDto {
 		private UserResponseDto.BriefInfo userBriefInfo;
 		private GroupCategory groupCategory;
 		private boolean isLiked;
+		private boolean isMine;
 
-		public static PostInfo from(Post post, boolean isLiked) {
+		public static PostInfo from(Post post, boolean isLiked, boolean isMine) {
 			return PostInfo.builder()
 				.id(post.getId())
 				.userId(post.getUser().getId())
@@ -45,6 +46,7 @@ public class PostResponseDto {
 				.userBriefInfo(UserResponseDto.BriefInfo.from(post.getUser()))
 				.groupCategory(post.getGroup().getCategory())
 				.isLiked(isLiked)
+				.isMine(isMine)
 				.createdAt(post.getCreatedAt())
 				.updatedAt(post.getUpdatedAt())
 				.build();
@@ -60,7 +62,7 @@ public class PostResponseDto {
 		private int likeCount;
 		private int commentCount;
 
-		public static PostDetail from(Post post, boolean isLiked, int likeCount, int commentCount) {
+		public static PostDetail from(Post post, boolean isLiked, int likeCount, int commentCount, boolean isMine) {
 			return PostDetail.builder()
 				.id(post.getId())
 				.userId(post.getUser().getId())
@@ -73,6 +75,7 @@ public class PostResponseDto {
 				.likeCount(likeCount)
 				.commentCount(commentCount)
 				.isLiked(isLiked)
+				.isMine(isMine)
 				.createdAt(post.getCreatedAt())
 				.updatedAt(post.getUpdatedAt())
 				.build();
