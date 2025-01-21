@@ -1,7 +1,8 @@
 package com.hana4.ggumtle.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -83,12 +84,14 @@ public class PostController {
 	@Operation(summary = "게시물 목록 조회", description = "페이지별로 게시물 목록을 조회합니다.")
 	@ApiResponse(responseCode = "200", description = "게시물 목록 조회 성공")
 	@GetMapping("/post")
-	public ResponseEntity<CustomApiResponse<List<PostResponseDto.PostInfo>>> getPostsByPage(
+	public ResponseEntity<CustomApiResponse<Page<PostResponseDto.PostInfo>>> getPostsByPage(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
-		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "0") int page,
+		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "0") int offset,
+		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "10") int limit,
 		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		Pageable pageable = PageRequest.of(offset / limit, limit);
 		return ResponseEntity.ok(
-			CustomApiResponse.success(postService.getPostsByPage(groupId, page, customUserDetails.getUser())));
+			CustomApiResponse.success(postService.getPostsByPage(groupId, pageable, customUserDetails.getUser())));
 	}
 
 	@Operation(summary = "게시물 수정", description = "특정 게시물을 수정합니다.")

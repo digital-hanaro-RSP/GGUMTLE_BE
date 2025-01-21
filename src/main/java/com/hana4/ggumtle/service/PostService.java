@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -98,11 +98,9 @@ public class PostService {
 			postLikeService.countLikeByPostId(postId), commentService.countCommentByPostId(postId));
 	}
 
-	public List<PostResponseDto.PostInfo> getPostsByPage(Long groupId, int page, User user) {
-		Pageable pageable = PageRequest.of(page, 10);
+	public Page<PostResponseDto.PostInfo> getPostsByPage(Long groupId, Pageable pageable, User user) {
 		return postRepository.findAllByGroupId(groupId, pageable)
-			.map(post -> PostResponseDto.PostInfo.from(post, postLikeService.isAuthorLike(post.getId(), user.getId())))
-			.getContent();
+			.map(post -> PostResponseDto.PostInfo.from(post, postLikeService.isAuthorLike(post.getId(), user.getId())));
 	}
 
 	public PostResponseDto.PostInfo updatePost(Long groupId, Long postId, PostRequestDto.Write postRequestDto,

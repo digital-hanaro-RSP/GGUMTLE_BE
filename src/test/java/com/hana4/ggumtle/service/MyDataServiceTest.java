@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -89,18 +88,14 @@ class MyDataServiceTest {
 
 		when(myDataRepository.findByUserId("1")).thenReturn(Optional.of(myData));
 
-		assertThat(myDataService.getMyDataByUserId("1").getDepositWithdrawalRatio()).isEqualTo(
-			myData.getDepositWithdrawal().divide(BigDecimal.valueOf(6), 4, RoundingMode.HALF_UP));
-		assertThat(myDataService.getMyDataByUserId("1").getSavingTimeDepositRatio()).isEqualTo(
-			myData.getSavingTimeDeposit().divide(BigDecimal.valueOf(6), 4, RoundingMode.HALF_UP));
-		assertThat(myDataService.getMyDataByUserId("1").getInvestmentRatio()).isEqualTo(
-			myData.getInvestment().divide(BigDecimal.valueOf(6), 4, RoundingMode.HALF_UP));
-		assertThat(myDataService.getMyDataByUserId("1").getForeignCurrencyRatio()).isEqualTo(
-			myData.getForeignCurrency().divide(BigDecimal.valueOf(6), 4, RoundingMode.HALF_UP));
-		assertThat(myDataService.getMyDataByUserId("1").getPensionRatio()).isEqualTo(
-			myData.getPension().divide(BigDecimal.valueOf(6), 4, RoundingMode.HALF_UP));
-		assertThat(myDataService.getMyDataByUserId("1").getEtcRatio()).isEqualTo(
-			myData.getEtc().divide(BigDecimal.valueOf(6), 4, RoundingMode.HALF_UP));
+		assertThat(myDataService.getMyDataByUserId("1").getDepositWithdrawal()).isEqualTo(
+			myData.getDepositWithdrawal());
+		assertThat(myDataService.getMyDataByUserId("1").getSavingTimeDeposit()).isEqualTo(
+			myData.getSavingTimeDeposit());
+		assertThat(myDataService.getMyDataByUserId("1").getInvestment()).isEqualTo(myData.getInvestment());
+		assertThat(myDataService.getMyDataByUserId("1").getForeignCurrency()).isEqualTo(myData.getForeignCurrency());
+		assertThat(myDataService.getMyDataByUserId("1").getPension()).isEqualTo(myData.getPension());
+		assertThat(myDataService.getMyDataByUserId("1").getEtc()).isEqualTo(myData.getEtc());
 	}
 
 	@Test

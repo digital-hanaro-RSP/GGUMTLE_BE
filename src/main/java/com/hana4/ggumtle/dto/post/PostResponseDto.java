@@ -2,6 +2,7 @@ package com.hana4.ggumtle.dto.post;
 
 import com.hana4.ggumtle.dto.BaseDto;
 import com.hana4.ggumtle.dto.user.UserResponseDto;
+import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.post.Post;
 import com.hana4.ggumtle.model.entity.post.PostType;
 
@@ -28,6 +29,8 @@ public class PostResponseDto {
 		private String imageUrls;
 		private String content;
 		private PostType postType;
+		private UserResponseDto.BriefInfo userBriefInfo;
+		private GroupCategory groupCategory;
 		private boolean isLiked;
 
 		public static PostInfo from(Post post, boolean isLiked) {
@@ -39,6 +42,8 @@ public class PostResponseDto {
 				.imageUrls(post.getImageUrls())
 				.content(post.getContent())
 				.postType(post.getPostType())
+				.userBriefInfo(UserResponseDto.BriefInfo.from(post.getUser()))
+				.groupCategory(post.getGroup().getCategory())
 				.isLiked(isLiked)
 				.createdAt(post.getCreatedAt())
 				.updatedAt(post.getUpdatedAt())
@@ -52,10 +57,8 @@ public class PostResponseDto {
 	@ToString
 	@SuperBuilder
 	public static class PostDetail extends PostInfo {
-		private UserResponseDto.BriefInfo userBriefInfo;
 		private int likeCount;
 		private int commentCount;
-		private boolean isLiked;
 
 		public static PostDetail from(Post post, boolean isLiked, int likeCount, int commentCount) {
 			return PostDetail.builder()
