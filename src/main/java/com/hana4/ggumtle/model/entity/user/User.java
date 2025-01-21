@@ -2,8 +2,6 @@ package com.hana4.ggumtle.model.entity.user;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.ColumnDefault;
-
 import com.hana4.ggumtle.model.entity.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -58,7 +56,6 @@ public class User extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	@ColumnDefault("USER")
 	@Builder.Default
 	private UserRole role = UserRole.USER;
 

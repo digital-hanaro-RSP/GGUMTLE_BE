@@ -390,7 +390,7 @@ class PostServiceTest {
 		post.setPostType(PostType.POST);
 		post.setContent("content");
 
-		PostResponseDto.PostDetail postDetail = PostResponseDto.PostDetail.from(post, false, 0, 0);
+		PostResponseDto.PostDetail postDetail = PostResponseDto.PostDetail.from(post, false, 0, 0, true);
 
 		when(postLikeService.isAuthorLike(post.getId(), user.getId())).thenReturn(false);
 		when(postLikeService.countLikeByPostId(post.getId())).thenReturn(0);
@@ -457,8 +457,7 @@ class PostServiceTest {
 		post.setPostType(PostType.POST);
 		post.setContent("content");
 
-		int page = 0;
-		Pageable pageable = PageRequest.of(page, 10);
+		Pageable pageable = PageRequest.of(0, 10);
 		List<Post> posts = List.of(post);
 		Page<Post> postPage = new PageImpl<>(posts, pageable, posts.size());
 
@@ -466,7 +465,7 @@ class PostServiceTest {
 		when(postLikeService.isAuthorLike(eq(post.getId()), eq(user.getId()))).thenReturn(true);
 
 		// When
-		List<PostResponseDto.PostInfo> result = postService.getPostsByPage(groupId, page, user);
+		List<PostResponseDto.PostInfo> result = postService.getPostsByPage(groupId, pageable, user).getContent();
 
 		// Then
 		assertNotNull(result);

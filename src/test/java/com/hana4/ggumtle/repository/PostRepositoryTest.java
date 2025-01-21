@@ -63,8 +63,8 @@ class PostRepositoryTest {
 		Post post = new Post();
 		post.setUser(savedUser);
 		post.setGroup(savedGroup);
-		post.setSnapshot("snapShot");
-		post.setImageUrls("https://example.com/image.jpg");
+		post.setSnapshot("{\"snapShot\":\"snapshot\"}");
+		post.setImageUrls("[\"https://example.com/group-image.jpg\"]");
 		post.setContent("글 내용");
 		post.setPostType(PostType.POST);
 		Post savedPost = postRepository.save(post);

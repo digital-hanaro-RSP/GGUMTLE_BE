@@ -16,6 +16,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -31,6 +35,7 @@ import com.hana4.ggumtle.config.TestSecurityConfig;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.dto.user.UserResponseDto;
+import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.post.PostType;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.PostService;
@@ -69,6 +74,9 @@ class PostControllerTest {
 		String imageUrls = "imageUrl";
 		String content = "content";
 		String snapShot = "snapShot";
+		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
+			.getAuthentication()
+			.getPrincipal();
 		PostRequestDto.Write write = new PostRequestDto.Write(imageUrls, content, snapShot, PostType.POST);
 
 		PostResponseDto.PostInfo post = new PostResponseDto.PostInfo(
@@ -79,12 +87,12 @@ class PostControllerTest {
 			imageUrls, // imageUrls
 			content, // content
 			PostType.POST, // postType
-			false
+			UserResponseDto.BriefInfo.from(customUserDetails.getUser()),
+			GroupCategory.AFTER_RETIREMENT,
+			false,
+			true
 		);
 
-		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
-			.getAuthentication()
-			.getPrincipal();
 		System.out.println("customUserDetails = " + customUserDetails.getUser());
 		given(postService.save(eq(1L), eq(write), eq(customUserDetails.getUser()))).willReturn(post);
 
@@ -161,7 +169,7 @@ class PostControllerTest {
 		// given
 		Long groupId = 1L;
 		Long postId = 1L;
-		int page = 0;
+		Pageable pageable = PageRequest.of(0, 10);
 
 		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
 			.getAuthentication()
@@ -185,8 +193,10 @@ class PostControllerTest {
 		for (int i = 0; i < 10; i++)
 			postInfos.add(postInfo);
 
+		Page<PostResponseDto.PostInfo> pages = new PageImpl<>(postInfos, pageable, postInfos.size());
 		System.out.println("customUserDetails = " + customUserDetails.getUser());
-		given(postService.getPostsByPage(eq(groupId), eq(page), eq(customUserDetails.getUser()))).willReturn(postInfos);
+		given(postService.getPostsByPage(eq(groupId), eq(pageable), eq(customUserDetails.getUser()))
+		).willReturn(pages);
 
 		// when, then
 		mockMvc.perform(MockMvcRequestBuilders.get("/community/group/{groupId}/post", groupId))
@@ -194,19 +204,19 @@ class PostControllerTest {
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("ok"))
-			.andExpect(jsonPath("$.data[0].userId").value(postInfos.get(0).getUserId()))
-			.andExpect(jsonPath("$.data[1].userId").value(postInfos.get(1).getUserId()))
-			.andExpect(jsonPath("$.data[2].userId").value(postInfos.get(2).getUserId()))
-			.andExpect(jsonPath("$.data[3].userId").value(postInfos.get(3).getUserId()))
-			.andExpect(jsonPath("$.data[4].userId").value(postInfos.get(4).getUserId()))
-			.andExpect(jsonPath("$.data[5].userId").value(postInfos.get(5).getUserId()))
-			.andExpect(jsonPath("$.data[6].userId").value(postInfos.get(6).getUserId()))
-			.andExpect(jsonPath("$.data[7].userId").value(postInfos.get(7).getUserId()))
-			.andExpect(jsonPath("$.data[8].userId").value(postInfos.get(8).getUserId()))
-			.andExpect(jsonPath("$.data[9].userId").value(postInfos.get(9).getUserId()))
+			.andExpect(jsonPath("$.data.content[0].userId").value(postInfos.get(0).getUserId()))
+			.andExpect(jsonPath("$.data.content[1].userId").value(postInfos.get(1).getUserId()))
+			.andExpect(jsonPath("$.data.content[2].userId").value(postInfos.get(2).getUserId()))
+			.andExpect(jsonPath("$.data.content[3].userId").value(postInfos.get(3).getUserId()))
+			.andExpect(jsonPath("$.data.content[4].userId").value(postInfos.get(4).getUserId()))
+			.andExpect(jsonPath("$.data.content[5].userId").value(postInfos.get(5).getUserId()))
+			.andExpect(jsonPath("$.data.content[6].userId").value(postInfos.get(6).getUserId()))
+			.andExpect(jsonPath("$.data.content[7].userId").value(postInfos.get(7).getUserId()))
+			.andExpect(jsonPath("$.data.content[8].userId").value(postInfos.get(8).getUserId()))
+			.andExpect(jsonPath("$.data.content[9].userId").value(postInfos.get(9).getUserId()))
 			.andDo(print());
 
-		verify(postService).getPostsByPage(groupId, 0, customUserDetails.getUser());
+		verify(postService).getPostsByPage(groupId, pageable, customUserDetails.getUser());
 	}
 
 	@Test
