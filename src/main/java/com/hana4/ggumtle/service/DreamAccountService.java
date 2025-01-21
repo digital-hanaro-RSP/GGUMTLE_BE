@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hana4.ggumtle.dto.dreamAccount.DreamAccountRequestDto;
 import com.hana4.ggumtle.dto.dreamAccount.DreamAccountResponseDto;
+import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
 import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -47,7 +49,6 @@ public class DreamAccountService {
 		// 	throw new RuntimeException("Dream Account already exists for this user");
 		// }
 
-		System.out.println("User: " + user);
 		// 새로운 DreamAccount 생성
 		DreamAccount newDreamAccount = requestDto.toEntity(user);
 
@@ -61,7 +62,7 @@ public class DreamAccountService {
 
 		// DreamAccount 조회
 		DreamAccount dreamAccount = dreamAccountRepository.findById(dreamAccountId)
-			.orElseThrow(() -> new RuntimeException("Dream Account not found"));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "꿈통장을 찾을 수 없습니다."));
 
 		// DreamAccount 금액 업데이트
 		dreamAccount.setBalance(dreamAccount.getBalance().add(amount));
@@ -82,10 +83,10 @@ public class DreamAccountService {
 	public DreamAccountResponseDto.DreamAccountInfo subtractAmountFromDreamAccount(Long dreamAccountId,
 		BigDecimal amount) {
 		DreamAccount dreamAccount = dreamAccountRepository.findById(dreamAccountId)
-			.orElseThrow(() -> new RuntimeException("Dream Account not found"));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "꿈통장을 찾을 수 없습니다."));
 		// 금액 제외
 		if (dreamAccount.getBalance().compareTo(amount) < 0) {
-			throw new RuntimeException("Insufficient balance in Dream Account");
+			throw new CustomException(ErrorCode.TRANSFER_FAILURE, "꿈통장에 잔액이 부족합니다.");
 		}
 
 		dreamAccount.setBalance(dreamAccount.getBalance().subtract(amount));
@@ -103,14 +104,14 @@ public class DreamAccountService {
 	public DreamAccountResponseDto.DreamAccountInfo distributeAmountToBucket(Long dreamAccountId, Long bucketId,
 		BigDecimal amount) {
 		DreamAccount dreamAccount = dreamAccountRepository.findById(dreamAccountId)
-			.orElseThrow(() -> new RuntimeException("Dream Account not found"));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "꿈통장을 찾을 수 없습니다."));
 
 		Bucket bucket = bucketRepository.findById(bucketId)
-			.orElseThrow(() -> new RuntimeException("Bucket not found"));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷리스트를 찾을 수 없습니다."));
 
 		// 꿈통장에 금액이 충분한지 확인
 		if (dreamAccount.getBalance().compareTo(amount) < 0) {
-			throw new RuntimeException("Insufficient balance in Dream Account");
+			throw new CustomException(ErrorCode.TRANSFER_FAILURE, "버킷리스트의 safebox 잔액이 부족합니다.");
 		}
 
 		// 금액을 꿈통장에서 제외하고 Bucket의 safeBox에 추가
@@ -132,14 +133,14 @@ public class DreamAccountService {
 		BigDecimal amount) {
 
 		DreamAccount dreamAccount = dreamAccountRepository.findById(dreamAccountId)
-			.orElseThrow(() -> new RuntimeException("Dream Account not found"));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "꿈통장을 찾을 수 없습니다."));
 
 		Bucket bucket = bucketRepository.findById(bucketId)
-			.orElseThrow(() -> new RuntimeException("Bucket not found"));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷리스트를 찾을 수 없습니다."));
 
 		// 꿈통장에 금액이 충분한지 확인
 		if (bucket.getSafeBox().compareTo(amount) < 0) {
-			throw new RuntimeException("세이프박스에 돈이 모자랍니다.");
+			throw new CustomException(ErrorCode.TRANSFER_FAILURE, "세이프박스에 돈이 모자랍니다.");
 		}
 		dreamAccount.setBalance(dreamAccount.getBalance().add(amount));
 		bucket.setSafeBox(bucket.getSafeBox().subtract(amount));

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
+import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
 
 public interface BucketRepository extends JpaRepository<Bucket, Long> {
 	Optional<Bucket> findById(Long bucketId);
@@ -22,4 +23,8 @@ public interface BucketRepository extends JpaRepository<Bucket, Long> {
 	@Query("SELECT COALESCE(SUM(b.safeBox), 0) FROM Bucket b WHERE b.dreamAccount.id = :dreamAccountId")
 	BigDecimal getTotalSafeBoxByDreamAccountId(@Param("dreamAccountId") Long dreamAccountId);
 
+	List<Bucket> findByIsRecommendedTrue();
+
+	// tagType에 맞는 버킷 조회
+	List<Bucket> findByTagType(BucketTagType tagType);
 }

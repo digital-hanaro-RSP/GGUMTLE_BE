@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,17 +26,12 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class BucketService {
 
-	private BucketRepository bucketRepository;
+	private final BucketRepository bucketRepository;
 
-	@Autowired
-	public BucketService(BucketRepository bucketRepository) {
-		this.bucketRepository = bucketRepository;
-	}
-
-	public BucketResponseDto.BucketInfo createBucket(BucketRequestDto.Create requestDto, User user,
+	public BucketResponseDto.BucketInfo createBucket(BucketRequestDto.CreateBucket requestDto, User user,
 		DreamAccount dreamAccount) {
 		if (Boolean.TRUE.equals(requestDto.getIsRecommended()) && requestDto.getOriginId() == null) {
-			throw new IllegalArgumentException("추천 플로우에서는 originId가 필요합니다.");
+			throw new CustomException(ErrorCode.INVALID_PARAMETER, "추천 플로우에서는 originId가 필요합니다.");
 		}
 
 		Bucket bucket = bucketRepository.save(requestDto.toEntity(user, dreamAccount));
@@ -45,26 +39,23 @@ public class BucketService {
 		return BucketResponseDto.BucketInfo.form(bucket);
 	}
 
-	public BucketResponseDto.BucketInfo updateBucket(Long bucketId, BucketRequestDto.Create requestDto) {
+	public BucketResponseDto.BucketInfo updateBucket(Long bucketId, BucketRequestDto.CreateBucket requestDto) {
 		Bucket bucket = bucketRepository.findById(bucketId)
-			.orElseThrow(() -> new IllegalArgumentException("버킷을 찾을 수 없습니다."));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷을 찾을 수 없습니다."));
 
 		bucket.updateFromDto(requestDto);
 
 		return BucketResponseDto.BucketInfo.form(bucket);
 	}
 
-	public BucketResponseDto.BucketInfo updateBucketStatus(Long bucketId, Map<String, String> updates) {
-		String statusValue = updates.get("status");
-		if (statusValue == null || statusValue.isBlank()) {
-			throw new IllegalArgumentException("Status 값은 필수입니다.");
-		}
+	public BucketResponseDto.BucketInfo updateBucketStatus(Long bucketId, BucketRequestDto.UpdateBucketStatus updates) {
+		BucketStatus statusValue = updates.getStatus();
 
 		Bucket bucket = bucketRepository.findById(bucketId)
-			.orElseThrow(() -> new IllegalArgumentException("버킷을 찾을 수 없습니다."));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷을 찾을 수 없습니다."));
 
-		BucketStatus newStatus = BucketStatus.valueOf(statusValue.toUpperCase()); // Enum 변환
-		bucket.setStatus(newStatus);
+		// Enum 변환
+		bucket.setStatus(statusValue);
 
 		bucketRepository.save(bucket);
 		return BucketResponseDto.BucketInfo.form(bucket);
@@ -73,10 +64,9 @@ public class BucketService {
 
 	public void deleteBucket(Long bucketId) {
 		Bucket bucket = bucketRepository.findById(bucketId)
-			.orElseThrow(() -> new IllegalArgumentException("버킷을 찾을 수 없습니다."));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷을 찾을 수 없습니다."));
 
 		bucketRepository.delete(bucket);
-		System.out.println("버킷이 삭제되었습니다");
 
 		BucketResponseDto.BucketInfo.form(bucket);
 	}
@@ -91,37 +81,52 @@ public class BucketService {
 
 	public BucketResponseDto.BucketInfo getBucketById(Long bucketId) {
 		Bucket bucket = bucketRepository.findById(bucketId)
-			.orElseThrow(() -> new IllegalArgumentException("버킷을 찾을 수 없습니다."));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷을 찾을 수 없습니다."));
 
 		return BucketResponseDto.BucketInfo.form(bucket);
 	}
 
-	public List<RecommendationResponseDto.RecommendedBucketInfo> getRecommendedBuckets() {
-		// 버킷을 태그 타입별로 그룹화
-		Map<BucketTagType, List<Bucket>> groupedBuckets = bucketRepository.findAll()
-			.stream()
-			.collect(Collectors.groupingBy(Bucket::getTagType));
+	public List<RecommendationResponseDto.RecommendedBucketInfo> getRecommendedBuckets(BucketTagType tagType) {
 
-		return groupedBuckets.entrySet()
-			.stream()
-			.map(entry -> {
-				List<RecommendationResponseDto.RecommendedBucketInfo.Recommendation> topRecommendations = entry.getValue()
-					.stream()
-					.sorted((b1, b2) -> Long.compare(b2.getFollowers(), b1.getFollowers())) // followers 기준 내림차순 정렬
-					.limit(3) // 상위 3개 선택
-					.map(bucket -> RecommendationResponseDto.RecommendedBucketInfo.Recommendation.builder()
-						.id(bucket.getId())
-						.title(bucket.getTitle())
-						.followers(bucket.getFollowers())
-						.build())
-					.toList();
+		if (tagType == null) {
+			// isRecommended가 true인 버킷만 조회
+			List<Bucket> recommendedBuckets = bucketRepository.findByIsRecommendedTrue();
 
-				return RecommendationResponseDto.RecommendedBucketInfo.builder()
-					.tagType(entry.getKey()) // 태그 타입
-					.recommendations(topRecommendations) // 추천 리스트
-					.build();
-			})
-			.toList();
+			// 버킷을 태그 타입별로 그룹화
+			Map<BucketTagType, List<Bucket>> groupedBuckets = recommendedBuckets
+				.stream()
+				.collect(Collectors.groupingBy(Bucket::getTagType));
+
+			return groupedBuckets.entrySet()
+				.stream()
+				.map(entry -> {
+					List<RecommendationResponseDto.RecommendedBucketInfo.Recommendation> topRecommendations = entry.getValue()
+						.stream()
+						.sorted((b1, b2) -> Long.compare(b2.getFollowers(), b1.getFollowers())) // followers 기준 내림차순 정렬
+						.limit(3) // 상위 3개 선택
+						.map(bucket -> RecommendationResponseDto.RecommendedBucketInfo.Recommendation.builder()
+							.id(bucket.getId())
+							.title(bucket.getTitle())
+							.followers(bucket.getFollowers())
+							.build())
+						.toList();
+
+					// RecommendationResponseDto.RecommendedBucketInfo의 from 메서드를 사용하여 반환
+					return RecommendationResponseDto.RecommendedBucketInfo.builder()
+						.tagType(entry.getKey()) // 태그 타입
+						.recommendations(topRecommendations) // 추천 리스트
+						.build();
+				})
+				.toList();
+		} else {
+			// tagType에 맞는 버킷만 조회
+			List<Bucket> recommendedBuckets = bucketRepository.findByTagType(tagType);
+
+			// 리턴되는 버킷들을 `RecommendationResponseDto`로 변환하여 반환
+			return recommendedBuckets.stream()
+				.map(RecommendationResponseDto.RecommendedBucketInfo::from)
+				.collect(Collectors.toList());
+		}
 	}
 
 	public Bucket getBucket(Long bucketId) {

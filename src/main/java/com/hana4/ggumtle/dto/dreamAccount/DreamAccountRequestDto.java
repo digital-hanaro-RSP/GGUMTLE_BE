@@ -27,9 +27,9 @@ public class DreamAccountRequestDto {
 	@EqualsAndHashCode
 	public static class Create {
 
-		@Schema(description = "DreamAccount과 연결된 사용자", requiredMode = Schema.RequiredMode.REQUIRED)
-		@NotNull(message = "사용자 ID는 필수입니다.")
-		private String userId;
+		// @Schema(description = "DreamAccount과 연결된 사용자", requiredMode = Schema.RequiredMode.REQUIRED)
+		// @NotNull(message = "사용자 ID는 필수입니다.")
+		// private String userId;
 
 		@Schema(description = "DreamAccount의 잔액", example = "1000.00", requiredMode = Schema.RequiredMode.REQUIRED)
 		@NotNull(message = "잔액은 필수입니다.")
@@ -73,6 +73,7 @@ public class DreamAccountRequestDto {
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	public static class DistributeAmount {
 		@NotNull(message = "분배 금액은 필수입니다.")
+		@Schema(description = "분배할 금액", example = "500.01", requiredMode = Schema.RequiredMode.REQUIRED)
 		@DecimalMin(value = "0.0", inclusive = false, message = "분배 금액은 0보다 커야 합니다.")
 		private BigDecimal amount;
 	}

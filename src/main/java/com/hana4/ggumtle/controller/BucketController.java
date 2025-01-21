@@ -1,9 +1,7 @@
 package com.hana4.ggumtle.controller;
 
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,12 +12,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
 import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
 import com.hana4.ggumtle.dto.recommendation.RecommendationResponseDto;
+import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
 import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.BucketService;
@@ -30,16 +30,16 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/buckets")
+@RequestMapping("/buckets")
+@RequiredArgsConstructor
 @Tag(name = "Bucket", description = "생성, 수정, 상태변환, 삭제, 전체조회, 상세조회, 추천 API")
 public class BucketController {
 
-	@Autowired
-	private BucketService bucketService;
-	@Autowired
-	private DreamAccountService dreamAccountService;
+	private final BucketService bucketService;
+	private final DreamAccountService dreamAccountService;
 
 	@Operation(summary = "버킷리스트 생성", description = "새로운 버킷리스트를 생성합니다.")
 	@ApiResponses(value = {
@@ -47,7 +47,7 @@ public class BucketController {
 	})
 	@PostMapping
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> createBucket(
-		@RequestBody @Valid BucketRequestDto.Create requestDto,
+		@RequestBody @Valid BucketRequestDto.CreateBucket requestDto,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 
 		// 유저가 가진 DreamAccount를 불러오기
@@ -67,7 +67,7 @@ public class BucketController {
 	@PutMapping("/{bucketId}")
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> updateBucket(
 		@PathVariable("bucketId") Long bucketId,
-		@RequestBody BucketRequestDto.Create requestDto) {
+		@RequestBody @Valid BucketRequestDto.CreateBucket requestDto) {
 		BucketResponseDto.BucketInfo updatedBucket = bucketService.updateBucket(bucketId, requestDto);
 
 		return ResponseEntity.ok(CustomApiResponse.success(updatedBucket));
@@ -80,7 +80,7 @@ public class BucketController {
 	@PatchMapping("/{bucketId}")
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> updateBucketStatus(
 		@PathVariable("bucketId") Long bucketId,
-		@RequestBody Map<String, String> updates) {
+		@RequestBody @Valid BucketRequestDto.UpdateBucketStatus updates) {
 		BucketResponseDto.BucketInfo updatedBucket = bucketService.updateBucketStatus(bucketId, updates);
 
 		return ResponseEntity.ok(CustomApiResponse.success(updatedBucket));
@@ -121,9 +121,20 @@ public class BucketController {
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "성공 응답")
 	})
+	// @GetMapping("/recommendation")
+	// public ResponseEntity<CustomApiResponse<List<RecommendationResponseDto.RecommendedBucketInfo>>> getRecommendedBuckets() {
+	// 	List<RecommendationResponseDto.RecommendedBucketInfo> recommendations = bucketService.getRecommendedBuckets();
+	// 	return ResponseEntity.ok(CustomApiResponse.success(recommendations));
+	// }
+
 	@GetMapping("/recommendation")
-	public ResponseEntity<CustomApiResponse<List<RecommendationResponseDto.RecommendedBucketInfo>>> getRecommendedBuckets() {
-		List<RecommendationResponseDto.RecommendedBucketInfo> recommendations = bucketService.getRecommendedBuckets();
+	public ResponseEntity<CustomApiResponse<List<RecommendationResponseDto.RecommendedBucketInfo>>> getRecommendedBuckets(
+		@RequestParam(required = false) BucketTagType tagType) {
+
+		// tagType을 전달하여 추천된 버킷 리스트를 가져옴
+		List<RecommendationResponseDto.RecommendedBucketInfo> recommendations = bucketService.getRecommendedBuckets(
+			tagType);
+
 		return ResponseEntity.ok(CustomApiResponse.success(recommendations));
 	}
 }

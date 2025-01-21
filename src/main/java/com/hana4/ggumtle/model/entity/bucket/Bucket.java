@@ -69,7 +69,7 @@ public class Bucket extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private BucketStatus status;
+	private BucketStatus status = BucketStatus.DOING;
 
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private Boolean isAutoAllocate;
@@ -84,7 +84,7 @@ public class Bucket extends BaseEntity {
 	private Boolean isRecommended;
 	private Long originId;
 
-	public void updateFromDto(BucketRequestDto.Create dto) {
+	public void updateFromDto(BucketRequestDto.CreateBucket dto) {
 		this.title = dto.getTitle();
 		this.tagType = dto.getTagType();
 		this.dueDate = dto.getDueDate();
@@ -95,7 +95,7 @@ public class Bucket extends BaseEntity {
 		this.cronCycle = dto.getCronCycle();
 		this.goalAmount = dto.getGoalAmount();
 		this.memo = dto.getMemo();
-		this.status = dto.getStatus();
+		this.status = BucketStatus.DOING;
 		this.isRecommended = dto.getIsRecommended();
 		this.originId = dto.getOriginId();
 		this.followers = dto.getFollowers();

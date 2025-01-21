@@ -11,24 +11,25 @@ import lombok.Getter;
 
 public class DreamAccountResponseDto {
 
+	@Schema(description = "꿈통장 정보 응답")
 	@Getter
 	@Builder
 	@AllArgsConstructor
 	public static class DreamAccountInfo {
 
-		@Schema(description = "DreamAccount ID")
+		@Schema(description = "DreamAccount ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
 		private Long id;
 
-		@Schema(description = "사용자 ID")
+		@Schema(description = "사용자 ID", example = "user123", requiredMode = Schema.RequiredMode.REQUIRED)
 		private String userId;
 
-		@Schema(description = "DreamAccount 잔액")
+		@Schema(description = "DreamAccount 잔액", example = "1000.01", requiredMode = Schema.RequiredMode.REQUIRED)
 		private BigDecimal balance;
 
-		@Schema(description = "DreamAccount 총액")
+		@Schema(description = "DreamAccount 총액", example = "1000.01", requiredMode = Schema.RequiredMode.REQUIRED)
 		private BigDecimal total;
 
-		@Schema
+		@Schema(description = "safebox 총액", example = "500.01", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
 		private BigDecimal totalSafeBox;
 
 		// @Schema(description = "DreamAccount 생성일")
