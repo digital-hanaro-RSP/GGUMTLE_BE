@@ -42,4 +42,5 @@ public class DreamAccount extends BaseEntity {
 
 	@Column(nullable = false)
 	private BigDecimal total;
+
 }

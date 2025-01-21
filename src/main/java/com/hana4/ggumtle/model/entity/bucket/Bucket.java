@@ -8,6 +8,7 @@ import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.user.User;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -37,8 +38,8 @@ public class Bucket extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "dreamAccountId", nullable = true, foreignKey = @ForeignKey(name = "fk_Bucket_dreamAccountId_DreamAccount"))
+	@ManyToOne(cascade = CascadeType.PERSIST)
+	@JoinColumn(name = "dreamAccountId", nullable = false, foreignKey = @ForeignKey(name = "fk_Bucket_dreamAccountId_DreamAccount"))
 	private DreamAccount dreamAccount;
 
 	@ManyToOne
@@ -81,7 +82,7 @@ public class Bucket extends BaseEntity {
 
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private Boolean isRecommended;
-	private BigDecimal originId;
+	private Long originId;
 
 	public void updateFromDto(BucketRequestDto.Create dto) {
 		this.title = dto.getTitle();

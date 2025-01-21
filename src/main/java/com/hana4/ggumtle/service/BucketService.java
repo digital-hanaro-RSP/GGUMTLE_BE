@@ -21,6 +21,7 @@ import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
 import com.hana4.ggumtle.model.entity.bucket.BucketStatus;
 import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
+import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.repository.BucketRepository;
 
@@ -41,12 +42,13 @@ public class BucketService {
 		this.bucketRepository = bucketRepository;
 	}
 
-	public BucketResponseDto.BucketInfo createBucket(BucketRequestDto.Create requestDto, User user) {
+	public BucketResponseDto.BucketInfo createBucket(BucketRequestDto.Create requestDto, User user,
+		DreamAccount dreamAccount) {
 		if (Boolean.TRUE.equals(requestDto.getIsRecommended()) && requestDto.getOriginId() == null) {
 			throw new IllegalArgumentException("추천 플로우에서는 originId가 필요합니다.");
 		}
 
-		Bucket bucket = bucketRepository.save(requestDto.toEntity(user));
+		Bucket bucket = bucketRepository.save(requestDto.toEntity(user, dreamAccount));
 
 		return BucketResponseDto.BucketInfo.form(bucket);
 	}

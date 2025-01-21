@@ -35,15 +35,18 @@ public class BucketResponseDto {
 		private String memo;
 		private BucketStatus status;
 		private Boolean isRecommended;
-		private BigDecimal originId;
+		private Long originId;
 		private BigDecimal safeBox;
 		private Long followers;
 		private String userId;
+		private Long dreamAccountId;
 
 		private List<Recommendation> recommendations;
 
 		public static BucketInfo form(Bucket bucket) {
+			
 			return BucketInfo.builder()
+				.dreamAccountId(bucket.getDreamAccount().getId())
 				.userId(bucket.getUser().getId())
 				.id(bucket.getId())
 				.title(bucket.getTitle())
@@ -57,6 +60,7 @@ public class BucketResponseDto {
 				.goalAmount(bucket.getGoalAmount())
 				.memo(bucket.getMemo())
 				.status(bucket.getStatus())
+				.safeBox(bucket.getSafeBox())
 				.isRecommended(bucket.getIsRecommended())
 				.originId(bucket.getOriginId())
 				.followers(bucket.getFollowers())

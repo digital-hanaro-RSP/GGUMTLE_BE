@@ -20,28 +20,50 @@ import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
 import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
 import com.hana4.ggumtle.dto.recommendation.RecommendationResponseDto;
+import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.BucketService;
+import com.hana4.ggumtle.service.DreamAccountService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/buckets")
+@Tag(name = "Bucket", description = "생성, 수정, 상태변환, 삭제, 전체조회, 상세조회, 추천 API")
 public class BucketController {
 
 	@Autowired
 	private BucketService bucketService;
+	@Autowired
+	private DreamAccountService dreamAccountService;
 
+	@Operation(summary = "버킷리스트 생성", description = "새로운 버킷리스트를 생성합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공 응답")
+	})
 	@PostMapping
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> createBucket(
 		@RequestBody @Valid BucketRequestDto.Create requestDto,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 
-		BucketResponseDto.BucketInfo createdBucket = bucketService.createBucket(requestDto, userDetails.getUser());
+		// 유저가 가진 DreamAccount를 불러오기
+		DreamAccount existingDreamAccount = dreamAccountService.getDreamAccountByUserId(userDetails.getUser().getId());
+
+		// Bucket 생성 로직 호출
+		BucketResponseDto.BucketInfo createdBucket = bucketService.createBucket(requestDto, userDetails.getUser(),
+			existingDreamAccount);
 
 		return ResponseEntity.ok(CustomApiResponse.success(createdBucket));
 	}
 
+	@Operation(summary = "버킷리스트 수정", description = "버킷리스트를 수정합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공 응답")
+	})
 	@PutMapping("/{bucketId}")
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> updateBucket(
 		@PathVariable("bucketId") Long bucketId,
@@ -51,6 +73,10 @@ public class BucketController {
 		return ResponseEntity.ok(CustomApiResponse.success(updatedBucket));
 	}
 
+	@Operation(summary = "버킷리스트 상태변환", description = "버킷리스트 상태를 변환합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공 응답")
+	})
 	@PatchMapping("/{bucketId}")
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> updateBucketStatus(
 		@PathVariable("bucketId") Long bucketId,
@@ -60,18 +86,30 @@ public class BucketController {
 		return ResponseEntity.ok(CustomApiResponse.success(updatedBucket));
 	}
 
+	@Operation(summary = "버킷리스트 삭제", description = "버킷리스트를 삭제합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공 응답")
+	})
 	@DeleteMapping("/{bucketId}")
 	public ResponseEntity<CustomApiResponse<Void>> deleteBucket(@PathVariable("bucketId") Long bucketId) {
 		bucketService.deleteBucket(bucketId);
 		return ResponseEntity.ok(CustomApiResponse.success(null));
 	}
 
+	@Operation(summary = "버킷리스트 전체 조회", description = "버킷리스트를 전체 조회합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공 응답")
+	})
 	@GetMapping
 	public ResponseEntity<CustomApiResponse<List<BucketResponseDto.BucketInfo>>> getAllBuckets() {
 		List<BucketResponseDto.BucketInfo> allBuckets = bucketService.getAllBuckets();
 		return ResponseEntity.ok(CustomApiResponse.success(allBuckets));
 	}
 
+	@Operation(summary = "버킷리스트 상세조회", description = "버킷리스트를 상세 조회합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공 응답")
+	})
 	@GetMapping("/{bucketId}")
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> getBucketById(
 		@PathVariable("bucketId") Long bucketId) {
@@ -79,6 +117,10 @@ public class BucketController {
 		return ResponseEntity.ok(CustomApiResponse.success(bucketInfo));
 	}
 
+	@Operation(summary = "버킷리스트 추천", description = "버킷리스트를 추천합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공 응답")
+	})
 	@GetMapping("/recommendation")
 	public ResponseEntity<CustomApiResponse<List<RecommendationResponseDto.RecommendedBucketInfo>>> getRecommendedBuckets() {
 		List<RecommendationResponseDto.RecommendedBucketInfo> recommendations = bucketService.getRecommendedBuckets();

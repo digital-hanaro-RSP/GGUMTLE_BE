@@ -7,6 +7,7 @@ import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 public class RecommendationResponseDto {
@@ -14,6 +15,7 @@ public class RecommendationResponseDto {
 	@Builder
 	@NoArgsConstructor
 	@AllArgsConstructor
+	@EqualsAndHashCode
 	public static class RecommendedBucketInfo {
 		private BucketTagType tagType;
 		private List<Recommendation> recommendations;

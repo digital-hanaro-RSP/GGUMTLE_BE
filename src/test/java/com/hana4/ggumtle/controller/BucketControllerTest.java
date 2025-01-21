@@ -87,7 +87,7 @@ class BucketControllerTest {
 			.status(BucketStatus.DOING) // Enum 값 사용
 			.memo("This is a test bucket.")
 			.isRecommended(true)
-			.originId(BigDecimal.valueOf(1)) // Optional 필드
+			.originId(1L) // Optional 필드
 			.build();
 
 		BucketResponseDto.Recommendation recommendation = BucketResponseDto.Recommendation.builder()
@@ -119,7 +119,7 @@ class BucketControllerTest {
 		// mock 설정
 		CustomUserDetails mockUser = mock(CustomUserDetails.class);
 		when(mockUser.getUser()).thenReturn(new User());
-		when(bucketService.createBucket(any(BucketRequestDto.Create.class), any())).thenReturn(responseDto);
+		when(bucketService.createBucket(any(BucketRequestDto.Create.class), any(), any())).thenReturn(responseDto);
 
 		String reqBody = objectMapper.writeValueAsString(requestDto);
 		// when
@@ -149,7 +149,7 @@ class BucketControllerTest {
 			.andDo(print());
 
 		// then
-		verify(bucketService).createBucket(any(BucketRequestDto.Create.class), any());
+		verify(bucketService).createBucket(any(BucketRequestDto.Create.class), any(), any());
 	}
 
 	@Test
@@ -170,7 +170,7 @@ class BucketControllerTest {
 			.status(BucketStatus.DOING) // Enum 값 사용
 			.memo("This is a updated bucket.")
 			.isRecommended(true)
-			.originId(BigDecimal.valueOf(1)) // Optional 필드
+			.originId(1L) // Optional 필드
 			.build();
 
 		BucketResponseDto.Recommendation recommendation = BucketResponseDto.Recommendation.builder()
@@ -243,7 +243,7 @@ class BucketControllerTest {
 			.status(BucketStatus.DONE) // 수정된 상태
 			.memo("This is a bucket.")
 			.isRecommended(true)
-			.originId(BigDecimal.valueOf(1))
+			.originId(1L)
 			.followers(10L)
 			.recommendations(List.of(recommendation))
 			.build();
@@ -296,7 +296,7 @@ class BucketControllerTest {
 				.goalAmount(BigDecimal.valueOf(10000))
 				.status(BucketStatus.DOING)
 				.isRecommended(true)
-				.originId(BigDecimal.valueOf(1))
+				.originId(1L)
 				.followers(10L)
 				.safeBox(BigDecimal.valueOf(1000))
 				.build(),
@@ -314,7 +314,7 @@ class BucketControllerTest {
 				.goalAmount(BigDecimal.valueOf(15000))
 				.status(BucketStatus.DONE)
 				.isRecommended(false)
-				.originId(BigDecimal.valueOf(2))
+				.originId(2L)
 				.followers(20L)
 				.safeBox(BigDecimal.valueOf(2000))
 				.build()
@@ -354,7 +354,7 @@ class BucketControllerTest {
 			.status(BucketStatus.DONE) // 수정된 상태
 			.memo("This is a bucket.")
 			.isRecommended(true)
-			.originId(BigDecimal.valueOf(1))
+			.originId(1L)
 			.followers(10L)
 			.recommendations(List.of(recommendation))
 			.build();
