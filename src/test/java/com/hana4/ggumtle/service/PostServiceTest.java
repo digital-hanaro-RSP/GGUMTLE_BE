@@ -390,7 +390,7 @@ class PostServiceTest {
 		post.setPostType(PostType.POST);
 		post.setContent("content");
 
-		PostResponseDto.PostDetail postDetail = PostResponseDto.PostDetail.from(post, false, 0, 0);
+		PostResponseDto.PostDetail postDetail = PostResponseDto.PostDetail.from(post, false, 0, 0, true);
 
 		when(postLikeService.isAuthorLike(post.getId(), user.getId())).thenReturn(false);
 		when(postLikeService.countLikeByPostId(post.getId())).thenReturn(0);
