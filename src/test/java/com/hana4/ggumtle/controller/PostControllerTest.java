@@ -89,7 +89,8 @@ class PostControllerTest {
 			PostType.POST, // postType
 			UserResponseDto.BriefInfo.from(customUserDetails.getUser()),
 			GroupCategory.AFTER_RETIREMENT,
-			false
+			false,
+			true
 		);
 
 		System.out.println("customUserDetails = " + customUserDetails.getUser());

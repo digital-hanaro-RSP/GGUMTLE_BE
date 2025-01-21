@@ -86,7 +86,7 @@ public class PostService {
 		Group group = groupService.getGroup(groupId);
 
 		postRequestDto.setSnapShot(makeSnapShot(postRequestDto, user));
-		return PostResponseDto.PostInfo.from(postRepository.save(postRequestDto.toEntity(user, group)), false);
+		return PostResponseDto.PostInfo.from(postRepository.save(postRequestDto.toEntity(user, group)), false, true);
 	}
 
 	public PostResponseDto.PostDetail getPost(Long groupId, Long postId, User user) {
@@ -95,12 +95,17 @@ public class PostService {
 			throw new CustomException(ErrorCode.NOT_FOUND, "글이 해당 그룹에 있지 않습니다.");
 		}
 		return PostResponseDto.PostDetail.from(post, postLikeService.isAuthorLike(postId, user.getId()),
-			postLikeService.countLikeByPostId(postId), commentService.countCommentByPostId(postId));
+			postLikeService.countLikeByPostId(postId), commentService.countCommentByPostId(postId),
+			post.getUser().getId().equals(user.getId()));
 	}
 
 	public Page<PostResponseDto.PostInfo> getPostsByPage(Long groupId, Pageable pageable, User user) {
 		return postRepository.findAllByGroupId(groupId, pageable)
-			.map(post -> PostResponseDto.PostInfo.from(post, postLikeService.isAuthorLike(post.getId(), user.getId())));
+			.map(post -> {
+				boolean isLiked = postLikeService.isAuthorLike(post.getId(), user.getId());
+				boolean isMine = post.getUser().getId().equals(user.getId());
+				return PostResponseDto.PostInfo.from(post, isLiked, isMine);
+			});
 	}
 
 	public PostResponseDto.PostInfo updatePost(Long groupId, Long postId, PostRequestDto.Write postRequestDto,
@@ -119,7 +124,7 @@ public class PostService {
 		post.setSnapshot(makeSnapShot(postRequestDto, user));
 
 		return PostResponseDto.PostInfo.from(postRepository.save(post),
-			postLikeService.isAuthorLike(post.getId(), user.getId()));
+			postLikeService.isAuthorLike(post.getId(), user.getId()), true);
 	}
 
 	public void deletePost(Long groupId, Long postId, User user) {
