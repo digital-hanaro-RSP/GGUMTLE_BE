@@ -35,6 +35,7 @@ import com.hana4.ggumtle.config.TestSecurityConfig;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.dto.user.UserResponseDto;
+import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.post.PostType;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.PostService;
@@ -87,6 +88,7 @@ class PostControllerTest {
 			content, // content
 			PostType.POST, // postType
 			UserResponseDto.BriefInfo.from(customUserDetails.getUser()),
+			GroupCategory.AFTER_RETIREMENT,
 			false
 		);
 
