@@ -21,7 +21,8 @@ public enum ErrorCode {
 	SMS_VALIDATION_FAILURE(HttpStatus.UNAUTHORIZED, "인증번호가 일치하지 않습니다."),
 	SMS_ALREADY_SENT(HttpStatus.BAD_REQUEST, "인증 코드가 이미 발송되었습니다. 잠시 후 다시 시도해주세요."),
 	REDIS_CONNECTION_FAILURE(HttpStatus.SERVICE_UNAVAILABLE, "Redis 연결에 실패했습니다."),
-	DAILY_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "일일 SMS 인증 요청 한도를 초과했습니다. 내일 다시 시도해주세요.");
+	DAILY_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "일일 SMS 인증 요청 한도를 초과했습니다. 내일 다시 시도해주세요."),
+	FILE_SIZE_EXCEEDED(HttpStatus.PAYLOAD_TOO_LARGE, "파일 용량이 너무 큽니다.");
 
 	private final HttpStatus httpStatus;
 	private final String message;
