@@ -11,11 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
 import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
 import com.hana4.ggumtle.dto.recommendation.RecommendationResponseDto;
-import com.hana4.ggumtle.dto.bucketlist.BucketRequestDto;
-import com.hana4.ggumtle.dto.bucketlist.BucketResponseDto;
-import com.hana4.ggumtle.repository.BucketRepository;
-import org.springframework.stereotype.Service;
-
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
@@ -26,9 +21,6 @@ import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.repository.BucketRepository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
