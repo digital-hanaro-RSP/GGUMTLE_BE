@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.user.User;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,6 +48,9 @@ public class UserRequestDto {
 		@Pattern(regexp = "[mf]", message = "성별은 'm' 또는 'f'로 입력하세요.")
 		private String gender;
 
+		@Schema(description = "프로필 이미지 url", example = "https://example.com/profile.jpg", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+		private String profileImageUrl;
+
 		@Schema(description = "닉네임", example = "익명의고라니", requiredMode = Schema.RequiredMode.REQUIRED)
 		@NotEmpty(message = "닉네임을 입력하세요.")
 		private String nickname;
@@ -64,6 +69,7 @@ public class UserRequestDto {
 				.birthDate(parsedBirthDate)
 				.gender(this.gender)
 				.nickname(this.nickname)
+				.profileImageUrl(this.profileImageUrl)
 				.build();
 		}
 	}
@@ -119,4 +125,27 @@ public class UserRequestDto {
 		@NotEmpty(message = "전화번호를 입력하세요.")
 		private String code;
 	}
+
+	@Schema(description = "사용자 정보 수정 요청 DTO")
+	@Getter
+	@Builder
+	@AllArgsConstructor
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	public static class UpdateUser {
+		@Schema(description = "새 비밀번호", example = "newpassword123", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+		private String password;
+
+		@Schema(description = "새 프로필 이미지 URL", example = "https://example.com/new-profile.jpg", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+		private String profileImageUrl;
+
+		@Schema(description = "새 닉네임", example = "새로운닉네임", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+		private String nickname;
+
+		public void validate() {
+			if (password == null && profileImageUrl == null && nickname == null) {
+				throw new CustomException(ErrorCode.INVALID_PARAMETER, "수정할 정보를 최소 하나 이상 입력해야 합니다.");
+			}
+		}
+	}
+
 }

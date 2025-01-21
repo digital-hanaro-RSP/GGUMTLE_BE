@@ -170,4 +170,33 @@ public class UserService {
 			throw new CustomException(ErrorCode.SMS_FAILURE, "인증 코드 검증 중 오류가 발생했습니다.");
 		}
 	}
+
+	public UserResponseDto.UserInfo getUserInfo(String userId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저를 찾을 수 없습니다"));
+
+		return UserResponseDto.UserInfo.from(user);
+	}
+
+	public UserResponseDto.UserInfo updateUserInfo(String userId, UserRequestDto.UpdateUser updateUserRequest) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저를 찾을 수 없습니다."));
+
+		if (updateUserRequest.getPassword() != null) {
+			user.setPassword(passwordEncoder.encode(updateUserRequest.getPassword()));
+		}
+
+		if (updateUserRequest.getProfileImageUrl() != null) {
+			user.setProfileImageUrl(updateUserRequest.getProfileImageUrl());
+		}
+
+		if (updateUserRequest.getNickname() != null) {
+			user.setNickname(updateUserRequest.getNickname());
+		}
+
+		userRepository.save(user);
+
+		return UserResponseDto.UserInfo.from(user);
+	}
+
 }
