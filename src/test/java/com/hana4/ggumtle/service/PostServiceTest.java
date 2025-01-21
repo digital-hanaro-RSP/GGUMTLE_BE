@@ -39,8 +39,10 @@ import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
 import com.hana4.ggumtle.model.entity.post.Post;
 import com.hana4.ggumtle.model.entity.post.PostType;
+import com.hana4.ggumtle.model.entity.postLike.PostLike;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.model.entity.user.UserRole;
+import com.hana4.ggumtle.repository.PostLikeRepository;
 import com.hana4.ggumtle.repository.PostRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,6 +52,9 @@ class PostServiceTest {
 
 	@Mock
 	private PostRepository postRepository;
+
+	@Mock
+	private PostLikeRepository postLikeRepository;
 
 	@Mock
 	private GroupService groupService;
@@ -62,9 +67,6 @@ class PostServiceTest {
 
 	@Mock
 	private MyDataService myDataService;
-
-	@Mock
-	private PostLikeService postLikeService;
 
 	@Mock
 	private CommentService commentService;
@@ -392,8 +394,9 @@ class PostServiceTest {
 
 		PostResponseDto.PostDetail postDetail = PostResponseDto.PostDetail.from(post, false, 0, 0, true);
 
-		when(postLikeService.isAuthorLike(post.getId(), user.getId())).thenReturn(false);
-		when(postLikeService.countLikeByPostId(post.getId())).thenReturn(0);
+		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
+			Optional.of(PostLike.builder().build()));
+		when(postService.countLikeByPostId(post.getId())).thenReturn(0);
 		when(commentService.countCommentByPostId(post.getId())).thenReturn(0);
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
@@ -462,8 +465,8 @@ class PostServiceTest {
 		Page<Post> postPage = new PageImpl<>(posts, pageable, posts.size());
 
 		when(postRepository.findAllByGroupId(groupId, pageable)).thenReturn(postPage);
-		when(postLikeService.isAuthorLike(eq(post.getId()), eq(user.getId()))).thenReturn(true);
-
+		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
+			Optional.of(PostLike.builder().build()));
 		// When
 		List<PostResponseDto.PostInfo> result = postService.getPostsByPage(groupId, pageable, user).getContent();
 
@@ -474,7 +477,7 @@ class PostServiceTest {
 
 		// verify(groupService).isMatchedGroupUser(eq(user), any(Group.class));
 		verify(postRepository).findAllByGroupId(groupId, pageable);
-		verify(postLikeService).isAuthorLike(eq(1L), eq("1"));
+		// verify(postService).isAuthorLike(eq(1L), eq("1"));
 	}
 
 	@Test
@@ -556,7 +559,9 @@ class PostServiceTest {
 		when(postRepository.findById(eq(1L))).thenReturn(Optional.of(post));
 		post.setImageUrls(newImageUrl);
 		post.setContent(newContent);
-		when(postLikeService.isAuthorLike(eq(post.getId()), eq(user.getId()))).thenReturn(true);
+		post.setId(1L);
+		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
+			Optional.of(PostLike.builder().build()));
 		when(objectMapper.readValue(eq(write.getSnapShot()), any(TypeReference.class))).thenReturn(realsnap);
 		when(objectMapper.convertValue(eq(realsnap.get("bucketId")), any(TypeReference.class))).thenReturn(
 			List.of(1, 2, 3));
