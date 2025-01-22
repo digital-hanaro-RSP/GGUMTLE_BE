@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
 import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
+import com.hana4.ggumtle.dto.dreamAccount.DreamAccountResponseDto;
 import com.hana4.ggumtle.dto.recommendation.RecommendationResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
@@ -18,6 +19,7 @@ import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
 import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.repository.BucketRepository;
+import com.hana4.ggumtle.repository.DreamAccountRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,16 +29,19 @@ import lombok.RequiredArgsConstructor;
 public class BucketService {
 
 	private final BucketRepository bucketRepository;
+	private final DreamAccountRepository dreamAccountRepository;
 
 	public BucketResponseDto.BucketInfo createBucket(BucketRequestDto.CreateBucket requestDto, User user,
-		DreamAccount dreamAccount) {
+		DreamAccountResponseDto.DreamAccountInfo dreamAccountInfo) {
 		if (Boolean.TRUE.equals(requestDto.getIsRecommended()) && requestDto.getOriginId() == null) {
 			throw new CustomException(ErrorCode.INVALID_PARAMETER, "추천 플로우에서는 originId가 필요합니다.");
 		}
+		DreamAccount dreamAccount = dreamAccountRepository.findById(dreamAccountInfo.getId())
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "DreamAccount를 찾을 수 없습니다."));
 
-		Bucket bucket = bucketRepository.save(requestDto.toEntity(user, dreamAccount));
+		Bucket bucket = bucketRepository.save(requestDto.from(user, dreamAccount));
 
-		return BucketResponseDto.BucketInfo.form(bucket);
+		return BucketResponseDto.BucketInfo.from(bucket);
 	}
 
 	public BucketResponseDto.BucketInfo updateBucket(Long bucketId, BucketRequestDto.CreateBucket requestDto) {
@@ -45,7 +50,7 @@ public class BucketService {
 
 		bucket.updateFromDto(requestDto);
 
-		return BucketResponseDto.BucketInfo.form(bucket);
+		return BucketResponseDto.BucketInfo.from(bucket);
 	}
 
 	public BucketResponseDto.BucketInfo updateBucketStatus(Long bucketId, BucketRequestDto.UpdateBucketStatus updates) {
@@ -58,7 +63,7 @@ public class BucketService {
 		bucket.setStatus(statusValue);
 
 		bucketRepository.save(bucket);
-		return BucketResponseDto.BucketInfo.form(bucket);
+		return BucketResponseDto.BucketInfo.from(bucket);
 
 	}
 
@@ -68,14 +73,14 @@ public class BucketService {
 
 		bucketRepository.delete(bucket);
 
-		BucketResponseDto.BucketInfo.form(bucket);
+		BucketResponseDto.BucketInfo.from(bucket);
 	}
 
 	public List<BucketResponseDto.BucketInfo> getAllBuckets() {
 		List<Bucket> buckets = bucketRepository.findAll();
 
 		return buckets.stream()
-			.map(BucketResponseDto.BucketInfo::form)
+			.map(BucketResponseDto.BucketInfo::from)
 			.collect(Collectors.toList());
 	}
 
@@ -83,7 +88,7 @@ public class BucketService {
 		Bucket bucket = bucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷을 찾을 수 없습니다."));
 
-		return BucketResponseDto.BucketInfo.form(bucket);
+		return BucketResponseDto.BucketInfo.from(bucket);
 	}
 
 	public List<RecommendationResponseDto.RecommendedBucketInfo> getRecommendedBuckets(BucketTagType tagType) {

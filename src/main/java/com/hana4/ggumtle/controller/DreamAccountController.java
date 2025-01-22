@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,7 +35,7 @@ public class DreamAccountController {
 	private final DreamAccountService dreamAccountService;
 
 	// 꿈통장 생성
-	@PostMapping("/create")
+	@PostMapping
 	public ResponseEntity<CustomApiResponse<DreamAccountResponseDto.DreamAccountInfo>> createDreamAccount(
 		@RequestBody @Valid DreamAccountRequestDto.Create requestDto,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -57,6 +58,21 @@ public class DreamAccountController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
 				.body(CustomApiResponse.failure(400, "Failed to create Dream Account.", e.getMessage()));
 		}
+	}
+
+	@Operation(summary = "유저가 가진 꿈통장", description = "유저가 가진 꿈통장을 반환합니다")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공 응답")
+	})
+	@GetMapping
+	public ResponseEntity<CustomApiResponse<DreamAccountResponseDto.DreamAccountInfo>> getDreamAccount(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		// 사용자의 ID로 DreamAccount를 검색
+		DreamAccountResponseDto.DreamAccountInfo dreamAccount = dreamAccountService.getDreamAccountByUserId(
+			userDetails.getUser().getId());
+
+		// 검색된 DreamAccount를 응답으로 반환
+		return ResponseEntity.ok(CustomApiResponse.success(dreamAccount));
 	}
 
 	//꿈통장 금액 추가

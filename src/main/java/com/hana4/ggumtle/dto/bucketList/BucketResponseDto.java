@@ -82,7 +82,7 @@ public class BucketResponseDto {
 		// @Schema(description = "꿈통장 ID", example = "1")
 		// private List<Recommendation> recommendations;
 
-		public static BucketInfo form(Bucket bucket) {
+		public static BucketInfo from(Bucket bucket) {
 
 			return BucketInfo.builder()
 				.dreamAccountId(bucket.getDreamAccount().getId())

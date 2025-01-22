@@ -33,8 +33,17 @@ public class DreamAccountService {
 		this.dreamAccountRepository = dreamAccountRepository;
 	}
 
-	public DreamAccount getDreamAccountByUserId(String userId) {
+	public DreamAccountResponseDto.DreamAccountInfo getDreamAccountByUserId(String userId) {
 		return dreamAccountRepository.findByUserId(userId)
+			.map(dreamAccount -> {
+				// 관련된 Bucket의 totalSafeBox 계산
+				BigDecimal totalSafeBox = bucketRepository.findAllByDreamAccountId(dreamAccount.getId()).stream()
+					.map(Bucket::getSafeBox)
+					.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+				// DreamAccountInfo 생성 (totalSafeBox 포함)
+				return DreamAccountResponseDto.DreamAccountInfo.from(dreamAccount, totalSafeBox);
+			})
 			.orElse(null); // DreamAccount가 없으면 null 반환
 	}
 
@@ -75,7 +84,7 @@ public class DreamAccountService {
 			.reduce(BigDecimal.ZERO, BigDecimal::add);
 
 		// DreamAccountInfo 반환
-		return DreamAccountResponseDto.DreamAccountInfo.fromEntity(dreamAccount, totalSafeBox);
+		return DreamAccountResponseDto.DreamAccountInfo.from(dreamAccount, totalSafeBox);
 	}
 
 	// 꿈통장에서 금액 제외
@@ -96,7 +105,7 @@ public class DreamAccountService {
 			.map(Bucket::getSafeBox)
 			.reduce(BigDecimal.ZERO, BigDecimal::add);
 
-		return DreamAccountResponseDto.DreamAccountInfo.fromEntity(dreamAccount, totalSafeBox);
+		return DreamAccountResponseDto.DreamAccountInfo.from(dreamAccount, totalSafeBox);
 	}
 
 	// 꿈통장 금액을 Bucket의 safeBox로 분배
@@ -125,7 +134,7 @@ public class DreamAccountService {
 		BigDecimal totalSafeBox = bucketRepository.getTotalSafeBoxByDreamAccountId(dreamAccountId);
 
 		// 7. DreamAccountInfo DTO 생성 및 반환
-		return DreamAccountResponseDto.DreamAccountInfo.fromEntity(dreamAccount, totalSafeBox);
+		return DreamAccountResponseDto.DreamAccountInfo.from(dreamAccount, totalSafeBox);
 	}
 
 	@Transactional
@@ -150,7 +159,7 @@ public class DreamAccountService {
 		BigDecimal totalSafeBox = bucketRepository.getTotalSafeBoxByDreamAccountId(dreamAccountId);
 
 		// 7. DreamAccountInfo DTO 생성 및 반환
-		return DreamAccountResponseDto.DreamAccountInfo.fromEntity(dreamAccount, totalSafeBox);
+		return DreamAccountResponseDto.DreamAccountInfo.from(dreamAccount, totalSafeBox);
 
 	}
 }

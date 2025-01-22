@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
 import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
+import com.hana4.ggumtle.dto.dreamAccount.DreamAccountResponseDto;
 import com.hana4.ggumtle.dto.recommendation.RecommendationResponseDto;
 import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
-import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.BucketService;
 import com.hana4.ggumtle.service.DreamAccountService;
@@ -51,11 +51,12 @@ public class BucketController {
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 
 		// 유저가 가진 DreamAccount를 불러오기
-		DreamAccount existingDreamAccount = dreamAccountService.getDreamAccountByUserId(userDetails.getUser().getId());
+		DreamAccountResponseDto.DreamAccountInfo dreamAccountInfo =
+			dreamAccountService.getDreamAccountByUserId(userDetails.getUser().getId());
 
 		// Bucket 생성 로직 호출
 		BucketResponseDto.BucketInfo createdBucket = bucketService.createBucket(requestDto, userDetails.getUser(),
-			existingDreamAccount);
+			dreamAccountInfo);
 
 		return ResponseEntity.ok(CustomApiResponse.success(createdBucket));
 	}
