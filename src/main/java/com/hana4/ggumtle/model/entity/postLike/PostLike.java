@@ -4,11 +4,12 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import com.hana4.ggumtle.model.entity.post.Post;
 import com.hana4.ggumtle.model.entity.user.User;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -34,11 +35,13 @@ public class PostLike {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(cascade = CascadeType.REMOVE)
+	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_PostLike_userId_User"))
 	private User user;
 
-	@ManyToOne(cascade = CascadeType.REMOVE)
+	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "postId", nullable = false, foreignKey = @ForeignKey(name = "fk_PostLike_postId_Post"))
 	private Post post;
 
