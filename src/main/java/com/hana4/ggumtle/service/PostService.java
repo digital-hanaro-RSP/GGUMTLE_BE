@@ -176,4 +176,12 @@ public class PostService {
 
 		postLikeRepository.findByPostIdAndUserId(postId, user.getId()).ifPresent(postLikeRepository::delete);
 	}
+
+	public PostResponseDto.ShareInfo saveNews(Long groupId, PostRequestDto.Share share, User user) {
+		if (!checkUserWithGroup(groupId, user)) {
+			throw new CustomException(ErrorCode.ACCESS_DENIED, "해당 그룹에 권한이 없습니다.");
+		}
+		Group group = groupService.getGroup(groupId);
+		return PostResponseDto.ShareInfo.from(postRepository.save(share.toEntity(user, group)));
+	}
 }

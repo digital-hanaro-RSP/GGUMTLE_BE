@@ -173,4 +173,25 @@ public class PostController {
 		postService.removeLike(groupId, postId, customUserDetails.getUser());
 		return ResponseEntity.ok(CustomApiResponse.success());
 	}
+
+	@Operation(summary = "새소식 공유", description = "새 소식(버켓리스트 완료)을 공유합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "새소식 공유 성공"),
+		@ApiResponse(responseCode = "401", description = "새소식 공유 실패",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 401, \"error\": \"Unauthorized\", \"message\": \"해당 그룹에 권한이 없습니다.\" }"
+			))),
+		@ApiResponse(responseCode = "404", description = "새소식 공유 실패",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹이 존재하지 않습니다.\" }"
+			)))
+	})
+	@PostMapping("/post/share")
+	public ResponseEntity<CustomApiResponse<PostResponseDto.ShareInfo>> shareBucketNews(
+		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
+		@Parameter(description = "새소식 내용") @RequestBody @Valid PostRequestDto.Share share,
+		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		return ResponseEntity.ok(
+			CustomApiResponse.success(postService.saveNews(groupId, share, customUserDetails.getUser())));
+	}
 }
