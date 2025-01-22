@@ -34,6 +34,9 @@ public class CommentService {
 
 	public Page<CommentResponseDto.CommentInfo> getCommentsByPage(Long postId, Pageable pageable,
 		User user) {
+		if (!postRepository.existsById(postId)) {
+			throw new CustomException(ErrorCode.NOT_FOUND, "해당 글이 존재하지 않습니다.");
+		}
 		return commentRepository.findAllByPostId(postId, pageable)
 			.map(comment -> CommentResponseDto.CommentInfo.from(comment,
 				comment.getUser().getId().equals(user.getId())));
