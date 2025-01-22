@@ -86,7 +86,7 @@ public class PresignedUrlService {
 				PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
 				presignedUrls.add(presignedRequest.url().toString());
 			} catch (Exception e) {
-				throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+				throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
 			}
 		}
 

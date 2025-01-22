@@ -13,13 +13,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hana4.ggumtle.dto.bucket.BucketResponseDto;
+import com.hana4.ggumtle.dto.post.PostLikeResponseDto;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.post.Post;
+import com.hana4.ggumtle.model.entity.postLike.PostLike;
 import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.repository.PostLikeRepository;
 import com.hana4.ggumtle.repository.PostRepository;
 
 import jakarta.transaction.Transactional;
@@ -30,8 +33,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class PostService {
 	private final PostRepository postRepository;
+	private final PostLikeRepository postLikeRepository;
 	private final GroupService groupService;
-	private final PostLikeService postLikeService;
 	private final CommentService commentService;
 	private final BucketService bucketService;
 	private final GoalPortfolioService goalPortfolioService;
@@ -94,15 +97,15 @@ public class PostService {
 		if (!post.getGroup().getId().equals(groupId)) {
 			throw new CustomException(ErrorCode.NOT_FOUND, "글이 해당 그룹에 있지 않습니다.");
 		}
-		return PostResponseDto.PostDetail.from(post, postLikeService.isAuthorLike(postId, user.getId()),
-			postLikeService.countLikeByPostId(postId), commentService.countCommentByPostId(postId),
+		return PostResponseDto.PostDetail.from(post, isAuthorLike(postId, user.getId()),
+			countLikeByPostId(postId), commentService.countCommentByPostId(postId),
 			post.getUser().getId().equals(user.getId()));
 	}
 
 	public Page<PostResponseDto.PostInfo> getPostsByPage(Long groupId, Pageable pageable, User user) {
 		return postRepository.findAllByGroupId(groupId, pageable)
 			.map(post -> {
-				boolean isLiked = postLikeService.isAuthorLike(post.getId(), user.getId());
+				boolean isLiked = isAuthorLike(post.getId(), user.getId());
 				boolean isMine = post.getUser().getId().equals(user.getId());
 				return PostResponseDto.PostInfo.from(post, isLiked, isMine);
 			});
@@ -123,8 +126,7 @@ public class PostService {
 		post.setContent(postRequestDto.getContent());
 		post.setSnapshot(makeSnapShot(postRequestDto, user));
 
-		return PostResponseDto.PostInfo.from(postRepository.save(post),
-			postLikeService.isAuthorLike(post.getId(), user.getId()), true);
+		return PostResponseDto.PostInfo.from(postRepository.save(post), isAuthorLike(post.getId(), user.getId()), true);
 	}
 
 	public void deletePost(Long groupId, Long postId, User user) {
@@ -144,5 +146,31 @@ public class PostService {
 	public Post getPostById(Long postId) {
 		return postRepository.findById(postId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 글이 존재하지 않습니다."));
+	}
+
+	public boolean isAuthorLike(Long postId, String userId) {
+		return postLikeRepository.findByPostIdAndUserId(postId, userId).isPresent();
+	}
+
+	public int countLikeByPostId(Long postId) {
+		return postLikeRepository.countByPostId(postId);
+	}
+
+	public PostLikeResponseDto.Add addLike(Long groupId, Long postId, User user) {
+		if (!checkUserWithGroup(groupId, user)) {
+			throw new CustomException(ErrorCode.NOT_FOUND, "해당 그룹에 권한이 없습니다.");
+		}
+
+		return PostLikeResponseDto.Add.from(
+			postLikeRepository.save(PostLike.builder().user(user).post(getPostById(postId)).build()));
+	}
+
+	public void removeLike(Long groupId, Long postId, User user) {
+		if (!checkUserWithGroup(groupId, user)) {
+			throw new CustomException(ErrorCode.NOT_FOUND, "해당 그룹에 권한이 없습니다.");
+		}
+		Post post = getPostById(postId);
+
+		postLikeRepository.findByPostIdAndUserId(postId, user.getId()).ifPresent(postLikeRepository::delete);
 	}
 }

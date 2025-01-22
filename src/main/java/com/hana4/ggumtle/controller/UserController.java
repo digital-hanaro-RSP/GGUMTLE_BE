@@ -2,6 +2,7 @@ package com.hana4.ggumtle.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -175,5 +176,47 @@ public class UserController {
 	) {
 		userService.validateVerificationCode(request);
 		return ResponseEntity.ok(CustomApiResponse.success());
+	}
+
+	@Operation(summary = "마이페이지", description = "사용자 정보를 반환합니다")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공 응답"),
+		@ApiResponse(responseCode = "404", description = "유저를 찾을 수 없음",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 유저를 찾을 수 없습니다\" }"
+			))),
+		@ApiResponse(responseCode = "500", description = "서버 오류",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 500, \"error\": \"Internal Server Error\", \"message\": \"내부 서버 오류\" }"
+			)))
+	})
+	@GetMapping("/user")
+	public ResponseEntity<CustomApiResponse<UserResponseDto.UserInfo>> getUserInfo(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		return ResponseEntity.ok(CustomApiResponse.success(userService.getUserInfo(userDetails.getUser().getId())));
+	}
+
+	@Operation(summary = "마이페이지", description = "사용자 이미지, 닉네임, 비밀번호 수정")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "성공 응답"),
+		@ApiResponse(responseCode = "404", description = "유저를 찾을 수 없음",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 유저를 찾을 수 없습니다\" }"
+			))),
+		@ApiResponse(responseCode = "500", description = "서버 오류",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 500, \"error\": \"Internal Server Error\", \"message\": \"내부 서버 오류\" }"
+			)))
+	})
+	@PatchMapping("/user")
+	public ResponseEntity<CustomApiResponse<UserResponseDto.UserInfo>> updateUserInfo(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestBody @Valid UserRequestDto.UpdateUser updateUserRequest) {
+
+		updateUserRequest.validate();
+
+		return ResponseEntity.ok(
+			CustomApiResponse.success(userService.updateUserInfo(userDetails.getUser().getId(), updateUserRequest))
+		);
 	}
 }
