@@ -30,11 +30,16 @@ public class CommentService {
 		return commentRepository.countByPostId(postId);
 	}
 
+	public boolean isAuthorLike(Long postId, String userId) {
+		return commentLikeRepository.findByCommentIdAndUserId(postId, userId).isPresent();
+	}
+
 	public CommentResponseDto.CommentInfo saveComment(Long postId, CommentRequestDto.CommentWrite commentWrite,
 		User user) {
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 글이 존재하지 않습니다."));
-		return CommentResponseDto.CommentInfo.from(commentRepository.save(commentWrite.toEntity(post, user)), true);
+		return CommentResponseDto.CommentInfo.from(commentRepository.save(commentWrite.toEntity(post, user)), user,
+			false, true, 0);
 	}
 
 	public Page<CommentResponseDto.CommentInfo> getCommentsByPage(Long postId, Pageable pageable,
@@ -43,8 +48,8 @@ public class CommentService {
 			throw new CustomException(ErrorCode.NOT_FOUND, "해당 글이 존재하지 않습니다.");
 		}
 		return commentRepository.findAllByPostId(postId, pageable)
-			.map(comment -> CommentResponseDto.CommentInfo.from(comment,
-				comment.getUser().getId().equals(user.getId())));
+			.map(comment -> CommentResponseDto.CommentInfo.from(comment, user, isAuthorLike(postId, user.getId()),
+				comment.getUser().getId().equals(user.getId()), countCommentByPostId(postId)));
 	}
 
 	public void deleteComment(Long commentId) {

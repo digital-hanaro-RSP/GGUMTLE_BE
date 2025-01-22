@@ -1,7 +1,9 @@
 package com.hana4.ggumtle.dto.comment;
 
 import com.hana4.ggumtle.dto.BaseDto;
+import com.hana4.ggumtle.dto.user.UserResponseDto;
 import com.hana4.ggumtle.model.entity.comment.Comment;
+import com.hana4.ggumtle.model.entity.user.User;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,14 +24,20 @@ public class CommentResponseDto {
 		private Long id;
 		private Long postId;
 		private String content;
+		private UserResponseDto.BriefInfo userBriefInfo;
+		private boolean isLiked;
 		private boolean isMine;
+		private int likeCount;
 
-		public static CommentInfo from(Comment comment, boolean isMine) {
+		public static CommentInfo from(Comment comment, User user, boolean isLiked, boolean isMine, int likeCount) {
 			return CommentInfo.builder()
 				.id(comment.getId())
 				.postId(comment.getPost().getId())
 				.content(comment.getContent())
+				.userBriefInfo(UserResponseDto.BriefInfo.from(user))
+				.isLiked(isLiked)
 				.isMine(isMine)
+				.likeCount(likeCount)
 				.createdAt(comment.getCreatedAt())
 				.updatedAt(comment.getUpdatedAt())
 				.build();
