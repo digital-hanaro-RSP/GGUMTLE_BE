@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
 import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
-import com.hana4.ggumtle.dto.dreamAccount.DreamAccountResponseDto;
 import com.hana4.ggumtle.dto.recommendation.RecommendationResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
@@ -31,25 +30,26 @@ public class BucketService {
 	private final BucketRepository bucketRepository;
 	private final DreamAccountRepository dreamAccountRepository;
 
-	public BucketResponseDto.BucketInfo createBucket(BucketRequestDto.CreateBucket requestDto, User user,
-		DreamAccountResponseDto.DreamAccountInfo dreamAccountInfo) {
+	public BucketResponseDto.BucketInfo createBucket(BucketRequestDto.CreateBucket requestDto, User user) {
 		if (Boolean.TRUE.equals(requestDto.getIsRecommended()) && requestDto.getOriginId() == null) {
 			throw new CustomException(ErrorCode.INVALID_PARAMETER, "추천 플로우에서는 originId가 필요합니다.");
 		}
-		DreamAccount dreamAccount = dreamAccountRepository.findById(dreamAccountInfo.getId())
+		DreamAccount dreamAccount = dreamAccountRepository.findByUserId(user.getId())
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "DreamAccount를 찾을 수 없습니다."));
 
-		Bucket bucket = bucketRepository.save(requestDto.from(user, dreamAccount));
+		Bucket bucket = bucketRepository.save(requestDto.toEntity(user, dreamAccount));
 
 		return BucketResponseDto.BucketInfo.from(bucket);
 	}
 
-	public BucketResponseDto.BucketInfo updateBucket(Long bucketId, BucketRequestDto.CreateBucket requestDto) {
-		Bucket bucket = bucketRepository.findById(bucketId)
+	public BucketResponseDto.BucketInfo updateBucket(User user, Long bucketId,
+		BucketRequestDto.CreateBucket requestDto) {
+		bucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷을 찾을 수 없습니다."));
+		DreamAccount dreamAccount = dreamAccountRepository.findByUserId(user.getId())
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "DreamAccount를 찾을 수 없습니다."));
 
-		bucket.updateFromDto(requestDto);
-
+		Bucket bucket = bucketRepository.save(requestDto.toEntity(user, dreamAccount));
 		return BucketResponseDto.BucketInfo.from(bucket);
 	}
 

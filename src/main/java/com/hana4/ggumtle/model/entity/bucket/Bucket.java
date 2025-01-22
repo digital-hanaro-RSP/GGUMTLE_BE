@@ -3,7 +3,6 @@ package com.hana4.ggumtle.model.entity.bucket;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
 import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -71,7 +70,6 @@ public class Bucket extends BaseEntity {
 	@Column(nullable = false)
 	private BucketStatus status = BucketStatus.DOING;
 
-	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private Boolean isAutoAllocate;
 
 	private BigDecimal allocateAmount;
@@ -80,26 +78,8 @@ public class Bucket extends BaseEntity {
 
 	private BigDecimal safeBox;
 
-
-
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private Boolean isRecommended;
 	private Long originId;
 
-	public void updateFromDto(BucketRequestDto.CreateBucket dto) {
-		this.title = dto.getTitle();
-		this.tagType = dto.getTagType();
-		this.dueDate = dto.getDueDate();
-		this.howTo = dto.getHowTo();
-		this.isDueSet = dto.getIsDueSet();
-		this.isAutoAllocate = dto.getIsAutoAllocate();
-		this.allocateAmount = dto.getAllocateAmount();
-		this.cronCycle = dto.getCronCycle();
-		this.goalAmount = dto.getGoalAmount();
-		this.memo = dto.getMemo();
-		this.status = BucketStatus.DOING;
-		this.isRecommended = dto.getIsRecommended();
-		this.originId = dto.getOriginId();
-		this.followers = dto.getFollowers();
-	}
 }

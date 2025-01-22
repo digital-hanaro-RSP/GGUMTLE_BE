@@ -1,7 +1,9 @@
 package com.hana4.ggumtle.dto.bucketList;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
 import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
@@ -39,7 +41,7 @@ public class BucketRequestDto {
 		private BucketTagType tagType;
 
 		@Schema(description = "버킷리스트 완료날짜", example = "2025-01-21", requiredMode = Schema.RequiredMode.REQUIRED)
-		private LocalDateTime dueDate;
+		private String dueDate;
 
 		@Schema(description = "버킷리스트 종류", example = "MONEY", requiredMode = Schema.RequiredMode.REQUIRED)
 		@NotNull(message = "버킷 종류를 입력하세요.")
@@ -82,20 +84,25 @@ public class BucketRequestDto {
 		@Schema(description = "추천 버킷이라면 오리지널 아이디", example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
 		private Long originId;   // 선택적 필드
 
-		public Bucket from(User user, DreamAccount dreamAccount) {
+		public Bucket toEntity(User user, DreamAccount dreamAccount) {
 
 			if (this.howTo == BucketHowTo.MONEY) {
 				safeBox = BigDecimal.ZERO;
 			} else {
 				safeBox = null;
 			}
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			LocalDate localDate = LocalDate.parse(this.dueDate, formatter);
+
+			// LocalDate -> LocalDateTime (default 00:00:00)
+			LocalDateTime parsedDueDate = localDate.atStartOfDay();
 			return new Bucket().toBuilder()
 				.user(user)
 				.dreamAccount(dreamAccount)
 				.safeBox(safeBox)
 				.title(this.title)
 				.tagType(this.tagType)
-				.dueDate(this.dueDate)
+				.dueDate(parsedDueDate)
 				.howTo(this.howTo)
 				.isDueSet(this.isDueSet)
 				.isAutoAllocate(this.isAutoAllocate)
