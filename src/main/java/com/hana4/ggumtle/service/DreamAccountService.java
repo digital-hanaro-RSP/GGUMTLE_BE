@@ -31,7 +31,7 @@ public class DreamAccountService {
 			.map(dreamAccount -> {
 				// 관련된 Bucket의 totalSafeBox 계산
 				BigDecimal totalSafeBox = bucketRepository.findAllByDreamAccountId(dreamAccount.getId()).stream()
-					.map(Bucket::getSafeBox)
+					.map(bucket -> bucket.getSafeBox() != null ? bucket.getSafeBox() : BigDecimal.ZERO)
 					.reduce(BigDecimal.ZERO, BigDecimal::add);
 
 				// DreamAccountInfo 생성 (totalSafeBox 포함)
