@@ -20,19 +20,19 @@ class PostLikeServiceTest {
 	private PostLikeRepository postLikeRepository;
 
 	@InjectMocks
-	private PostLikeService postLikeService;
+	private PostService postService;
 
 	@Test
 	void isAuthorLike() {
 		when(postLikeRepository.findByPostIdAndUserId(1L, "1")).thenReturn(Optional.of(new PostLike()));
 
-		assertThat(postLikeService.isAuthorLike(1L, "1")).isEqualTo(true);
+		assertThat(postService.isAuthorLike(1L, "1")).isEqualTo(true);
 	}
 
 	@Test
 	void countLikeByPostId() {
 		when(postLikeRepository.countByPostId(1L)).thenReturn(1);
 
-		assertThat(postLikeService.countLikeByPostId(1L)).isEqualTo(1);
+		assertThat(postService.countLikeByPostId(1L)).isEqualTo(1);
 	}
 }

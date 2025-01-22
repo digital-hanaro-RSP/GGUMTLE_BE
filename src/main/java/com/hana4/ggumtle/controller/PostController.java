@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hana4.ggumtle.dto.CustomApiResponse;
+import com.hana4.ggumtle.dto.post.PostLikeResponseDto;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.security.CustomUserDetails;
@@ -139,6 +140,37 @@ public class PostController {
 		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
 		postService.deletePost(groupId, postId, customUserDetails.getUser());
+		return ResponseEntity.ok(CustomApiResponse.success());
+	}
+
+	@Operation(summary = "게시물 좋아요 추가", description = "특정 게시물에 좋아요를 추가합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "좋아요 추가 성공"),
+		@ApiResponse(responseCode = "404", description = "그룹 권한 없음",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹에 권한이 없습니다.\" }"
+			)))
+	})
+	@PostMapping("/post/{postId}/like")
+	public ResponseEntity<CustomApiResponse<PostLikeResponseDto.Add>> likePost(@PathVariable Long groupId,
+		@PathVariable Long postId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		return ResponseEntity.ok(
+			CustomApiResponse.success(postService.addLike(groupId, postId, customUserDetails.getUser())));
+	}
+
+	@Operation(summary = "게시물 좋아요 취소", description = "특정 게시물의 좋아요를 취소합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "좋아요 취소 성공"),
+		@ApiResponse(responseCode = "404", description = "게시물 삭제 실패",
+			content = @Content(mediaType = "application/json", examples = {
+				@ExampleObject(name = "글 없음", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 글이 존재하지 않습니다.\" }"),
+				@ExampleObject(name = "그룹 권한 없음", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹에 권한이 없습니다.\" }")
+			}))
+	})
+	@DeleteMapping("/post/{postId}/dislike")
+	public ResponseEntity<CustomApiResponse<PostLikeResponseDto.Add>> dislikePost(@PathVariable Long groupId,
+		@PathVariable Long postId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		postService.removeLike(groupId, postId, customUserDetails.getUser());
 		return ResponseEntity.ok(CustomApiResponse.success());
 	}
 }
