@@ -3,6 +3,7 @@ package com.hana4.ggumtle.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +20,8 @@ import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.advertisement.Advertisement;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementLocationType;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementProductType;
+import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.model.entity.user.UserRole;
 import com.hana4.ggumtle.repository.AdvertisementRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,12 +36,10 @@ public class AdvertisementServiceTest {
 	@Mock
 	private GoalPortfolioService goalPortfolioService;
 
-	private String userId;
 	private Advertisement mockAdvertisement;
 
 	@BeforeEach
 	void setUp() {
-		userId = "testUserId";
 		mockAdvertisement = Advertisement.builder()
 			.id(1L)
 			.productType(AdvertisementProductType.INVESTMENT)
@@ -76,13 +77,16 @@ public class AdvertisementServiceTest {
 	}
 
 	private void testGetMainAdForInvestmentType(String investmentType, String expectedRiskRating) {
-		GoalPortfolioResponseDto.InvestmentType mockInvestmentType = new GoalPortfolioResponseDto.InvestmentType(
-			investmentType);
-		when(goalPortfolioService.getGoalPortfolioInvestmentTypeByUserId(userId)).thenReturn(mockInvestmentType);
+		User user = createTestUser();
+
+		GoalPortfolioResponseDto.InvestmentType mockInvestmentType = mock(
+			GoalPortfolioResponseDto.InvestmentType.class);
+		when(mockInvestmentType.getInvestmentType()).thenReturn(investmentType);
+		when(goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(user)).thenReturn(mockInvestmentType);
 		when(advertisementRepository.findFirstByRiskRating(expectedRiskRating)).thenReturn(
 			Optional.of(mockAdvertisement));
 
-		AdvertisementResponseDto.MainAd result = advertisementService.getMainAd(userId);
+		AdvertisementResponseDto.MainAd result = advertisementService.getMainAd(user);
 
 		assertNotNull(result);
 		assertEquals(mockAdvertisement.getId(), result.getId());
@@ -94,24 +98,44 @@ public class AdvertisementServiceTest {
 
 	@Test
 	void testGetMainAd_InvalidInvestmentType() {
-		GoalPortfolioResponseDto.InvestmentType mockInvestmentType = new GoalPortfolioResponseDto.InvestmentType(
-			"INVALID");
-		when(goalPortfolioService.getGoalPortfolioInvestmentTypeByUserId(userId)).thenReturn(mockInvestmentType);
+		User user = createTestUser();
 
-		CustomException exception = assertThrows(CustomException.class, () -> advertisementService.getMainAd(userId));
+		GoalPortfolioResponseDto.InvestmentType mockInvestmentType = mock(
+			GoalPortfolioResponseDto.InvestmentType.class);
+		when(mockInvestmentType.getInvestmentType()).thenReturn("INVALID");
+		when(goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(user)).thenReturn(mockInvestmentType);
+
+		CustomException exception = assertThrows(CustomException.class, () -> advertisementService.getMainAd(user));
 		assertEquals(ErrorCode.INTERNAL_SERVER_ERROR, exception.getErrorCode());
 		assertTrue(exception.getMessage().contains("지원하지 않는 투자성향 타입입니다"));
 	}
 
 	@Test
 	void testGetMainAd_NoAdvertisementFound() {
-		GoalPortfolioResponseDto.InvestmentType mockInvestmentType = new GoalPortfolioResponseDto.InvestmentType(
-			"BALANCED");
-		when(goalPortfolioService.getGoalPortfolioInvestmentTypeByUserId(userId)).thenReturn(mockInvestmentType);
+		User user = createTestUser();
+
+		GoalPortfolioResponseDto.InvestmentType mockInvestmentType = mock(
+			GoalPortfolioResponseDto.InvestmentType.class);
+		when(mockInvestmentType.getInvestmentType()).thenReturn("BALANCED");
+		when(goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(user)).thenReturn(mockInvestmentType);
 		when(advertisementRepository.findFirstByRiskRating("보통위험")).thenReturn(Optional.empty());
 
-		CustomException exception = assertThrows(CustomException.class, () -> advertisementService.getMainAd(userId));
+		CustomException exception = assertThrows(CustomException.class, () -> advertisementService.getMainAd(user));
 		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
 		assertTrue(exception.getMessage().contains("해당 위험 등급의 광고가 존재하지 않습니다"));
+	}
+
+	private User createTestUser() {
+		return User.builder()
+			.id("27295730-41ce-4df8-9864-4da1fa3c6caa")
+			.name("문서아")
+			.tel("01012341234")
+			.password("password")
+			.birthDate(LocalDateTime.of(2000, 1, 1, 0, 0))
+			.gender("f")
+			.nickname("익명의고라니")
+			.role(UserRole.USER)
+			.permission((short)0)
+			.build();
 	}
 }

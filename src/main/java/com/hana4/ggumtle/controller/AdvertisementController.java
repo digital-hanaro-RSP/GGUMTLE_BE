@@ -51,7 +51,7 @@ public class AdvertisementController {
 	public ResponseEntity<CustomApiResponse<AdvertisementResponseDto.MainAd>> getMainAd(
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		AdvertisementResponseDto.MainAd response = advertisementService.getMainAd(userDetails.getUser().getId());
+		AdvertisementResponseDto.MainAd response = advertisementService.getMainAd(userDetails.getUser());
 		return ResponseEntity.ok(CustomApiResponse.success(response));
 	}
 }

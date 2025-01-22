@@ -21,7 +21,7 @@ public class SurveyRequestDto {
 	@AllArgsConstructor
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	public static class CreateSurvey {
-		@Schema(description = "투자 성향을 입력하세요", example = "CONSERVATIVE(안정형), MODERATELY_CONSERVATIVE(안정추구형), BALANCED // 위험중립형, MODERATELY_AGGRESSIVE // 적극투자형, AGGRESSIVE // 공격투자형", requiredMode = Schema.RequiredMode.REQUIRED)
+		@Schema(description = "투자 성향을 입력하세요", example = "CONSERVATIVE(안정형), MODERATELY_CONSERVATIVE(안정추구형), BALANCED(위험중립형), MODERATELY_AGGRESSIVE(적극투자형), AGGRESSIVE(공격투자형)", requiredMode = Schema.RequiredMode.REQUIRED)
 		@NotNull(message = "투자 성향을 입력하세요")
 		private String investmentType;
 

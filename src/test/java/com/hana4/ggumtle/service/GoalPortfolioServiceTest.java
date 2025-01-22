@@ -114,8 +114,9 @@ class GoalPortfolioServiceTest {
 
 	@Test
 	void getGoalPortfolioInvestmentTypeByUserId_Success() {
-		String userId = "testUser";
-		User user = User.builder().id(userId).build();
+		user = new User();
+		user.setId("testUser");
+		user.setName("testUserName");
 		PortfolioTemplate template = PortfolioTemplate.builder()
 			.name("BALANCED")
 			.depositWithdrawalRatio(BigDecimal.valueOf(0.30))
@@ -137,28 +138,72 @@ class GoalPortfolioServiceTest {
 			.template(template)
 			.build();
 
-		when(goalPortfolioRepository.findByUserId(userId)).thenReturn(Optional.of(goalPortfolio));
+		when(goalPortfolioRepository.findByUserId(user.getId())).thenReturn(Optional.of(goalPortfolio));
 
-		GoalPortfolioResponseDto.InvestmentType result = goalPortfolioService.getGoalPortfolioInvestmentTypeByUserId(
-			userId);
+		GoalPortfolioResponseDto.InvestmentType result = goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(
+			user);
 
 		assertNotNull(result);
 		assertEquals("BALANCED", result.getInvestmentType());
-		verify(goalPortfolioRepository).findByUserId(userId);
+		verify(goalPortfolioRepository).findByUserId(user.getId());
 	}
 
 	@Test
 	void getGoalPortfolioInvestmentTypeByUserId_UserNotFound() {
-		String userId = "nonExistentUser";
-		when(goalPortfolioRepository.findByUserId(userId)).thenReturn(Optional.empty());
+		user = new User();
+		user.setId("testUser");
+		user.setName("testUserName");
+		when(goalPortfolioRepository.findByUserId(user.getId())).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class, () ->
-			goalPortfolioService.getGoalPortfolioInvestmentTypeByUserId(userId)
+			goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(user)
 		);
 
 		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
 		assertEquals("해당 유저의 목표 포트폴리오가 존재하지 않습니다.", exception.getMessage());
-		verify(goalPortfolioRepository).findByUserId(userId);
+		verify(goalPortfolioRepository).findByUserId(user.getId());
 	}
 
+	@Test
+	void getGoalPortfolioInvestmentTypeByUser_Success() {
+		User user = new User();
+		user.setId("testUser");
+		user.setName("testUserName");
+
+		PortfolioTemplate template = PortfolioTemplate.builder()
+			.name("BALANCED")
+			.build();
+
+		GoalPortfolio goalPortfolio = GoalPortfolio.builder()
+			.user(user)
+			.template(template)
+			.build();
+
+		when(goalPortfolioRepository.findByUserId(user.getId())).thenReturn(Optional.of(goalPortfolio));
+
+		GoalPortfolioResponseDto.InvestmentType result = goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(
+			user);
+
+		assertNotNull(result);
+		assertEquals("BALANCED", result.getInvestmentType());
+		assertEquals("testUserName", result.getUserName());
+		verify(goalPortfolioRepository).findByUserId(user.getId());
+	}
+
+	@Test
+	void getGoalPortfolioInvestmentTypeByUser_UserNotFound() {
+		User user = new User();
+		user.setId("testUser");
+		user.setName("testUserName");
+
+		when(goalPortfolioRepository.findByUserId(user.getId())).thenReturn(Optional.empty());
+
+		CustomException exception = assertThrows(CustomException.class, () ->
+			goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(user)
+		);
+
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+		assertEquals("해당 유저의 목표 포트폴리오가 존재하지 않습니다.", exception.getMessage());
+		verify(goalPortfolioRepository).findByUserId(user.getId());
+	}
 }

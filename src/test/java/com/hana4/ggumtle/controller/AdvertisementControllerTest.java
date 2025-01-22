@@ -23,8 +23,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hana4.ggumtle.WithMockCustomUser;
 import com.hana4.ggumtle.config.TestSecurityConfig;
 import com.hana4.ggumtle.dto.advertisement.AdvertisementResponseDto;
+import com.hana4.ggumtle.dto.user.UserRequestDto;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementLocationType;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementProductType;
+import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.model.entity.user.UserRole;
 import com.hana4.ggumtle.service.AdvertisementService;
 
 @WebMvcTest(
@@ -58,6 +61,22 @@ public class AdvertisementControllerTest {
 	@Test
 	@WithMockCustomUser
 	public void testGetMainAd() throws Exception {
+		// 요청 DTO
+		UserRequestDto.Register request = UserRequestDto.Register.builder()
+			.name("문서아")
+			.tel("01012341234")
+			.password("password")
+			.birthDate("2000-01-01")
+			.gender("f")
+			.nickname("익명의고라니")
+			.build();
+
+		// User 엔티티
+		User user = request.toEntity();
+		user.setId("27295730-41ce-4df8-9864-4da1fa3c6caa");
+		user.setRole(UserRole.USER);
+		user.setPermission((short)0);
+
 		AdvertisementResponseDto.MainAd mockAd = AdvertisementResponseDto.MainAd.builder()
 			.id(2L)
 			.productType(AdvertisementProductType.PENSION)
@@ -68,13 +87,12 @@ public class AdvertisementControllerTest {
 			.link("https://www.samsungfund.com/fund/product/view.do?id=K55105DK2904")
 			.build();
 
-		when(advertisementService.getMainAd(anyString())).thenReturn(mockAd);
+		when(advertisementService.getMainAd(any(User.class))).thenReturn(mockAd);
 
 		mockMvc.perform(get("/ads/main")
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(
-				jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("ok"))
 			.andExpect(jsonPath("$.data.id").value(2L))
 			.andExpect(jsonPath("$.data.productType").value("PENSION"))

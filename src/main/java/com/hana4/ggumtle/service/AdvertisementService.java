@@ -7,6 +7,7 @@ import com.hana4.ggumtle.dto.goalPortfolio.GoalPortfolioResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.advertisement.Advertisement;
+import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.repository.AdvertisementRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -17,9 +18,9 @@ public class AdvertisementService {
 	private final AdvertisementRepository advertisementRepository;
 	private final GoalPortfolioService goalPortfolioService;
 
-	public AdvertisementResponseDto.MainAd getMainAd(String userId) {
-		GoalPortfolioResponseDto.InvestmentType investmentType = goalPortfolioService.getGoalPortfolioInvestmentTypeByUserId(
-			userId);
+	public AdvertisementResponseDto.MainAd getMainAd(User user) {
+		GoalPortfolioResponseDto.InvestmentType investmentType = goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(
+			user);
 
 		String riskRating = switch (investmentType.getInvestmentType()) {
 			case "CONSERVATIVE" -> "매우낮은위험";
