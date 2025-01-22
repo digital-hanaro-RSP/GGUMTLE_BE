@@ -90,7 +90,8 @@ class PostControllerTest {
 			UserResponseDto.BriefInfo.from(customUserDetails.getUser()),
 			GroupCategory.AFTER_RETIREMENT,
 			false,
-			true
+			true,
+			0, 0
 		);
 
 		System.out.println("customUserDetails = " + customUserDetails.getUser());
@@ -128,7 +129,7 @@ class PostControllerTest {
 			.getAuthentication()
 			.getPrincipal();
 
-		PostResponseDto.PostDetail postDetail = PostResponseDto.PostDetail.builder()
+		PostResponseDto.PostInfo postInfo = PostResponseDto.PostInfo.builder()
 			.id(postId)
 			.userId("1")
 			.groupId(groupId)
@@ -145,7 +146,7 @@ class PostControllerTest {
 			.build();
 
 		System.out.println("customUserDetails = " + customUserDetails.getUser());
-		given(postService.getPost(eq(groupId), eq(postId), eq(customUserDetails.getUser()))).willReturn(postDetail);
+		given(postService.getPost(eq(groupId), eq(postId), eq(customUserDetails.getUser()))).willReturn(postInfo);
 
 		// when, then
 		mockMvc.perform(MockMvcRequestBuilders.get("/community/group/{groupId}/post/{postId}", groupId, postId))
@@ -153,11 +154,11 @@ class PostControllerTest {
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("ok"))
-			.andExpect(jsonPath("$.data.userId").value(postDetail.getUserId()))
-			.andExpect(jsonPath("$.data.groupId").value(postDetail.getGroupId()))
-			.andExpect(jsonPath("$.data.imageUrls").value(postDetail.getImageUrls()))
-			.andExpect(jsonPath("$.data.content").value(postDetail.getContent()))
-			.andExpect(jsonPath("$.data.postType").value(postDetail.getPostType().name()))
+			.andExpect(jsonPath("$.data.userId").value(postInfo.getUserId()))
+			.andExpect(jsonPath("$.data.groupId").value(postInfo.getGroupId()))
+			.andExpect(jsonPath("$.data.imageUrls").value(postInfo.getImageUrls()))
+			.andExpect(jsonPath("$.data.content").value(postInfo.getContent()))
+			.andExpect(jsonPath("$.data.postType").value(postInfo.getPostType().name()))
 			.andDo(print());
 
 		verify(postService).getPost(groupId, postId, customUserDetails.getUser());

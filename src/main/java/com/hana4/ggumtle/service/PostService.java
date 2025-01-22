@@ -89,17 +89,18 @@ public class PostService {
 		Group group = groupService.getGroup(groupId);
 
 		postRequestDto.setSnapShot(makeSnapShot(postRequestDto, user));
-		return PostResponseDto.PostInfo.from(postRepository.save(postRequestDto.toEntity(user, group)), false, true);
+		return PostResponseDto.PostInfo.from(postRepository.save(postRequestDto.toEntity(user, group)), false, true, 0,
+			0);
 	}
 
-	public PostResponseDto.PostDetail getPost(Long groupId, Long postId, User user) {
+	public PostResponseDto.PostInfo getPost(Long groupId, Long postId, User user) {
 		Post post = getPostById(postId);
 		if (!post.getGroup().getId().equals(groupId)) {
 			throw new CustomException(ErrorCode.NOT_FOUND, "글이 해당 그룹에 있지 않습니다.");
 		}
-		return PostResponseDto.PostDetail.from(post, isAuthorLike(postId, user.getId()),
-			countLikeByPostId(postId), commentService.countCommentByPostId(postId),
-			post.getUser().getId().equals(user.getId()));
+		return PostResponseDto.PostInfo.from(post, isAuthorLike(postId, user.getId()),
+			post.getUser().getId().equals(user.getId()), countLikeByPostId(postId),
+			commentService.countCommentByPostId(postId));
 	}
 
 	public Page<PostResponseDto.PostInfo> getPostsByPage(Long groupId, Pageable pageable, User user) {
@@ -107,7 +108,8 @@ public class PostService {
 			.map(post -> {
 				boolean isLiked = isAuthorLike(post.getId(), user.getId());
 				boolean isMine = post.getUser().getId().equals(user.getId());
-				return PostResponseDto.PostInfo.from(post, isLiked, isMine);
+				return PostResponseDto.PostInfo.from(post, isLiked, isMine, countLikeByPostId(post.getId()),
+					commentService.countCommentByPostId(post.getId()));
 			});
 	}
 
@@ -126,7 +128,8 @@ public class PostService {
 		post.setContent(postRequestDto.getContent());
 		post.setSnapshot(makeSnapShot(postRequestDto, user));
 
-		return PostResponseDto.PostInfo.from(postRepository.save(post), isAuthorLike(post.getId(), user.getId()), true);
+		return PostResponseDto.PostInfo.from(postRepository.save(post), isAuthorLike(post.getId(), user.getId()), true,
+			countLikeByPostId(postId), commentService.countCommentByPostId(postId));
 	}
 
 	public void deletePost(Long groupId, Long postId, User user) {

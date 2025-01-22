@@ -73,7 +73,7 @@ public class PostController {
 			}))
 	})
 	@GetMapping("/post/{postId}")
-	public ResponseEntity<CustomApiResponse<PostResponseDto.PostDetail>> getPost(
+	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> getPost(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
 		@Parameter(description = "게시물 ID") @PathVariable Long postId,
 		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {

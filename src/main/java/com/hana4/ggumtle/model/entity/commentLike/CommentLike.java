@@ -2,6 +2,11 @@ package com.hana4.ggumtle.model.entity.commentLike;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.hana4.ggumtle.model.entity.comment.Comment;
 import com.hana4.ggumtle.model.entity.user.User;
 
@@ -33,13 +38,17 @@ public class CommentLike {
 	private Long id;
 
 	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_CommentLike_userId_User"))
 	private User user;
 
 	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "commentId", nullable = false, foreignKey = @ForeignKey(name = "fk_CommentLike_commentId_Comment"))
 	private Comment comment;
 
-	@Column(nullable = false)
+	@CreationTimestamp
+	@Column(nullable = false, updatable = false, columnDefinition = "timestamp")
+	@ColumnDefault("CURRENT_TIMESTAMP")
 	private LocalDateTime createdAt;
 }
