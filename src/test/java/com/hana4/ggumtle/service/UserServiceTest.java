@@ -388,4 +388,198 @@ class UserServiceTest {
 			.isInstanceOf(CustomException.class)
 			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.SMS_FAILURE);
 	}
+
+	@Test
+	void testGetUserInfo_UserExists() {
+		// given
+		String userId = "user123";
+		User mockUser = new User();
+		mockUser.setId(userId);
+		when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
+		// when
+		UserResponseDto.UserInfo result = userService.getUserInfo(userId);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(result.getId()).isEqualTo(userId);
+		verify(userRepository).findById(userId);
+	}
+
+	@Test
+	void testGetUserInfo_UserNotFound() {
+		// given
+		String userId = "user123";
+		when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> userService.getUserInfo(userId))
+			.isInstanceOf(CustomException.class)
+			.hasMessageContaining("해당 유저를 찾을 수 없습니다");
+		verify(userRepository).findById(userId);
+	}
+
+	@Test
+	void testUpdateUserInfo_Success() {
+		// given
+		String userId = "user123";
+		UserRequestDto.UpdateUser updateUserRequest = UserRequestDto.UpdateUser.builder()
+			.password("newPassword")
+			.profileImageUrl("http://example.com/image.jpg")
+			.nickname("newNickname")
+			.build();
+
+		User mockUser = new User();
+		mockUser.setId(userId);
+		mockUser.setPassword("oldPassword");
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+		when(passwordEncoder.encode(updateUserRequest.getPassword())).thenReturn("hashedNewPassword");
+
+		// when
+		UserResponseDto.UserInfo result = userService.updateUserInfo(userId, updateUserRequest);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(mockUser.getPassword()).isEqualTo("hashedNewPassword");
+		assertThat(mockUser.getProfileImageUrl()).isEqualTo("http://example.com/image.jpg");
+		assertThat(mockUser.getNickname()).isEqualTo("newNickname");
+
+		verify(userRepository).save(mockUser);
+	}
+
+	@Test
+	void testUpdateUserInfo_UserNotFound() {
+		// given
+		String userId = "user123";
+		UserRequestDto.UpdateUser updateUserRequest = UserRequestDto.UpdateUser.builder()
+			.password("newPassword")
+			.build();
+
+		when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+		// when & then
+		assertThatThrownBy(() -> userService.updateUserInfo(userId, updateUserRequest))
+			.isInstanceOf(CustomException.class)
+			.hasMessageContaining("유저를 찾을 수 없습니다.");
+
+		verify(userRepository).findById(userId);
+	}
+
+	@Test
+	void testUpdateUserInfo_OnlyPassword() {
+		// given
+		String userId = "user123";
+		UserRequestDto.UpdateUser updateUserRequest = UserRequestDto.UpdateUser.builder()
+			.password("newPassword")
+			.build();
+
+		User mockUser = new User();
+		mockUser.setId(userId);
+		mockUser.setPassword("oldPassword");
+		mockUser.setProfileImageUrl("oldImageUrl");
+		mockUser.setNickname("oldNickname");
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+		when(passwordEncoder.encode("newPassword")).thenReturn("hashedNewPassword");
+
+		// when
+		UserResponseDto.UserInfo result = userService.updateUserInfo(userId, updateUserRequest);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(mockUser.getPassword()).isEqualTo("hashedNewPassword");
+		assertThat(mockUser.getProfileImageUrl()).isEqualTo("oldImageUrl");
+		assertThat(mockUser.getNickname()).isEqualTo("oldNickname");
+
+		verify(userRepository).save(mockUser);
+		verify(passwordEncoder).encode("newPassword");
+	}
+
+	@Test
+	void testUpdateUserInfo_OnlyProfileImageUrl() {
+		// given
+		String userId = "user123";
+		UserRequestDto.UpdateUser updateUserRequest = UserRequestDto.UpdateUser.builder()
+			.profileImageUrl("newImageUrl")
+			.build();
+
+		User mockUser = new User();
+		mockUser.setId(userId);
+		mockUser.setPassword("oldPassword");
+		mockUser.setProfileImageUrl("oldImageUrl");
+		mockUser.setNickname("oldNickname");
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
+		// when
+		UserResponseDto.UserInfo result = userService.updateUserInfo(userId, updateUserRequest);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(mockUser.getPassword()).isEqualTo("oldPassword");
+		assertThat(mockUser.getProfileImageUrl()).isEqualTo("newImageUrl");
+		assertThat(mockUser.getNickname()).isEqualTo("oldNickname");
+
+		verify(userRepository).save(mockUser);
+		verify(passwordEncoder, never()).encode(any());
+	}
+
+	@Test
+	void testUpdateUserInfo_OnlyNickname() {
+		// given
+		String userId = "user123";
+		UserRequestDto.UpdateUser updateUserRequest = UserRequestDto.UpdateUser.builder()
+			.nickname("newNickname")
+			.build();
+
+		User mockUser = new User();
+		mockUser.setId(userId);
+		mockUser.setPassword("oldPassword");
+		mockUser.setProfileImageUrl("oldImageUrl");
+		mockUser.setNickname("oldNickname");
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
+		// when
+		UserResponseDto.UserInfo result = userService.updateUserInfo(userId, updateUserRequest);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(mockUser.getPassword()).isEqualTo("oldPassword");
+		assertThat(mockUser.getProfileImageUrl()).isEqualTo("oldImageUrl");
+		assertThat(mockUser.getNickname()).isEqualTo("newNickname");
+
+		verify(userRepository).save(mockUser);
+		verify(passwordEncoder, never()).encode(any());
+	}
+
+	@Test
+	void testUpdateUserInfo_AllFieldsNull() {
+		// 이 부분은 controller 단에서 사전에 차단됨
+		// given
+		String userId = "user123";
+		UserRequestDto.UpdateUser updateUserRequest = UserRequestDto.UpdateUser.builder().build();
+
+		User mockUser = new User();
+		mockUser.setId(userId);
+		mockUser.setPassword("oldPassword");
+		mockUser.setProfileImageUrl("oldImageUrl");
+		mockUser.setNickname("oldNickname");
+
+		when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
+		// when
+		UserResponseDto.UserInfo result = userService.updateUserInfo(userId, updateUserRequest);
+
+		// then
+		assertThat(result).isNotNull();
+		assertThat(mockUser.getPassword()).isEqualTo("oldPassword");
+		assertThat(mockUser.getProfileImageUrl()).isEqualTo("oldImageUrl");
+		assertThat(mockUser.getNickname()).isEqualTo("oldNickname");
+
+		verify(userRepository).save(mockUser);
+		verify(passwordEncoder, never()).encode(any());
+	}
+
 }

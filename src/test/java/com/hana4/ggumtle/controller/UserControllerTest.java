@@ -317,4 +317,78 @@ public class UserControllerTest {
 		verify(userService, never()).validateVerificationCode(any(UserRequestDto.Validation.class));
 	}
 
+	@Test
+	@WithMockCustomUser
+	public void testGetUserInfo() throws Exception {
+		// Mock response DTO
+		UserResponseDto.UserInfo mockUserInfo = UserResponseDto.UserInfo.builder()
+			.id("12345678-1234-1234-1234-123456789012")
+			.name("문서아")
+			.tel("01012341234")
+			.nickname("익명의고라니")
+			.birthDate(LocalDateTime.of(2000, 1, 1, 0, 0))
+			.gender("f")
+			.role(UserRole.USER)
+			.profileImageUrl("testurl")
+			.permission((short)0)
+			.build();
+
+		when(userService.getUserInfo(anyString())).thenReturn(mockUserInfo);
+
+		mockMvc.perform(get("/user")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andExpect(jsonPath("$.data.id").value("12345678-1234-1234-1234-123456789012"))
+			.andExpect(jsonPath("$.data.name").value("문서아"))
+			.andExpect(jsonPath("$.data.tel").value("01012341234"))
+			.andExpect(jsonPath("$.data.nickname").value("익명의고라니"))
+			.andExpect(jsonPath("$.data.birthDate").value("2000-01-01T00:00:00"))
+			.andExpect(jsonPath("$.data.gender").value("f"))
+			.andExpect(jsonPath("$.data.profileImageUrl").value("testurl"))
+			.andExpect(jsonPath("$.data.role").value("USER"))
+			.andExpect(jsonPath("$.data.permission").value(0));
+	}
+
+	@Test
+	@WithMockCustomUser
+	public void testUpdateUserInfo() throws Exception {
+		// Mock request DTO
+		UserRequestDto.UpdateUser updateUserRequest = UserRequestDto.UpdateUser.builder()
+			.nickname("변경된닉네임")
+			.password("newPassword123")
+			.build();
+
+		// Mock response DTO
+		UserResponseDto.UserInfo updatedUserInfo = UserResponseDto.UserInfo.builder()
+			.id("12345678-1234-1234-1234-123456789012")
+			.name("문서아")
+			.tel("01012341234")
+			.nickname("변경된닉네임")
+			.birthDate(LocalDateTime.of(2000, 1, 1, 0, 0))
+			.gender("f")
+			.role(UserRole.USER)
+			.permission((short)0)
+			.build();
+
+		when(userService.updateUserInfo(anyString(), any(UserRequestDto.UpdateUser.class)))
+			.thenReturn(updatedUserInfo);
+
+		mockMvc.perform(patch("/user")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(updateUserRequest)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andExpect(jsonPath("$.data.id").value("12345678-1234-1234-1234-123456789012"))
+			.andExpect(jsonPath("$.data.nickname").value("변경된닉네임"))
+			.andExpect(jsonPath("$.data.name").value("문서아"))
+			.andExpect(jsonPath("$.data.tel").value("01012341234"))
+			.andExpect(jsonPath("$.data.birthDate").value("2000-01-01T00:00:00"))
+			.andExpect(jsonPath("$.data.gender").value("f"))
+			.andExpect(jsonPath("$.data.role").value("USER"))
+			.andExpect(jsonPath("$.data.permission").value(0));
+	}
+
 }
