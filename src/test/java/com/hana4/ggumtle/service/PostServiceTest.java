@@ -392,7 +392,7 @@ class PostServiceTest {
 		post.setPostType(PostType.POST);
 		post.setContent("content");
 
-		PostResponseDto.PostDetail postDetail = PostResponseDto.PostDetail.from(post, false, 0, 0, true);
+		PostResponseDto.PostInfo postDetail = PostResponseDto.PostInfo.from(post, false, true, 0, 0);
 
 		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
 			Optional.of(PostLike.builder().build()));
@@ -400,7 +400,7 @@ class PostServiceTest {
 		when(commentService.countCommentByPostId(post.getId())).thenReturn(0);
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
-		PostResponseDto.PostDetail result = postService.getPost(group.getId(), 1L, user);
+		PostResponseDto.PostInfo result = postService.getPost(group.getId(), 1L, user);
 
 		// then
 		assertThat(result).isNotNull();

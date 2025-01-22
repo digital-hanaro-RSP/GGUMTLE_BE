@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hana4.ggumtle.dto.CustomApiResponse;
+import com.hana4.ggumtle.dto.comment.CommentLikeResponseDto;
 import com.hana4.ggumtle.dto.comment.CommentRequestDto;
 import com.hana4.ggumtle.dto.comment.CommentResponseDto;
 import com.hana4.ggumtle.security.CustomUserDetails;
@@ -83,6 +84,38 @@ public class CommentController {
 	public ResponseEntity<CustomApiResponse<Void>> deleteComment(
 		@Parameter(description = "댓글 ID") @PathVariable Long commentId) {
 		commentService.deleteComment(commentId);
+		return ResponseEntity.ok(CustomApiResponse.success());
+	}
+
+	@Operation(summary = "댓글 좋아요 추가", description = "특정 댓글에 좋아요를 추가합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "좋아요 추가 성공"),
+		@ApiResponse(responseCode = "404", description = "좋아요 추가 실패",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 댓글이 존재하지 않습니다.\" }"
+			)))
+	})
+	@PostMapping("/comment/{commentId}/like")
+	public ResponseEntity<CustomApiResponse<CommentLikeResponseDto.CommentLikeInfo>> likeComment(
+		@Parameter(description = "댓글 ID") @PathVariable Long commentId,
+		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		return ResponseEntity.ok(
+			CustomApiResponse.success(commentService.addLike(commentId, customUserDetails.getUser())));
+	}
+
+	@Operation(summary = "댓글 좋아요 취소", description = "특정 댓글의 좋아요를 취소합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "좋아요 취소 성공"),
+		@ApiResponse(responseCode = "404", description = "좋아요 취소 실패",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 댓글이 존재하지 않습니다.\" }"
+			)))
+	})
+	@DeleteMapping("/comment/{commentId}/dislike")
+	public ResponseEntity<CustomApiResponse<Void>> dislikeComment(
+		@Parameter(description = "댓글 ID") @PathVariable Long commentId,
+		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		commentService.removeLike(commentId, customUserDetails.getUser());
 		return ResponseEntity.ok(CustomApiResponse.success());
 	}
 }
