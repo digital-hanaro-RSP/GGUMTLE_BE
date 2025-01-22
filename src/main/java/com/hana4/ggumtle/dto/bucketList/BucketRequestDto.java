@@ -39,7 +39,6 @@ public class BucketRequestDto {
 		private BucketTagType tagType;
 
 		@Schema(description = "버킷리스트 완료날짜", example = "2025-01-21", requiredMode = Schema.RequiredMode.REQUIRED)
-		@NotNull(message = "완료 날짜를 입력하세요.")
 		private LocalDateTime dueDate;
 
 		@Schema(description = "버킷리스트 종류", example = "MONEY", requiredMode = Schema.RequiredMode.REQUIRED)
