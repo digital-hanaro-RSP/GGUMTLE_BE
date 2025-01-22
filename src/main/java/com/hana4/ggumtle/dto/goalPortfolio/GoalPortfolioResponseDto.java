@@ -2,6 +2,7 @@ package com.hana4.ggumtle.dto.goalPortfolio;
 
 import java.math.BigDecimal;
 
+import com.hana4.ggumtle.dto.BaseDto;
 import com.hana4.ggumtle.model.entity.goalPortfolio.GoalPortfolio;
 
 import lombok.AccessLevel;
@@ -19,13 +20,15 @@ public class GoalPortfolioResponseDto {
 	@AllArgsConstructor
 	@ToString
 	@SuperBuilder
-	public static class Ratio {
+	public static class Ratio extends BaseDto {
 		private BigDecimal depositWithdrawalRatio;
 		private BigDecimal savingTimeDepositRatio;
 		private BigDecimal investmentRatio;
 		private BigDecimal foreignCurrencyRatio;
 		private BigDecimal pensionRatio;
 		private BigDecimal etcRatio;
+		private long id;
+		private String userId;
 
 		public static Ratio from(GoalPortfolio goalPortfolio) {
 			return Ratio.builder()
@@ -35,6 +38,10 @@ public class GoalPortfolioResponseDto {
 				.foreignCurrencyRatio(goalPortfolio.getForeignCurrencyRatio())
 				.pensionRatio(goalPortfolio.getPensionRatio())
 				.etcRatio(goalPortfolio.getEtcRatio())
+				.id(goalPortfolio.getId())
+				.userId(goalPortfolio.getUser().getId())
+				.createdAt(goalPortfolio.getCreatedAt())
+				.updatedAt(goalPortfolio.getUpdatedAt())
 				.build();
 		}
 	}
