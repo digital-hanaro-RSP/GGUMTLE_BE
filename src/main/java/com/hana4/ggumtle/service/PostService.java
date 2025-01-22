@@ -113,6 +113,16 @@ public class PostService {
 			});
 	}
 
+	public Page<PostResponseDto.PostInfo> getPopularPostsByPage(Pageable pageable, User user) {
+		return postRepository.findAllPostsWithLikeCount(pageable)
+			.map(post -> {
+				boolean isLiked = isAuthorLike(post.getId(), user.getId());
+				boolean isMine = post.getUser().getId().equals(user.getId());
+				return PostResponseDto.PostInfo.from(post, isLiked, isMine, countLikeByPostId(post.getId()),
+					commentService.countCommentByPostId(post.getId()));
+			});
+	}
+
 	public PostResponseDto.PostInfo updatePost(Long groupId, Long postId, PostRequestDto.Write postRequestDto,
 		User user) throws JsonProcessingException {
 		if (!checkUserWithGroup(groupId, user)) {
