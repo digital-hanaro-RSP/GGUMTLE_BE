@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
 import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
-import com.hana4.ggumtle.dto.dreamAccount.DreamAccountResponseDto;
 import com.hana4.ggumtle.dto.recommendation.RecommendationResponseDto;
 import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
 import com.hana4.ggumtle.security.CustomUserDetails;
@@ -49,14 +48,9 @@ public class BucketController {
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> createBucket(
 		@RequestBody @Valid BucketRequestDto.CreateBucket requestDto,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-
-		// 유저가 가진 DreamAccount를 불러오기
-		DreamAccountResponseDto.DreamAccountInfo dreamAccountInfo =
-			dreamAccountService.getDreamAccountByUserId(userDetails.getUser().getId());
-
+		
 		// Bucket 생성 로직 호출
-		BucketResponseDto.BucketInfo createdBucket = bucketService.createBucket(requestDto, userDetails.getUser(),
-			dreamAccountInfo);
+		BucketResponseDto.BucketInfo createdBucket = bucketService.createBucket(requestDto, userDetails.getUser());
 
 		return ResponseEntity.ok(CustomApiResponse.success(createdBucket));
 	}
@@ -68,8 +62,10 @@ public class BucketController {
 	@PutMapping("/{bucketId}")
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> updateBucket(
 		@PathVariable("bucketId") Long bucketId,
+		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid BucketRequestDto.CreateBucket requestDto) {
-		BucketResponseDto.BucketInfo updatedBucket = bucketService.updateBucket(bucketId, requestDto);
+		BucketResponseDto.BucketInfo updatedBucket = bucketService.updateBucket(userDetails.getUser(), bucketId,
+			requestDto);
 
 		return ResponseEntity.ok(CustomApiResponse.success(updatedBucket));
 	}
