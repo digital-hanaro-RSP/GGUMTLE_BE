@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/community/group/{groupId}/post/{postId}")
+@RequestMapping("/community/")
 @Tag(name = "Comment", description = "댓글 관련 API")
 public class CommentController {
 	private final CommentService commentService;
@@ -45,28 +45,26 @@ public class CommentController {
 				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 글이 존재하지 않습니다.\" }"
 			)))
 	})
-	@PostMapping("/comment")
+	@PostMapping("/post/{postId}/comment")
 	public ResponseEntity<CustomApiResponse<CommentResponseDto.CommentInfo>> addComment(
-		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
-		@Parameter(description = "POST ID") @PathVariable Long postId,
+		@Parameter(description = "Post ID") @PathVariable Long postId,
 		@Parameter(description = "댓글 내용") @RequestBody @Valid CommentRequestDto.CommentWrite commentWrite,
 		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		return ResponseEntity.ok(CustomApiResponse.success(
-			commentService.saveComment(groupId, postId, commentWrite, customUserDetails.getUser())));
+			commentService.saveComment(postId, commentWrite, customUserDetails.getUser())));
 	}
 
 	@Operation(summary = "댓글 목록 조회", description = "페이지별로 댓글 목록을 조회합니다.")
 	@ApiResponse(responseCode = "200", description = "댓글 목록 조회 성공")
-	@GetMapping("/comment")
+	@GetMapping("/post/{postId}/comments")
 	public ResponseEntity<CustomApiResponse<Page<CommentResponseDto.CommentInfo>>> getComments(
-		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
-		@Parameter(description = "그룹 ID") @PathVariable Long postId,
 		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "0") int offset,
 		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "10") int limit,
+		@Parameter(description = "Post ID") @PathVariable Long postId,
 		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		Pageable pageable = PageRequest.of(offset / limit, limit);
 		return ResponseEntity.ok(CustomApiResponse.success(
-			commentService.getCommentsByPage(groupId, postId, pageable, customUserDetails.getUser())));
+			commentService.getCommentsByPage(postId, pageable, customUserDetails.getUser())));
 	}
 
 	@Operation(summary = "댓글 삭제", description = "특정 댓글을 삭제합니다.")
@@ -83,8 +81,6 @@ public class CommentController {
 	})
 	@DeleteMapping("/comment/{commentId}")
 	public ResponseEntity<CustomApiResponse<Void>> deleteComment(
-		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
-		@Parameter(description = "POST ID") @PathVariable Long postId,
 		@Parameter(description = "댓글 ID") @PathVariable Long commentId) {
 		commentService.deleteComment(commentId);
 		return ResponseEntity.ok(CustomApiResponse.success());
