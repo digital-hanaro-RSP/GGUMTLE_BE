@@ -45,4 +45,19 @@ public class GoalPortfolioResponseDto {
 				.build();
 		}
 	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@ToString
+	@SuperBuilder
+	public static class InvestmentType {
+		private String investmentType;
+
+		public static InvestmentType from(GoalPortfolio goalPortfolio) {
+			return InvestmentType.builder()
+				.investmentType(goalPortfolio.getTemplate().getName())
+				.build();
+		}
+	}
 }
