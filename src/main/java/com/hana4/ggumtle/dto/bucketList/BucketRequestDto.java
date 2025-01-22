@@ -91,11 +91,16 @@ public class BucketRequestDto {
 			} else {
 				safeBox = null;
 			}
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-			LocalDate localDate = LocalDate.parse(this.dueDate, formatter);
 
-			// LocalDate -> LocalDateTime (default 00:00:00)
-			LocalDateTime parsedDueDate = localDate.atStartOfDay();
+			LocalDateTime parsedDueDate = null;
+
+			if (this.dueDate != null) {
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+				LocalDate localDate = LocalDate.parse(this.dueDate, formatter);
+				// LocalDate -> LocalDateTime (default 00:00:00)
+				parsedDueDate = localDate.atStartOfDay();
+			}
+
 			return new Bucket().toBuilder()
 				.user(user)
 				.dreamAccount(dreamAccount)
