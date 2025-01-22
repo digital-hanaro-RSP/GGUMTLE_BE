@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.dto.dreamAccount.DreamAccountRequestDto;
 import com.hana4.ggumtle.dto.dreamAccount.DreamAccountResponseDto;
-import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.DreamAccountService;
 
@@ -41,18 +40,11 @@ public class DreamAccountController {
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		try {
 			// DreamAccount 생성
-			DreamAccount newDreamAccount = dreamAccountService.createDreamAccount(requestDto, userDetails.getUser());
-
-			// 응답 데이터 생성
-			DreamAccountResponseDto.DreamAccountInfo responseDto = DreamAccountResponseDto.DreamAccountInfo.builder()
-				.id(newDreamAccount.getId())
-				.userId(newDreamAccount.getUser().getId())
-				.balance(newDreamAccount.getBalance())
-				.total(newDreamAccount.getTotal())
-				.build();
-
+			DreamAccountResponseDto.DreamAccountInfo dreamAccount = dreamAccountService.createDreamAccount(requestDto,
+				userDetails.getUser());
+			
 			return ResponseEntity.status(HttpStatus.CREATED)
-				.body(CustomApiResponse.success(responseDto));
+				.body(CustomApiResponse.success(dreamAccount));
 		} catch (RuntimeException e) {
 			// 에러 응답
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST)

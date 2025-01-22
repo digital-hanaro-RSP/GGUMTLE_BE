@@ -3,6 +3,7 @@ package com.hana4.ggumtle.dto.bucketList;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.hana4.ggumtle.dto.BaseDto;
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
 import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
 import com.hana4.ggumtle.model.entity.bucket.BucketStatus;
@@ -11,10 +12,10 @@ import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Generated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 @Schema(description = "버킷리스트 응답 DTO")
 @Generated
@@ -23,8 +24,8 @@ public class BucketResponseDto {
 	@Getter
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor
-	@Builder
-	public static class BucketInfo {
+	@SuperBuilder
+	public static class BucketInfo extends BaseDto {
 		@Schema(description = "사용자 ID", example = "user123")
 		private Long id;
 
@@ -103,6 +104,8 @@ public class BucketResponseDto {
 				.isRecommended(bucket.getIsRecommended())
 				.originId(bucket.getOriginId())
 				.followers(bucket.getFollowers())
+				.createdAt(bucket.getCreatedAt())
+				.updatedAt(bucket.getUpdatedAt())
 				.build();
 		}
 	}

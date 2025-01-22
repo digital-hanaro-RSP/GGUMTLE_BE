@@ -2,7 +2,6 @@ package com.hana4.ggumtle.service;
 
 import java.math.BigDecimal;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,21 +16,15 @@ import com.hana4.ggumtle.repository.BucketRepository;
 import com.hana4.ggumtle.repository.DreamAccountRepository;
 import com.hana4.ggumtle.repository.UserRepository;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Service
 public class DreamAccountService {
 
-	@Autowired
-	private DreamAccountRepository dreamAccountRepository;
-
-	@Autowired
-	private BucketRepository bucketRepository;
-
-	@Autowired
-	private UserRepository userRepository;
-
-	public DreamAccountService(DreamAccountRepository dreamAccountRepository) {
-		this.dreamAccountRepository = dreamAccountRepository;
-	}
+	private final DreamAccountRepository dreamAccountRepository;
+	private final BucketRepository bucketRepository;
+	private final UserRepository userRepository;
 
 	public DreamAccountResponseDto.DreamAccountInfo getDreamAccountByUserId(String userId) {
 		return dreamAccountRepository.findByUserId(userId)
@@ -48,21 +41,28 @@ public class DreamAccountService {
 	}
 
 	@Transactional
-	public DreamAccount createDreamAccount(DreamAccountRequestDto.Create requestDto, User user) {
+	public DreamAccountResponseDto.DreamAccountInfo createDreamAccount(DreamAccountRequestDto.Create requestDto,
+		User user) {
 		// User 확인
 		// User user = userRepository.findById(requestDto.getUserId())
-		// 	.orElseThrow(() -> new RuntimeException("User not found"));
+		//     .orElseThrow(() -> new RuntimeException("User not found"));
 
-		// // 기존 꿈통장이 존재하면 예외 처리
+		// 기존 꿈통장이 존재하면 예외 처리
 		// if (dreamAccountRepository.existsByUser(user)) {
-		// 	throw new RuntimeException("Dream Account already exists for this user");
+		//     throw new RuntimeException("Dream Account already exists for this user");
 		// }
 
 		// 새로운 DreamAccount 생성
-		DreamAccount newDreamAccount = requestDto.toEntity(user);
+		DreamAccount dreamAccount = requestDto.toEntity(user);
+		BigDecimal totalSafeBox = bucketRepository.findAllByDreamAccountId(dreamAccount.getId()).stream()
+			.map(Bucket::getSafeBox)
+			.reduce(BigDecimal.ZERO, BigDecimal::add);
 
-		// 저장 및 반환
-		return dreamAccountRepository.save(newDreamAccount);
+		// DreamAccount 저장
+		DreamAccount savedDreamAccount = dreamAccountRepository.save(dreamAccount);
+
+		// DreamAccountResponseDto.DreamAccountInfo로 변환하여 반환
+		return DreamAccountResponseDto.DreamAccountInfo.from(savedDreamAccount, totalSafeBox);
 	}
 
 	// 꿈통장에 금액 추가

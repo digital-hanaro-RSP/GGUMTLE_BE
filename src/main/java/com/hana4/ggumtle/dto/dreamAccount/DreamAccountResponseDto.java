@@ -2,21 +2,27 @@ package com.hana4.ggumtle.dto.dreamAccount;
 
 import java.math.BigDecimal;
 
+import com.hana4.ggumtle.dto.BaseDto;
 import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.user.User;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 public class DreamAccountResponseDto {
 
 	@Schema(description = "꿈통장 정보 응답")
 	@Getter
-	@Builder
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	@AllArgsConstructor
-	public static class DreamAccountInfo {
+	@ToString
+	@SuperBuilder
+	public static class DreamAccountInfo extends BaseDto {
 
 		@Schema(description = "DreamAccount ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
 		private Long id;
@@ -50,8 +56,8 @@ public class DreamAccountResponseDto {
 				.balance(dreamAccount.getBalance())
 				.total(dreamAccount.getTotal())
 				.totalSafeBox(totalSafeBox)
-				// .createdDate(dreamAccount.getCreatedDate().toString())  // 생성일을 String으로 변환
-				// .updatedDate(dreamAccount.getUpdatedDate().toString())  // 업데이트일을 String으로 변환
+				.createdAt(dreamAccount.getCreatedAt())  // 생성일을 String으로 변환
+				.updatedAt(dreamAccount.getUpdatedAt())  // 업데이트일을 String으로 변환
 				.build();
 		}
 	}
