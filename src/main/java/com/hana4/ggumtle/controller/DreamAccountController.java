@@ -1,6 +1,5 @@
 package com.hana4.ggumtle.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,24 +32,24 @@ public class DreamAccountController {
 
 	private final DreamAccountService dreamAccountService;
 
-	// 꿈통장 생성
-	@PostMapping
-	public ResponseEntity<CustomApiResponse<DreamAccountResponseDto.DreamAccountInfo>> createDreamAccount(
-		@RequestBody @Valid DreamAccountRequestDto.Create requestDto,
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		try {
-			// DreamAccount 생성
-			DreamAccountResponseDto.DreamAccountInfo dreamAccount = dreamAccountService.createDreamAccount(requestDto,
-				userDetails.getUser());
-			
-			return ResponseEntity.status(HttpStatus.CREATED)
-				.body(CustomApiResponse.success(dreamAccount));
-		} catch (RuntimeException e) {
-			// 에러 응답
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-				.body(CustomApiResponse.failure(400, "Failed to create Dream Account.", e.getMessage()));
-		}
-	}
+	// // 꿈통장 생성
+	// @PostMapping
+	// public ResponseEntity<CustomApiResponse<DreamAccountResponseDto.DreamAccountInfo>> createDreamAccount(
+	// 	@RequestBody @Valid DreamAccountRequestDto.Create requestDto,
+	// 	@AuthenticationPrincipal CustomUserDetails userDetails) {
+	// 	try {
+	// 		// DreamAccount 생성
+	// 		DreamAccountResponseDto.DreamAccountInfo dreamAccount = dreamAccountService.createDreamAccount(requestDto,
+	// 			userDetails.getUser());
+	//
+	// 		return ResponseEntity.status(HttpStatus.CREATED)
+	// 			.body(CustomApiResponse.success(dreamAccount));
+	// 	} catch (RuntimeException e) {
+	// 		// 에러 응답
+	// 		return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+	// 			.body(CustomApiResponse.failure(400, "Failed to create Dream Account.", e.getMessage()));
+	// 	}
+	// }
 
 	@Operation(summary = "유저가 가진 꿈통장", description = "유저가 가진 꿈통장을 반환합니다")
 	@ApiResponses(value = {
