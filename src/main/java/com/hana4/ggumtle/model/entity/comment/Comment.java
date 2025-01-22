@@ -2,7 +2,9 @@ package com.hana4.ggumtle.model.entity.comment;
 
 import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.post.Post;
+import com.hana4.ggumtle.model.entity.user.User;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -30,9 +32,13 @@ public class Comment extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.REMOVE)
 	@JoinColumn(name = "postId", nullable = false, foreignKey = @ForeignKey(name = "fk_Comment_postId_Post"))
 	private Post post;
+
+	@ManyToOne
+	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_Comment_userId_User"))
+	private User user;
 
 	@Column(nullable = false)
 	private String content;
