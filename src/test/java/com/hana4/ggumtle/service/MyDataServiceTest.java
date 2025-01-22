@@ -85,6 +85,7 @@ class MyDataServiceTest {
 		myData.setForeignCurrency(BigDecimal.ONE);
 		myData.setPension(BigDecimal.ONE);
 		myData.setEtc(BigDecimal.ONE);
+		myData.setId(1L);
 
 		when(myDataRepository.findByUserId("1")).thenReturn(Optional.of(myData));
 
@@ -96,6 +97,7 @@ class MyDataServiceTest {
 		assertThat(myDataService.getMyDataByUserId("1").getForeignCurrency()).isEqualTo(myData.getForeignCurrency());
 		assertThat(myDataService.getMyDataByUserId("1").getPension()).isEqualTo(myData.getPension());
 		assertThat(myDataService.getMyDataByUserId("1").getEtc()).isEqualTo(myData.getEtc());
+		assertThat(myDataService.getMyDataByUserId("1").getId()).isEqualTo(1L);
 	}
 
 	@Test

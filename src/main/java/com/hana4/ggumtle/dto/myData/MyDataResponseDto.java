@@ -26,6 +26,8 @@ public class MyDataResponseDto {
 		private BigDecimal foreignCurrency;
 		private BigDecimal pension;
 		private BigDecimal etc;
+		private long id;
+		private String userId;
 
 		public static CurrentPortfolio from(MyData myData) {
 			return CurrentPortfolio.builder()
@@ -35,6 +37,8 @@ public class MyDataResponseDto {
 				.foreignCurrency(myData.getForeignCurrency())
 				.pension(myData.getPension())
 				.etc(myData.getEtc())
+				.id(myData.getId())
+				.userId(myData.getUser().getId())
 				.build();
 		}
 	}

@@ -299,10 +299,12 @@ class PostServiceTest {
 		when(bucketService.getBucket(eq(3L))).thenReturn(bucket);
 		when(goalPortfolioService.getGoalPortfolioByUserId(user.getId())).thenReturn(
 			new GoalPortfolioResponseDto.Ratio(BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7),
-				BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7)));
+				BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), 1,
+				"1"));
 		when(myDataService.getMyDataByUserId(user.getId())).thenReturn(
 			new MyDataResponseDto.CurrentPortfolio(BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7),
-				BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7)));
+				BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), 1,
+				"1"));
 
 		// when
 		PostResponseDto.PostInfo result = postService.save(groupId, write, user);
