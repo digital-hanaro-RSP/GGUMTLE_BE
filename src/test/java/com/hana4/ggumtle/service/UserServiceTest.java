@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,10 +20,10 @@ import com.hana4.ggumtle.dto.user.UserResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.repository.RefreshTokenRepository;
 import com.hana4.ggumtle.repository.TelCodeValidationRepository;
 import com.hana4.ggumtle.repository.UserRepository;
 import com.hana4.ggumtle.security.provider.JwtProvider;
-import com.hana4.ggumtle.vo.RefreshToken;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -49,6 +48,9 @@ class UserServiceTest {
 
 	@Mock
 	private SmsService smsService;
+
+	@Mock
+	private RefreshTokenRepository refreshTokenRepository;
 
 	// @BeforeEach
 	// void setUp() {
@@ -145,39 +147,25 @@ class UserServiceTest {
 
 	@Test
 	void testLogin_Success() {
-		try (MockedStatic<RefreshToken> mockedStatic = mockStatic(RefreshToken.class)) {
-			// Mock the static methods of RefreshToken
-			mockedStatic.when(() -> RefreshToken.getRefreshToken(any()))
-				.thenReturn("userId");
-			mockedStatic.when(() -> RefreshToken.removeUserRefreshToken(any()))
-				.thenAnswer(invocation -> null);
-			mockedStatic.when(() -> RefreshToken.putRefreshToken(any(), any()))
-				.thenAnswer(invocation -> null);
+		// Given
+		String tel = "01012341234";
+		String password = "password";
+		UserRequestDto.Login loginDto = new UserRequestDto.Login(tel, password);
+		User mockUser = new User();
+		mockUser.setId("userId");
+		mockUser.setPassword("hashedPassword");
 
-			// Given
-			String tel = "01012341234";
-			String password = "password";
-			UserRequestDto.Login loginDto = new UserRequestDto.Login(tel, password);
-			User mockUser = new User();
-			mockUser.setPassword("hashedPassword");
+		when(userRepository.findUserByTel(tel)).thenReturn(Optional.of(mockUser));
+		when(passwordEncoder.matches(password, "hashedPassword")).thenReturn(true);
+		when(jwtProvider.generateAccessToken(any())).thenReturn("accessToken");
 
-			when(userRepository.findUserByTel(tel)).thenReturn(Optional.of(mockUser));
-			when(passwordEncoder.matches(password, "hashedPassword")).thenReturn(true);
-			when(jwtProvider.generateAccessToken(any())).thenReturn("accessToken");
-			when(jwtProvider.generateRefreshToken(any())).thenReturn("refreshToken");
+		// When
+		UserResponseDto.TokensWithPermission result = userService.login(loginDto);
 
-			// When
-			UserResponseDto.TokensWithPermission result = userService.login(loginDto);
-
-			// Then
-			assertThat(result).isNotNull();
-			assertThat(result.getAccessToken()).isEqualTo("accessToken");
-			assertThat(result.getRefreshToken()).isEqualTo("refreshToken");
-
-			// Verify that static methods were called
-			mockedStatic.verify(() -> RefreshToken.removeUserRefreshToken(any()), atLeastOnce());
-			mockedStatic.verify(() -> RefreshToken.putRefreshToken(any(), any()), atLeastOnce());
-		}
+		// Then
+		assertThat(result).isNotNull();
+		assertThat(result.getAccessToken()).isEqualTo("accessToken");
+		verify(jwtProvider).generateAccessToken(any());
 	}
 
 	@Test
@@ -199,46 +187,60 @@ class UserServiceTest {
 
 	@Test
 	void testRefresh_Success() {
-		// refreshtoken static 메서드 모킹
-		try (MockedStatic<RefreshToken> mockedStatic = mockStatic(RefreshToken.class)) {
-			mockedStatic.when(() -> RefreshToken.getRefreshToken(any()))
-				.thenReturn("userId");
-			mockedStatic.when(() -> RefreshToken.removeUserRefreshToken(any()))
-				.thenAnswer(invocation -> null);
-			mockedStatic.when(() -> RefreshToken.putRefreshToken(any(), any()))
-				.thenAnswer(invocation -> null);
+		// Given
+		String refreshToken = "validRefreshToken";
+		String userId = "userId";
+		when(jwtProvider.validateToken(refreshToken)).thenReturn(true);
+		when(refreshTokenRepository.getRefreshToken(refreshToken)).thenReturn(userId);
+		when(jwtProvider.generateAccessToken(userId)).thenReturn("newAccessToken");
+		when(jwtProvider.generateRefreshToken(userId)).thenReturn("newRefreshToken");
 
-			String oldRefreshToken = "oldRefreshToken";
-			String newRefreshToken = "newRefreshToken";
-			String newAccessToken = "newAccessToken";
-			UserRequestDto.Refresh refreshDto = new UserRequestDto.Refresh(oldRefreshToken);
+		UserRequestDto.Refresh refreshRequest = new UserRequestDto.Refresh(refreshToken);
 
-			when(jwtProvider.validateToken(oldRefreshToken)).thenReturn(true);
-			when(jwtProvider.generateAccessToken(any())).thenReturn(newAccessToken);
-			when(jwtProvider.generateRefreshToken(any())).thenReturn(newRefreshToken);
+		// When
+		UserResponseDto.Tokens result = userService.refresh(refreshRequest);
 
-			UserResponseDto.Tokens result = userService.refresh(refreshDto);
+		// Then
+		assertThat(result).isNotNull();
+		assertThat(result.getAccessToken()).isEqualTo("newAccessToken");
+		assertThat(result.getRefreshToken()).isEqualTo("newRefreshToken");
 
-			assertThat(result).isNotNull();
-			assertThat(result.getAccessToken()).isEqualTo(newAccessToken);
-			assertThat(result.getRefreshToken()).isEqualTo(newRefreshToken);
-
-			mockedStatic.verify(() -> RefreshToken.getRefreshToken(oldRefreshToken), atLeastOnce());
-			mockedStatic.verify(() -> RefreshToken.removeUserRefreshToken("userId"), atLeastOnce());
-			mockedStatic.verify(() -> RefreshToken.putRefreshToken(newRefreshToken, "userId"), atLeastOnce());
-		}
+		verify(refreshTokenRepository).deleteRefreshToken(refreshToken);
+		verify(refreshTokenRepository).saveRefreshToken(anyString(), eq(userId));
 	}
 
 	@Test
-	void testCheckRefreshToken_InvalidToken() {
-		// given
-		String invalidToken = "invalidToken";
-		when(jwtProvider.validateToken(invalidToken)).thenReturn(false);
+	void testRefresh_InvalidToken() {
+		// Given
+		String refreshToken = "invalidRefreshToken";
+		when(jwtProvider.validateToken(refreshToken)).thenReturn(false);
 
-		// when & then
-		assertThatThrownBy(() -> userService.refresh(new UserRequestDto.Refresh(invalidToken)))
+		UserRequestDto.Refresh refreshRequest = new UserRequestDto.Refresh(refreshToken);
+
+		// When & Then
+		assertThatThrownBy(() -> userService.refresh(refreshRequest))
 			.isInstanceOf(CustomException.class)
-			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.TOKEN_INVALID);
+			.hasMessageContaining("Refresh Token이 만료되었거나 정상적인 Token이 아닙니다.");
+		verify(refreshTokenRepository, never()).deleteRefreshToken(anyString());
+		verify(refreshTokenRepository, never()).saveRefreshToken(anyString(), anyString());
+	}
+
+	@Test
+	void testRefreshTokenDeletion_WhenUserIdIsNull() {
+		// Given
+		String refreshToken = "validRefreshToken";
+		String userId = null; // userId가 null
+		UserRequestDto.Refresh userRequestDto = UserRequestDto.Refresh.builder().refreshToken(refreshToken).build();
+
+		// Mock repository interactions
+		when(jwtProvider.validateToken(refreshToken)).thenReturn(true); // validateToken이 true를 반환하도록 설정
+		when(refreshTokenRepository.getRefreshToken(refreshToken)).thenReturn(userId);
+
+		// When
+		userService.refresh(userRequestDto);
+
+		// Then
+		verify(refreshTokenRepository, never()).deleteRefreshToken(anyString()); // refreshToken이 삭제되지 않아야 함
 	}
 
 	@Test
