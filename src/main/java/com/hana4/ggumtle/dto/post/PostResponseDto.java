@@ -33,37 +33,11 @@ public class PostResponseDto {
 		private GroupCategory groupCategory;
 		private boolean isLiked;
 		private boolean isMine;
-
-		public static PostInfo from(Post post, boolean isLiked, boolean isMine) {
-			return PostInfo.builder()
-				.id(post.getId())
-				.userId(post.getUser().getId())
-				.groupId(post.getGroup().getId())
-				.snapShot(post.getSnapshot())
-				.imageUrls(post.getImageUrls())
-				.content(post.getContent())
-				.postType(post.getPostType())
-				.userBriefInfo(UserResponseDto.BriefInfo.from(post.getUser()))
-				.groupCategory(post.getGroup().getCategory())
-				.isLiked(isLiked)
-				.isMine(isMine)
-				.createdAt(post.getCreatedAt())
-				.updatedAt(post.getUpdatedAt())
-				.build();
-		}
-	}
-
-	@Getter
-	@NoArgsConstructor(access = AccessLevel.PROTECTED)
-	@AllArgsConstructor
-	@ToString
-	@SuperBuilder
-	public static class PostDetail extends PostInfo {
 		private int likeCount;
 		private int commentCount;
 
-		public static PostDetail from(Post post, boolean isLiked, int likeCount, int commentCount, boolean isMine) {
-			return PostDetail.builder()
+		public static PostInfo from(Post post, boolean isLiked, boolean isMine, int likeCount, int commentCount) {
+			return PostInfo.builder()
 				.id(post.getId())
 				.userId(post.getUser().getId())
 				.groupId(post.getGroup().getId())
