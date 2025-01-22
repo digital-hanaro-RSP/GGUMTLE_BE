@@ -83,7 +83,7 @@ public class BucketRequestDto {
 		@Schema(description = "추천 버킷이라면 오리지널 아이디", example = "1", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
 		private Long originId;   // 선택적 필드
 
-		public Bucket toEntity(User user, DreamAccount dreamAccount) {
+		public Bucket from(User user, DreamAccount dreamAccount) {
 
 			if (this.howTo == BucketHowTo.MONEY) {
 				safeBox = BigDecimal.ZERO;

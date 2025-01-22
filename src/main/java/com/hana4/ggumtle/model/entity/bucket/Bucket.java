@@ -80,6 +80,8 @@ public class Bucket extends BaseEntity {
 
 	private BigDecimal safeBox;
 
+
+
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private Boolean isRecommended;
 	private Long originId;

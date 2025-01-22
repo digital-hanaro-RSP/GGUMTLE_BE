@@ -2,7 +2,6 @@ package com.hana4.ggumtle.service;
 
 import java.math.BigDecimal;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,43 +16,53 @@ import com.hana4.ggumtle.repository.BucketRepository;
 import com.hana4.ggumtle.repository.DreamAccountRepository;
 import com.hana4.ggumtle.repository.UserRepository;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Service
 public class DreamAccountService {
 
-	@Autowired
-	private DreamAccountRepository dreamAccountRepository;
+	private final DreamAccountRepository dreamAccountRepository;
+	private final BucketRepository bucketRepository;
+	private final UserRepository userRepository;
 
-	@Autowired
-	private BucketRepository bucketRepository;
-
-	@Autowired
-	private UserRepository userRepository;
-
-	public DreamAccountService(DreamAccountRepository dreamAccountRepository) {
-		this.dreamAccountRepository = dreamAccountRepository;
-	}
-
-	public DreamAccount getDreamAccountByUserId(String userId) {
+	public DreamAccountResponseDto.DreamAccountInfo getDreamAccountByUserId(String userId) {
 		return dreamAccountRepository.findByUserId(userId)
+			.map(dreamAccount -> {
+				// 관련된 Bucket의 totalSafeBox 계산
+				BigDecimal totalSafeBox = bucketRepository.findAllByDreamAccountId(dreamAccount.getId()).stream()
+					.map(Bucket::getSafeBox)
+					.reduce(BigDecimal.ZERO, BigDecimal::add);
+
+				// DreamAccountInfo 생성 (totalSafeBox 포함)
+				return DreamAccountResponseDto.DreamAccountInfo.from(dreamAccount, totalSafeBox);
+			})
 			.orElse(null); // DreamAccount가 없으면 null 반환
 	}
 
 	@Transactional
-	public DreamAccount createDreamAccount(DreamAccountRequestDto.Create requestDto, User user) {
+	public DreamAccountResponseDto.DreamAccountInfo createDreamAccount(DreamAccountRequestDto.Create requestDto,
+		User user) {
 		// User 확인
 		// User user = userRepository.findById(requestDto.getUserId())
-		// 	.orElseThrow(() -> new RuntimeException("User not found"));
+		//     .orElseThrow(() -> new RuntimeException("User not found"));
 
-		// // 기존 꿈통장이 존재하면 예외 처리
+		// 기존 꿈통장이 존재하면 예외 처리
 		// if (dreamAccountRepository.existsByUser(user)) {
-		// 	throw new RuntimeException("Dream Account already exists for this user");
+		//     throw new RuntimeException("Dream Account already exists for this user");
 		// }
 
 		// 새로운 DreamAccount 생성
-		DreamAccount newDreamAccount = requestDto.toEntity(user);
+		DreamAccount dreamAccount = requestDto.toEntity(user);
+		BigDecimal totalSafeBox = bucketRepository.findAllByDreamAccountId(dreamAccount.getId()).stream()
+			.map(Bucket::getSafeBox)
+			.reduce(BigDecimal.ZERO, BigDecimal::add);
 
-		// 저장 및 반환
-		return dreamAccountRepository.save(newDreamAccount);
+		// DreamAccount 저장
+		DreamAccount savedDreamAccount = dreamAccountRepository.save(dreamAccount);
+
+		// DreamAccountResponseDto.DreamAccountInfo로 변환하여 반환
+		return DreamAccountResponseDto.DreamAccountInfo.from(savedDreamAccount, totalSafeBox);
 	}
 
 	// 꿈통장에 금액 추가
@@ -75,7 +84,7 @@ public class DreamAccountService {
 			.reduce(BigDecimal.ZERO, BigDecimal::add);
 
 		// DreamAccountInfo 반환
-		return DreamAccountResponseDto.DreamAccountInfo.fromEntity(dreamAccount, totalSafeBox);
+		return DreamAccountResponseDto.DreamAccountInfo.from(dreamAccount, totalSafeBox);
 	}
 
 	// 꿈통장에서 금액 제외
@@ -96,7 +105,7 @@ public class DreamAccountService {
 			.map(Bucket::getSafeBox)
 			.reduce(BigDecimal.ZERO, BigDecimal::add);
 
-		return DreamAccountResponseDto.DreamAccountInfo.fromEntity(dreamAccount, totalSafeBox);
+		return DreamAccountResponseDto.DreamAccountInfo.from(dreamAccount, totalSafeBox);
 	}
 
 	// 꿈통장 금액을 Bucket의 safeBox로 분배
@@ -125,7 +134,7 @@ public class DreamAccountService {
 		BigDecimal totalSafeBox = bucketRepository.getTotalSafeBoxByDreamAccountId(dreamAccountId);
 
 		// 7. DreamAccountInfo DTO 생성 및 반환
-		return DreamAccountResponseDto.DreamAccountInfo.fromEntity(dreamAccount, totalSafeBox);
+		return DreamAccountResponseDto.DreamAccountInfo.from(dreamAccount, totalSafeBox);
 	}
 
 	@Transactional
@@ -150,7 +159,7 @@ public class DreamAccountService {
 		BigDecimal totalSafeBox = bucketRepository.getTotalSafeBoxByDreamAccountId(dreamAccountId);
 
 		// 7. DreamAccountInfo DTO 생성 및 반환
-		return DreamAccountResponseDto.DreamAccountInfo.fromEntity(dreamAccount, totalSafeBox);
+		return DreamAccountResponseDto.DreamAccountInfo.from(dreamAccount, totalSafeBox);
 
 	}
 }
