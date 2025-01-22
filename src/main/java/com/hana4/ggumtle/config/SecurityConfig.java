@@ -67,7 +67,6 @@ public class SecurityConfig {
 			mvc.pattern("/v3/api-docs/**"),
 			mvc.pattern("/swagger-ui/**"),
 			mvc.pattern("/webjars/**"),
-			mvc.pattern("/webjars/**"),
 			mvc.pattern("/imageUpload/multiple")
 		};
 
