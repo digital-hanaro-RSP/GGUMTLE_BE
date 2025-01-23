@@ -49,7 +49,8 @@ jobs:
           mkdir -p ./src/main/resources
 
       - name: set props
-        run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties
+        run: echo "${{ secrets.APPLICATION }}" > ./src/main/resources/application.properties &&
+          echo "${{ secrets.APPLICATION_TEST }}" > ./src/test/resources/application.properties
 
       - name: grant exe
         run: chmod +x gradlew
