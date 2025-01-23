@@ -73,7 +73,7 @@ public class SecurityConfig {
 		// http request 인증 설정
 		http.authorizeHttpRequests(authorize -> authorize
 			.requestMatchers(permitAllWhiteList).permitAll() // 화이트리스트 설정
-			.requestMatchers(PathRequest.toH2Console()).permitAll() // H2 콘솔 허용
+			// .requestMatchers(PathRequest.toH2Console()).permitAll() // H2 콘솔 허용
 			.anyRequest().authenticated()  // 마지막에 위치해야 함
 		);
 

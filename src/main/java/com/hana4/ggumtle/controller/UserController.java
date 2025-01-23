@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.dto.user.UserRequestDto;
 import com.hana4.ggumtle.dto.user.UserResponseDto;
+import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.UserService;
 
@@ -25,10 +27,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "User", description = "회원가입, 로그인, 토큰 재발급, 약관동의 API")
+@Slf4j
 public class UserController {
 	public final UserService userService;
 
@@ -128,7 +132,12 @@ public class UserController {
 	@PatchMapping("/mydata/permission")
 	public ResponseEntity<CustomApiResponse<UserResponseDto.UserInfo>> updatePermission(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		return ResponseEntity.ok(CustomApiResponse.success(userService.addMyDataPermission(userDetails.getUser())));
+		try {
+			return ResponseEntity.ok(CustomApiResponse.success(userService.addMyDataPermission(userDetails.getUser())));
+		} catch (Exception e) {
+			log.error("오류메시지 로깅", e.getMessage());
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@Operation(summary = "인증번호 코드 요청", description = "휴대폰 인증번호를 문자로 발송합니다. 같은 번호로 하루 10번 이상 불가.")
