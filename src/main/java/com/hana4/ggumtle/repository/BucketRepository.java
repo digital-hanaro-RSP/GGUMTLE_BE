@@ -17,4 +17,6 @@ public interface BucketRepository extends JpaRepository<Bucket, Long> {
 
 	// tagType에 맞는 버킷 조회
 	List<Bucket> findByTagType(BucketTagType tagType);
+
+	List<Bucket> findByTagTypeAndIsRecommendedTrue(BucketTagType tagType);
 }
