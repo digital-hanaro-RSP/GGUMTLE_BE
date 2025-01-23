@@ -137,7 +137,7 @@ public class InitialDataLoader implements ApplicationRunner {
 				.locationType(AdvertisementLocationType.COMMUNITY)
 				.adType(AdvertisementAdType.HANA)
 				.bannerImageUrl(
-					"https://www.youthdaily.co.kr/data/photos/20230728/art_16892990338051_020c14.jpg")
+					"https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/hanainvest.png")
 				.link("https://www.hanaw.com/main/main/index.cmd")
 				.build();
 
@@ -145,7 +145,7 @@ public class InitialDataLoader implements ApplicationRunner {
 				.locationType(AdvertisementLocationType.COMMUNITY)
 				.adType(AdvertisementAdType.EDUCATION)
 				.bannerImageUrl(
-					"https://file.newswire.co.kr/data/datafile2/thumb_640/2023/08/2041018078_20230823084016_4569338748.jpg")
+					"https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/udemy.png")
 				.link(
 					"https://www.udemy.com/")
 				.build();
@@ -154,7 +154,7 @@ public class InitialDataLoader implements ApplicationRunner {
 				.locationType(AdvertisementLocationType.COMMUNITY)
 				.adType(AdvertisementAdType.HOBBY)
 				.bannerImageUrl(
-					"https://d2v80xjmx68n4w.cloudfront.net/members/portfolios/6Ioei1713446955.jpg")
+					"https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/somssidang.png")
 				.link("https://www.sssd.co.kr/main")
 				.build();
 
@@ -162,7 +162,7 @@ public class InitialDataLoader implements ApplicationRunner {
 				.locationType(AdvertisementLocationType.COMMUNITY)
 				.adType(AdvertisementAdType.RETIREMENT)
 				.bannerImageUrl(
-					"https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F2353343B572016AE34")
+					"https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/silvertown.png")
 				.link("http://www.signumhaus.com/")
 				.build();
 
@@ -170,7 +170,7 @@ public class InitialDataLoader implements ApplicationRunner {
 				.locationType(AdvertisementLocationType.COMMUNITY)
 				.adType(AdvertisementAdType.TRAVEL)
 				.bannerImageUrl(
-					"https://cdn.enewstoday.co.kr/news/photo/202111/1522970_578981_4741.jpg")
+					"https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/hanatour.png")
 				.link("https://www.hanatour.com/")
 				.build();
 
