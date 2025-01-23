@@ -35,7 +35,7 @@ public class BucketResponseDto {
 		@Schema(description = "버킷리스트 태그타입", example = "GO", requiredMode = Schema.RequiredMode.REQUIRED)
 		private BucketTagType tagType;
 
-		@Schema(description = "버킷리스트 완료날짜", example = "1990-01-01T00:00:00", requiredMode = Schema.RequiredMode.REQUIRED)
+		@Schema(description = "버킷리스트 완료날짜", example = "1990-01-01", requiredMode = Schema.RequiredMode.REQUIRED)
 		private LocalDateTime dueDate;
 
 		@Schema(description = "버킷리스트 종류", example = "MONEY", requiredMode = Schema.RequiredMode.REQUIRED)

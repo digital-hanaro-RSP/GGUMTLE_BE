@@ -125,7 +125,7 @@ public class BucketService {
 				.toList();
 		} else {
 			// tagType에 맞는 버킷만 조회
-			List<Bucket> recommendedBuckets = bucketRepository.findByTagType(tagType);
+			List<Bucket> recommendedBuckets = bucketRepository.findByTagTypeAndIsRecommendedTrue(tagType);
 
 			// 리턴되는 버킷들을 `RecommendationResponseDto`로 변환하여 반환
 			return recommendedBuckets.stream()
