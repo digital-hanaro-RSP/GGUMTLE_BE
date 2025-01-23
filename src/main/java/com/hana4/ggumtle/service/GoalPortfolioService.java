@@ -36,4 +36,10 @@ public class GoalPortfolioService {
 		return GoalPortfolioResponseDto.Ratio.from(goalPortfolioRepository.findByUserId(userId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저의 목표 포트폴리오가 존재하지 않습니다.")));
 	}
+
+	public GoalPortfolioResponseDto.InvestmentType getGoalPortfolioInvestmentTypeByUser(User user) {
+		return GoalPortfolioResponseDto.InvestmentType.from(goalPortfolioRepository.findByUserId(user.getId())
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저의 목표 포트폴리오가 존재하지 않습니다.")),
+			user.getName());
+	}
 }

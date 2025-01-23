@@ -8,10 +8,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.hana4.ggumtle.dto.CustomApiResponse;
 import com.hana4.ggumtle.dto.MainPortfolio.MainPortfolioResponseDto;
+import com.hana4.ggumtle.dto.goalPortfolio.GoalPortfolioResponseDto;
 import com.hana4.ggumtle.security.CustomUserDetails;
+import com.hana4.ggumtle.service.GoalPortfolioService;
 import com.hana4.ggumtle.service.MainPortfolioService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class PortfolioController {
 
 	private final MainPortfolioService mainPortfolioService;
+	private final GoalPortfolioService goalPortfolioService;
 
 	@Operation(summary = "메인페이지 포트폴리오 조회", description = "메인페이지에서 유저의 현재 포트폴리오와 목표포트폴리오를 조회합니다.")
 	@ApiResponses(value = {
@@ -35,6 +40,26 @@ public class PortfolioController {
 		MainPortfolioResponseDto.PortfolioInfo mainPortfolio = mainPortfolioService.getMainPortfolioByUserId(
 			userDetails.getUser().getId());
 		return ResponseEntity.ok(CustomApiResponse.success(mainPortfolio));
+	}
+
+	@Operation(summary = "메인페이지 사용자 이름과 투자성향 조회", description = "이름과 투자성향을 반환합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "이름과 투자성향 반환 성공"),
+		@ApiResponse(responseCode = "404", description = "사용자의 목표 포트폴리오를 찾을 수 없음",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 유저의 목표 포트폴리오가 존재하지 않습니다.\" }"
+			))),
+		@ApiResponse(responseCode = "500", description = "서버 오류",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 500, \"error\": \"Internal Server Error\", \"message\": \"내부 서버 오류\" }"
+			)))
+	})
+	@GetMapping("/investmentType")
+	public ResponseEntity<CustomApiResponse<GoalPortfolioResponseDto.InvestmentType>> getUserNameAndInvestmentType(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		GoalPortfolioResponseDto.InvestmentType response = goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(
+			userDetails.getUser());
+		return ResponseEntity.ok(CustomApiResponse.success(response));
 	}
 
 }
