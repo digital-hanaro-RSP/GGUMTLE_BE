@@ -30,8 +30,12 @@ public class CommentService {
 		return commentRepository.countByPostId(postId);
 	}
 
-	public boolean isAuthorLike(Long postId, String userId) {
-		return commentLikeRepository.findByCommentIdAndUserId(postId, userId).isPresent();
+	public int countLikeByCommentId(Long commentId) {
+		return commentLikeRepository.countByCommentId(commentId);
+	}
+
+	public boolean isAuthorLike(Long commentId, String userId) {
+		return commentLikeRepository.findByCommentIdAndUserId(commentId, userId).isPresent();
 	}
 
 	public CommentResponseDto.CommentInfo saveComment(Long postId, CommentRequestDto.CommentWrite commentWrite,
@@ -42,14 +46,14 @@ public class CommentService {
 			false, true, 0);
 	}
 
-	public Page<CommentResponseDto.CommentInfo> getCommentsByPage(Long postId, Pageable pageable,
-		User user) {
+	public Page<CommentResponseDto.CommentInfo> getCommentsByPage(Long postId, Pageable pageable, User user) {
 		if (!postRepository.existsById(postId)) {
 			throw new CustomException(ErrorCode.NOT_FOUND, "해당 글이 존재하지 않습니다.");
 		}
 		return commentRepository.findAllByPostId(postId, pageable)
-			.map(comment -> CommentResponseDto.CommentInfo.from(comment, user, isAuthorLike(postId, user.getId()),
-				comment.getUser().getId().equals(user.getId()), countCommentByPostId(postId)));
+			.map(comment -> CommentResponseDto.CommentInfo.from(comment, user,
+				isAuthorLike(comment.getId(), user.getId()), comment.getUser().getId().equals(user.getId()),
+				countLikeByCommentId(comment.getId())));
 	}
 
 	public void deleteComment(Long commentId) {

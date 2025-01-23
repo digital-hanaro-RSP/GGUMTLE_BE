@@ -8,4 +8,6 @@ import com.hana4.ggumtle.model.entity.commentLike.CommentLike;
 
 public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> {
 	Optional<CommentLike> findByCommentIdAndUserId(Long commentId, String userId);
+	
+	int countByCommentId(Long commentId);
 }
