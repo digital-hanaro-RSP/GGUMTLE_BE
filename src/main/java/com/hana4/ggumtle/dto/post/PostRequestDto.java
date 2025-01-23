@@ -48,4 +48,28 @@ public class PostRequestDto {
 				.build();
 		}
 	}
+
+	@Getter
+	@Setter
+	@AllArgsConstructor
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@Builder
+	@EqualsAndHashCode
+	public static class Share {
+		@NotEmpty(message = "내용을 입력하세요.")
+		private String content;
+
+		@NotNull(message = "글 타입을 입력하세요.")
+		@Builder.Default
+		private PostType postType = PostType.NEWS;
+
+		public Post toEntity(User user, Group group) {
+			return Post.builder()
+				.user(user)
+				.group(group)
+				.content(this.content)
+				.postType(this.postType)
+				.build();
+		}
+	}
 }

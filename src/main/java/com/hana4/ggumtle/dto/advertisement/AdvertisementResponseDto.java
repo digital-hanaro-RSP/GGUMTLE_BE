@@ -1,6 +1,7 @@
 package com.hana4.ggumtle.dto.advertisement;
 
 import com.hana4.ggumtle.model.entity.advertisement.Advertisement;
+import com.hana4.ggumtle.model.entity.advertisement.AdvertisementAdType;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementLocationType;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementProductType;
 
@@ -51,6 +52,28 @@ public class AdvertisementResponseDto {
 				.locationType(advertisement.getLocationType())
 				.riskRating(advertisement.getRiskRating())
 				.yield(advertisement.getYield())
+				.link(advertisement.getLink())
+				.build();
+		}
+	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@Builder
+	public static class CommunityAd {
+		private Long id;
+		private AdvertisementLocationType locationType;
+		private AdvertisementAdType adType;
+		private String bannerImageUrl;
+		private String link;
+
+		public static CommunityAd from(Advertisement advertisement) {
+			return CommunityAd.builder()
+				.id(advertisement.getId())
+				.locationType(advertisement.getLocationType())
+				.adType(advertisement.getAdType())
+				.bannerImageUrl(advertisement.getBannerImageUrl())
 				.link(advertisement.getLink())
 				.build();
 		}

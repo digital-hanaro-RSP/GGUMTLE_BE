@@ -38,6 +38,7 @@ import com.hana4.ggumtle.dto.user.UserResponseDto;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.post.PostType;
 import com.hana4.ggumtle.security.CustomUserDetails;
+import com.hana4.ggumtle.service.AdvertisementService;
 import com.hana4.ggumtle.service.PostService;
 
 @WebMvcTest(controllers = PostController.class,
@@ -50,6 +51,9 @@ class PostControllerTest {
 
 	@MockitoBean
 	PostService postService;
+
+	@MockitoBean
+	AdvertisementService advertisementService;
 
 	@Autowired
 	MockMvc mockMvc;

@@ -113,6 +113,16 @@ public class PostService {
 			});
 	}
 
+	public Page<PostResponseDto.PostInfo> getPopularPostsByPage(Pageable pageable, User user) {
+		return postRepository.findAllPostsWithLikeCount(pageable)
+			.map(post -> {
+				boolean isLiked = isAuthorLike(post.getId(), user.getId());
+				boolean isMine = post.getUser().getId().equals(user.getId());
+				return PostResponseDto.PostInfo.from(post, isLiked, isMine, countLikeByPostId(post.getId()),
+					commentService.countCommentByPostId(post.getId()));
+			});
+	}
+
 	public PostResponseDto.PostInfo updatePost(Long groupId, Long postId, PostRequestDto.Write postRequestDto,
 		User user) throws JsonProcessingException {
 		if (!checkUserWithGroup(groupId, user)) {
@@ -175,5 +185,13 @@ public class PostService {
 		Post post = getPostById(postId);
 
 		postLikeRepository.findByPostIdAndUserId(postId, user.getId()).ifPresent(postLikeRepository::delete);
+	}
+
+	public PostResponseDto.ShareInfo saveNews(Long groupId, PostRequestDto.Share share, User user) {
+		if (!checkUserWithGroup(groupId, user)) {
+			throw new CustomException(ErrorCode.ACCESS_DENIED, "해당 그룹에 권한이 없습니다.");
+		}
+		Group group = groupService.getGroup(groupId);
+		return PostResponseDto.ShareInfo.from(postRepository.save(share.toEntity(user, group)));
 	}
 }

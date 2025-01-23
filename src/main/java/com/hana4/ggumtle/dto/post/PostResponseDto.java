@@ -55,4 +55,26 @@ public class PostResponseDto {
 				.build();
 		}
 	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@ToString
+	@SuperBuilder
+	public static class ShareInfo extends BaseDto {
+		private Long id;
+		private String content;
+		private UserResponseDto.BriefInfo briefInfo;
+		private PostType postType;
+
+		public static ShareInfo from(Post post) {
+			return ShareInfo.builder()
+				.id(post.getId())
+				.content(post.getContent())
+				.briefInfo(UserResponseDto.BriefInfo.from(post.getUser()))
+				.postType(post.getPostType())
+				.createdAt(post.getCreatedAt())
+				.build();
+		}
+	}
 }

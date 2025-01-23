@@ -17,10 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hana4.ggumtle.dto.CustomApiResponse;
+import com.hana4.ggumtle.dto.advertisement.AdvertisementResponseDto;
 import com.hana4.ggumtle.dto.post.PostLikeResponseDto;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.security.CustomUserDetails;
+import com.hana4.ggumtle.service.AdvertisementService;
 import com.hana4.ggumtle.service.PostService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,10 +38,11 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/community/group/{groupId}")
+@RequestMapping("/community")
 @Tag(name = "Post", description = "게시물 관련 API")
 public class PostController {
 	private final PostService postService;
+	private final AdvertisementService advertisementService;
 
 	@Operation(summary = "게시물 작성", description = "새로운 게시물을 작성합니다.")
 	@ApiResponses(value = {
@@ -53,7 +56,7 @@ public class PostController {
 				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹이 존재하지 않습니다.\" }"
 			)))
 	})
-	@PostMapping("/post")
+	@PostMapping("/group/{groupId}/post")
 	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> writePost(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
 		@Parameter(description = "게시물 내용") @RequestBody @Valid PostRequestDto.Write write,
@@ -72,7 +75,7 @@ public class PostController {
 				@ExampleObject(name = "그룹 내 글 없음", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"글이 해당 그룹에 있지 않습니다.\" }")
 			}))
 	})
-	@GetMapping("/post/{postId}")
+	@GetMapping("/group/{groupId}/post/{postId}")
 	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> getPost(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
 		@Parameter(description = "게시물 ID") @PathVariable Long postId,
@@ -84,7 +87,7 @@ public class PostController {
 
 	@Operation(summary = "게시물 목록 조회", description = "페이지별로 게시물 목록을 조회합니다.")
 	@ApiResponse(responseCode = "200", description = "게시물 목록 조회 성공")
-	@GetMapping("/post")
+	@GetMapping("/group/{groupId}/post")
 	public ResponseEntity<CustomApiResponse<Page<PostResponseDto.PostInfo>>> getPostsByPage(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
 		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "0") int offset,
@@ -93,6 +96,19 @@ public class PostController {
 		Pageable pageable = PageRequest.of(offset / limit, limit);
 		return ResponseEntity.ok(
 			CustomApiResponse.success(postService.getPostsByPage(groupId, pageable, customUserDetails.getUser())));
+	}
+
+	@Operation(summary = "게시물 목록 조회(인기순)", description = "페이지 별로 게시물 목록을 인기순으로 조회합니다.")
+	@ApiResponse(responseCode = "200", description = "게시물 목록 조회 성공")
+	@GetMapping("/post/popular")
+	public ResponseEntity<CustomApiResponse<Page<PostResponseDto.PostInfo>>> getPopularPostsByPage(
+		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "0") int offset,
+		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "10") int limit,
+		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		Pageable pageable = PageRequest.of(offset / limit, limit);
+		return ResponseEntity.ok(
+			CustomApiResponse.success(
+				postService.getPopularPostsByPage(pageable, customUserDetails.getUser())));
 	}
 
 	@Operation(summary = "게시물 수정", description = "특정 게시물을 수정합니다.")
@@ -108,7 +124,7 @@ public class PostController {
 				@ExampleObject(name = "", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹에 권한이 없습니다.\" }")
 			}))
 	})
-	@PatchMapping("/post/{postId}")
+	@PatchMapping("/group/{groupId}/post/{postId}")
 	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> updatePost(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
 		@Parameter(description = "게시물 ID") @PathVariable Long postId,
@@ -133,7 +149,7 @@ public class PostController {
 				@ExampleObject(name = "그룹 권한 없음", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹에 권한이 없습니다.\" }")
 			}))
 	})
-	@DeleteMapping("/post/{postId}")
+	@DeleteMapping("/group/{groupId}/post/{postId}")
 	public ResponseEntity<CustomApiResponse<PostResponseDto.PostInfo>> deletePost(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
 		@Parameter(description = "게시물 ID") @PathVariable Long postId,
@@ -151,7 +167,7 @@ public class PostController {
 				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹에 권한이 없습니다.\" }"
 			)))
 	})
-	@PostMapping("/post/{postId}/like")
+	@PostMapping("/group/{groupId}/post/{postId}/like")
 	public ResponseEntity<CustomApiResponse<PostLikeResponseDto.Add>> likePost(@PathVariable Long groupId,
 		@PathVariable Long postId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		return ResponseEntity.ok(
@@ -167,10 +183,46 @@ public class PostController {
 				@ExampleObject(name = "그룹 권한 없음", value = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹에 권한이 없습니다.\" }")
 			}))
 	})
-	@DeleteMapping("/post/{postId}/dislike")
+	@DeleteMapping("/group/{groupId}/post/{postId}/dislike")
 	public ResponseEntity<CustomApiResponse<PostLikeResponseDto.Add>> dislikePost(@PathVariable Long groupId,
 		@PathVariable Long postId, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		postService.removeLike(groupId, postId, customUserDetails.getUser());
 		return ResponseEntity.ok(CustomApiResponse.success());
+	}
+
+	@Operation(summary = "새소식 공유", description = "새 소식(버켓리스트 완료)을 공유합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "새소식 공유 성공"),
+		@ApiResponse(responseCode = "401", description = "새소식 공유 실패",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 401, \"error\": \"Unauthorized\", \"message\": \"해당 그룹에 권한이 없습니다.\" }"
+			))),
+		@ApiResponse(responseCode = "404", description = "새소식 공유 실패",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹이 존재하지 않습니다.\" }"
+			)))
+	})
+	@PostMapping("/group/{groupId}/post/share")
+	public ResponseEntity<CustomApiResponse<PostResponseDto.ShareInfo>> shareBucketNews(
+		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
+		@Parameter(description = "새소식 내용") @RequestBody @Valid PostRequestDto.Share share,
+		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		return ResponseEntity.ok(
+			CustomApiResponse.success(postService.saveNews(groupId, share, customUserDetails.getUser())));
+	}
+
+	@Operation(summary = "그룹별 광고 조회", description = "특정 그룹의 광고를 조회합니다.")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "광고 조회 성공"),
+		@ApiResponse(responseCode = "404", description = "광고 조회 실패",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 그룹이 존재하지 않습니다.\" }"
+			)))
+	})
+	@GetMapping("/group/{groupId}/advertisement")
+	public ResponseEntity<CustomApiResponse<AdvertisementResponseDto.CommunityAd>> getCommunityAd(
+		@PathVariable Long groupId) {
+		return ResponseEntity.ok(
+			CustomApiResponse.success(advertisementService.getCommunityAd(groupId)));
 	}
 }
