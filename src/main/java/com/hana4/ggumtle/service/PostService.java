@@ -19,6 +19,7 @@ import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.group.Group;
+import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.post.Post;
 import com.hana4.ggumtle.model.entity.postLike.PostLike;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -113,7 +114,30 @@ public class PostService {
 			});
 	}
 
-	public Page<PostResponseDto.PostInfo> getPopularPostsByPage(Pageable pageable, User user) {
+	public Page<PostResponseDto.PostInfo> getPopularPostsByPage(Pageable pageable, User user, String category,
+		String search) {
+		GroupCategory groupCategory;
+
+		try {
+			groupCategory = GroupCategory.valueOf(category.toUpperCase());
+		} catch (IllegalArgumentException ie) {
+			groupCategory = null;
+		}
+
+		if (groupCategory != null) {
+			return postRepository.findAllPostsGroupedByGroupCategory(pageable, groupCategory)
+				.map(post -> PostResponseDto.PostInfo.from(post, isAuthorLike(post.getId(), user.getId()),
+					post.getUser().getId().equals(user.getId()), countLikeByPostId(post.getId()),
+					commentService.countCommentByPostId(post.getId())));
+		}
+
+		if (search != null) {
+			return postRepository.findAllPostsWithSearchParam(pageable, search)
+				.map(post -> PostResponseDto.PostInfo.from(post, isAuthorLike(post.getId(), user.getId()),
+					post.getUser().getId().equals(user.getId()), countLikeByPostId(post.getId()),
+					commentService.countCommentByPostId(post.getId())));
+		}
+
 		return postRepository.findAllPostsWithLikeCount(pageable)
 			.map(post -> {
 				boolean isLiked = isAuthorLike(post.getId(), user.getId());

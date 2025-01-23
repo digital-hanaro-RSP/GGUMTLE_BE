@@ -104,11 +104,13 @@ public class PostController {
 	public ResponseEntity<CustomApiResponse<Page<PostResponseDto.PostInfo>>> getPopularPostsByPage(
 		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "0") int offset,
 		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "10") int limit,
+		@Parameter(description = "그룹 카테고리") @RequestParam(required = false) String category,
+		@Parameter(description = "검색") @RequestParam(required = false) String search,
 		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		Pageable pageable = PageRequest.of(offset / limit, limit);
 		return ResponseEntity.ok(
 			CustomApiResponse.success(
-				postService.getPopularPostsByPage(pageable, customUserDetails.getUser())));
+				postService.getPopularPostsByPage(pageable, customUserDetails.getUser(), category, search)));
 	}
 
 	@Operation(summary = "게시물 수정", description = "특정 게시물을 수정합니다.")
