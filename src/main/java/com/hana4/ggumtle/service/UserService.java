@@ -12,10 +12,10 @@ import com.hana4.ggumtle.dto.user.UserResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.repository.RefreshTokenRepository;
 import com.hana4.ggumtle.repository.TelCodeValidationRepository;
 import com.hana4.ggumtle.repository.UserRepository;
 import com.hana4.ggumtle.security.provider.JwtProvider;
-import com.hana4.ggumtle.vo.RefreshToken;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +31,7 @@ public class UserService {
 	private final MyDataService myDataService;
 	private final SmsService smsService;
 	private final TelCodeValidationRepository telCodeValidationRepository;
+	private final RefreshTokenRepository refreshTokenRepository;
 
 	public User getUserByTel(String tel) {
 		return userRepository.findUserByTel(tel)
@@ -69,11 +70,11 @@ public class UserService {
 		String accessToken = jwtProvider.generateAccessToken(userInfo.getId());
 
 		// 기존에 가지고 있는 사용자의 refresh token 제거
-		RefreshToken.removeUserRefreshToken(userInfo.getId());
+		refreshTokenRepository.deleteAllTokensByUserId(userInfo.getId());
 
 		// refresh token 생성 후 저장
 		String refreshToken = jwtProvider.generateRefreshToken(userInfo.getId());
-		RefreshToken.putRefreshToken(refreshToken, userInfo.getId());
+		refreshTokenRepository.saveRefreshToken(refreshToken, userInfo.getId());
 
 		return UserResponseDto.TokensWithPermission.builder()
 			.accessToken(accessToken)
@@ -87,17 +88,18 @@ public class UserService {
 		checkRefreshToken(userRequestDto.getRefreshToken());
 
 		// refresh token id 조회
-		String id = RefreshToken.getRefreshToken(userRequestDto.getRefreshToken());
+		String userId = refreshTokenRepository.getRefreshToken(userRequestDto.getRefreshToken());
+		if (userId != null) {
+			// 기존에 가지고 있는 사용자의 refresh token 제거
+			refreshTokenRepository.deleteRefreshToken(userRequestDto.getRefreshToken());
+		}
 
 		// 새로운 access token 생성
-		String newAccessToken = jwtProvider.generateAccessToken(id);
-
-		// 기존에 가지고 있는 사용자의 refresh token 제거
-		RefreshToken.removeUserRefreshToken(id);
+		String newAccessToken = jwtProvider.generateAccessToken(userId);
 
 		// 새로운 refresh token 생성 후 저장
-		String newRefreshToken = jwtProvider.generateRefreshToken(id);
-		RefreshToken.putRefreshToken(newRefreshToken, id);
+		String newRefreshToken = jwtProvider.generateRefreshToken(userId);
+		refreshTokenRepository.saveRefreshToken(newRefreshToken, userId);
 
 		return UserResponseDto.Tokens.builder()
 			.accessToken(newAccessToken)
@@ -170,4 +172,33 @@ public class UserService {
 			throw new CustomException(ErrorCode.SMS_FAILURE, "인증 코드 검증 중 오류가 발생했습니다.");
 		}
 	}
+
+	public UserResponseDto.UserInfo getUserInfo(String userId) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저를 찾을 수 없습니다"));
+
+		return UserResponseDto.UserInfo.from(user);
+	}
+
+	public UserResponseDto.UserInfo updateUserInfo(String userId, UserRequestDto.UpdateUser updateUserRequest) {
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저를 찾을 수 없습니다."));
+
+		if (updateUserRequest.getPassword() != null) {
+			user.setPassword(passwordEncoder.encode(updateUserRequest.getPassword()));
+		}
+
+		if (updateUserRequest.getProfileImageUrl() != null) {
+			user.setProfileImageUrl(updateUserRequest.getProfileImageUrl());
+		}
+
+		if (updateUserRequest.getNickname() != null) {
+			user.setNickname(updateUserRequest.getNickname());
+		}
+
+		userRepository.save(user);
+
+		return UserResponseDto.UserInfo.from(user);
+	}
+
 }

@@ -34,6 +34,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+
     // hibernate validator
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
@@ -57,6 +58,14 @@ dependencies {
 
     // sms
     implementation 'net.nurigo:sdk:4.3.2'
+
+    //aws
+    implementation platform('software.amazon.awssdk:bom:2.20.83')
+    implementation 'software.amazon.awssdk:s3'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-secrets-manager:3.0.1'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter:3.0.1'
+    implementation 'software.amazon.awssdk:s3:2.20.57'
+    implementation 'software.amazon.awssdk:auth:2.20.57'
 }
 
 tasks.named('test') {

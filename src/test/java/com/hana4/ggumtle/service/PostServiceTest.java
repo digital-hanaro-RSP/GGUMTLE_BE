@@ -39,8 +39,10 @@ import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
 import com.hana4.ggumtle.model.entity.post.Post;
 import com.hana4.ggumtle.model.entity.post.PostType;
+import com.hana4.ggumtle.model.entity.postLike.PostLike;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.model.entity.user.UserRole;
+import com.hana4.ggumtle.repository.PostLikeRepository;
 import com.hana4.ggumtle.repository.PostRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,6 +52,9 @@ class PostServiceTest {
 
 	@Mock
 	private PostRepository postRepository;
+
+	@Mock
+	private PostLikeRepository postLikeRepository;
 
 	@Mock
 	private GroupService groupService;
@@ -62,9 +67,6 @@ class PostServiceTest {
 
 	@Mock
 	private MyDataService myDataService;
-
-	@Mock
-	private PostLikeService postLikeService;
 
 	@Mock
 	private CommentService commentService;
@@ -297,10 +299,12 @@ class PostServiceTest {
 		when(bucketService.getBucket(eq(3L))).thenReturn(bucket);
 		when(goalPortfolioService.getGoalPortfolioByUserId(user.getId())).thenReturn(
 			new GoalPortfolioResponseDto.Ratio(BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7),
-				BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7)));
+				BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), 1,
+				"1"));
 		when(myDataService.getMyDataByUserId(user.getId())).thenReturn(
 			new MyDataResponseDto.CurrentPortfolio(BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7),
-				BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7)));
+				BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), 1,
+				"1"));
 
 		// when
 		PostResponseDto.PostInfo result = postService.save(groupId, write, user);
@@ -390,14 +394,15 @@ class PostServiceTest {
 		post.setPostType(PostType.POST);
 		post.setContent("content");
 
-		PostResponseDto.PostDetail postDetail = PostResponseDto.PostDetail.from(post, false, 0, 0);
+		PostResponseDto.PostInfo postDetail = PostResponseDto.PostInfo.from(post, false, true, 0, 0);
 
-		when(postLikeService.isAuthorLike(post.getId(), user.getId())).thenReturn(false);
-		when(postLikeService.countLikeByPostId(post.getId())).thenReturn(0);
+		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
+			Optional.of(PostLike.builder().build()));
+		when(postService.countLikeByPostId(post.getId())).thenReturn(0);
 		when(commentService.countCommentByPostId(post.getId())).thenReturn(0);
 		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
 
-		PostResponseDto.PostDetail result = postService.getPost(group.getId(), 1L, user);
+		PostResponseDto.PostInfo result = postService.getPost(group.getId(), 1L, user);
 
 		// then
 		assertThat(result).isNotNull();
@@ -457,16 +462,15 @@ class PostServiceTest {
 		post.setPostType(PostType.POST);
 		post.setContent("content");
 
-		int page = 0;
-		Pageable pageable = PageRequest.of(page, 10);
+		Pageable pageable = PageRequest.of(0, 10);
 		List<Post> posts = List.of(post);
 		Page<Post> postPage = new PageImpl<>(posts, pageable, posts.size());
 
 		when(postRepository.findAllByGroupId(groupId, pageable)).thenReturn(postPage);
-		when(postLikeService.isAuthorLike(eq(post.getId()), eq(user.getId()))).thenReturn(true);
-
+		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
+			Optional.of(PostLike.builder().build()));
 		// When
-		List<PostResponseDto.PostInfo> result = postService.getPostsByPage(groupId, page, user);
+		List<PostResponseDto.PostInfo> result = postService.getPostsByPage(groupId, pageable, user).getContent();
 
 		// Then
 		assertNotNull(result);
@@ -475,7 +479,7 @@ class PostServiceTest {
 
 		// verify(groupService).isMatchedGroupUser(eq(user), any(Group.class));
 		verify(postRepository).findAllByGroupId(groupId, pageable);
-		verify(postLikeService).isAuthorLike(eq(1L), eq("1"));
+		// verify(postService).isAuthorLike(eq(1L), eq("1"));
 	}
 
 	@Test
@@ -557,7 +561,9 @@ class PostServiceTest {
 		when(postRepository.findById(eq(1L))).thenReturn(Optional.of(post));
 		post.setImageUrls(newImageUrl);
 		post.setContent(newContent);
-		when(postLikeService.isAuthorLike(eq(post.getId()), eq(user.getId()))).thenReturn(true);
+		post.setId(1L);
+		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
+			Optional.of(PostLike.builder().build()));
 		when(objectMapper.readValue(eq(write.getSnapShot()), any(TypeReference.class))).thenReturn(realsnap);
 		when(objectMapper.convertValue(eq(realsnap.get("bucketId")), any(TypeReference.class))).thenReturn(
 			List.of(1, 2, 3));

@@ -14,6 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.hana4.ggumtle.dto.goalPortfolio.GoalPortfolioResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.goalPortfolio.GoalPortfolio;
@@ -105,6 +106,101 @@ class GoalPortfolioServiceTest {
 		CustomException exception = assertThrows(CustomException.class, () -> {
 			goalPortfolioService.getGoalPortfolioByUserId(user.getId());
 		});
+
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+		assertEquals("해당 유저의 목표 포트폴리오가 존재하지 않습니다.", exception.getMessage());
+		verify(goalPortfolioRepository).findByUserId(user.getId());
+	}
+
+	@Test
+	void getGoalPortfolioInvestmentTypeByUserId_Success() {
+		user = new User();
+		user.setId("testUser");
+		user.setName("testUserName");
+		PortfolioTemplate template = PortfolioTemplate.builder()
+			.name("BALANCED")
+			.depositWithdrawalRatio(BigDecimal.valueOf(0.30))
+			.savingTimeDepositRatio(BigDecimal.valueOf(0.20))
+			.investmentRatio(BigDecimal.valueOf(0.20))
+			.foreignCurrencyRatio(BigDecimal.valueOf(0.10))
+			.pensionRatio(BigDecimal.valueOf(0.15))
+			.etcRatio(BigDecimal.valueOf(0.05))
+			.build();
+
+		GoalPortfolio goalPortfolio = GoalPortfolio.builder()
+			.user(user)
+			.depositWithdrawalRatio(BigDecimal.valueOf(0.30))
+			.savingTimeDepositRatio(BigDecimal.valueOf(0.20))
+			.investmentRatio(BigDecimal.valueOf(0.20))
+			.foreignCurrencyRatio(BigDecimal.valueOf(0.10))
+			.pensionRatio(BigDecimal.valueOf(0.15))
+			.etcRatio(BigDecimal.valueOf(0.05))
+			.template(template)
+			.build();
+
+		when(goalPortfolioRepository.findByUserId(user.getId())).thenReturn(Optional.of(goalPortfolio));
+
+		GoalPortfolioResponseDto.InvestmentType result = goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(
+			user);
+
+		assertNotNull(result);
+		assertEquals("BALANCED", result.getInvestmentType());
+		verify(goalPortfolioRepository).findByUserId(user.getId());
+	}
+
+	@Test
+	void getGoalPortfolioInvestmentTypeByUserId_UserNotFound() {
+		user = new User();
+		user.setId("testUser");
+		user.setName("testUserName");
+		when(goalPortfolioRepository.findByUserId(user.getId())).thenReturn(Optional.empty());
+
+		CustomException exception = assertThrows(CustomException.class, () ->
+			goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(user)
+		);
+
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+		assertEquals("해당 유저의 목표 포트폴리오가 존재하지 않습니다.", exception.getMessage());
+		verify(goalPortfolioRepository).findByUserId(user.getId());
+	}
+
+	@Test
+	void getGoalPortfolioInvestmentTypeByUser_Success() {
+		User user = new User();
+		user.setId("testUser");
+		user.setName("testUserName");
+
+		PortfolioTemplate template = PortfolioTemplate.builder()
+			.name("BALANCED")
+			.build();
+
+		GoalPortfolio goalPortfolio = GoalPortfolio.builder()
+			.user(user)
+			.template(template)
+			.build();
+
+		when(goalPortfolioRepository.findByUserId(user.getId())).thenReturn(Optional.of(goalPortfolio));
+
+		GoalPortfolioResponseDto.InvestmentType result = goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(
+			user);
+
+		assertNotNull(result);
+		assertEquals("BALANCED", result.getInvestmentType());
+		assertEquals("testUserName", result.getUserName());
+		verify(goalPortfolioRepository).findByUserId(user.getId());
+	}
+
+	@Test
+	void getGoalPortfolioInvestmentTypeByUser_UserNotFound() {
+		User user = new User();
+		user.setId("testUser");
+		user.setName("testUserName");
+
+		when(goalPortfolioRepository.findByUserId(user.getId())).thenReturn(Optional.empty());
+
+		CustomException exception = assertThrows(CustomException.class, () ->
+			goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(user)
+		);
 
 		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
 		assertEquals("해당 유저의 목표 포트폴리오가 존재하지 않습니다.", exception.getMessage());

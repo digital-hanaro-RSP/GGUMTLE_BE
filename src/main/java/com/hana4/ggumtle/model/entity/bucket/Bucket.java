@@ -7,6 +7,7 @@ import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.user.User;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -28,7 +29,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Entity
 @Table(name = "Bucket")
 public class Bucket extends BaseEntity {
@@ -36,7 +37,7 @@ public class Bucket extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "dreamAccountId", nullable = false, foreignKey = @ForeignKey(name = "fk_Bucket_dreamAccountId_DreamAccount"))
 	private DreamAccount dreamAccount;
 
@@ -54,7 +55,7 @@ public class Bucket extends BaseEntity {
 	private LocalDateTime dueDate;
 
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-	private boolean isDueSet;
+	private Boolean isDueSet;
 
 	private String memo;
 
@@ -67,10 +68,9 @@ public class Bucket extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private BucketStatus status;
+	private BucketStatus status = BucketStatus.DOING;
 
-	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-	private boolean isAutoAllocate;
+	private Boolean isAutoAllocate;
 
 	private BigDecimal allocateAmount;
 
@@ -79,5 +79,7 @@ public class Bucket extends BaseEntity {
 	private BigDecimal safeBox;
 
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-	private boolean isRecommended;
+	private Boolean isRecommended;
+	private Long originId;
+
 }

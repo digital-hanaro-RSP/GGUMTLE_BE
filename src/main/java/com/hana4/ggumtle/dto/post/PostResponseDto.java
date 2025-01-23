@@ -2,6 +2,7 @@ package com.hana4.ggumtle.dto.post;
 
 import com.hana4.ggumtle.dto.BaseDto;
 import com.hana4.ggumtle.dto.user.UserResponseDto;
+import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.post.Post;
 import com.hana4.ggumtle.model.entity.post.PostType;
 
@@ -28,37 +29,15 @@ public class PostResponseDto {
 		private String imageUrls;
 		private String content;
 		private PostType postType;
-		private boolean isLiked;
-
-		public static PostInfo from(Post post, boolean isLiked) {
-			return PostInfo.builder()
-				.id(post.getId())
-				.userId(post.getUser().getId())
-				.groupId(post.getGroup().getId())
-				.snapShot(post.getSnapshot())
-				.imageUrls(post.getImageUrls())
-				.content(post.getContent())
-				.postType(post.getPostType())
-				.isLiked(isLiked)
-				.createdAt(post.getCreatedAt())
-				.updatedAt(post.getUpdatedAt())
-				.build();
-		}
-	}
-
-	@Getter
-	@NoArgsConstructor(access = AccessLevel.PROTECTED)
-	@AllArgsConstructor
-	@ToString
-	@SuperBuilder
-	public static class PostDetail extends PostInfo {
 		private UserResponseDto.BriefInfo userBriefInfo;
+		private GroupCategory groupCategory;
+		private boolean isLiked;
+		private boolean isMine;
 		private int likeCount;
 		private int commentCount;
-		private boolean isLiked;
 
-		public static PostDetail from(Post post, boolean isLiked, int likeCount, int commentCount) {
-			return PostDetail.builder()
+		public static PostInfo from(Post post, boolean isLiked, boolean isMine, int likeCount, int commentCount) {
+			return PostInfo.builder()
 				.id(post.getId())
 				.userId(post.getUser().getId())
 				.groupId(post.getGroup().getId())
@@ -70,8 +49,31 @@ public class PostResponseDto {
 				.likeCount(likeCount)
 				.commentCount(commentCount)
 				.isLiked(isLiked)
+				.isMine(isMine)
 				.createdAt(post.getCreatedAt())
 				.updatedAt(post.getUpdatedAt())
+				.build();
+		}
+	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@ToString
+	@SuperBuilder
+	public static class ShareInfo extends BaseDto {
+		private Long id;
+		private String content;
+		private UserResponseDto.BriefInfo briefInfo;
+		private PostType postType;
+
+		public static ShareInfo from(Post post) {
+			return ShareInfo.builder()
+				.id(post.getId())
+				.content(post.getContent())
+				.briefInfo(UserResponseDto.BriefInfo.from(post.getUser()))
+				.postType(post.getPostType())
+				.createdAt(post.getCreatedAt())
 				.build();
 		}
 	}

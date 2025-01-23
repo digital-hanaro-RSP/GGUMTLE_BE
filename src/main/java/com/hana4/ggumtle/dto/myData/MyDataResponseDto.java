@@ -20,29 +20,25 @@ public class MyDataResponseDto {
 	@ToString
 	@SuperBuilder
 	public static class CurrentPortfolio {
-		private BigDecimal depositWithdrawalRatio;
-		private BigDecimal savingTimeDepositRatio;
-		private BigDecimal investmentRatio;
-		private BigDecimal foreignCurrencyRatio;
-		private BigDecimal pensionRatio;
-		private BigDecimal etcRatio;
+		private BigDecimal depositWithdrawal;
+		private BigDecimal savingTimeDeposit;
+		private BigDecimal investment;
+		private BigDecimal foreignCurrency;
+		private BigDecimal pension;
+		private BigDecimal etc;
+		private long id;
+		private String userId;
 
 		public static CurrentPortfolio from(MyData myData) {
-			BigDecimal sum =
-				myData.getDepositWithdrawal()
-					.add(myData.getSavingTimeDeposit())
-					.add(myData.getInvestment())
-					.add(myData.getForeignCurrency())
-					.add(myData.getPension())
-					.add(myData.getEtc());
-
 			return CurrentPortfolio.builder()
-				.depositWithdrawalRatio(myData.getDepositWithdrawal().divide(sum, 4, BigDecimal.ROUND_HALF_UP))
-				.savingTimeDepositRatio(myData.getSavingTimeDeposit().divide(sum, 4, BigDecimal.ROUND_HALF_UP))
-				.investmentRatio(myData.getInvestment().divide(sum, 4, BigDecimal.ROUND_HALF_UP))
-				.foreignCurrencyRatio(myData.getForeignCurrency().divide(sum, 4, BigDecimal.ROUND_HALF_UP))
-				.pensionRatio(myData.getPension().divide(sum, 4, BigDecimal.ROUND_HALF_UP))
-				.etcRatio(myData.getEtc().divide(sum, 4, BigDecimal.ROUND_HALF_UP))
+				.depositWithdrawal(myData.getDepositWithdrawal())
+				.savingTimeDeposit(myData.getSavingTimeDeposit())
+				.investment(myData.getInvestment())
+				.foreignCurrency(myData.getForeignCurrency())
+				.pension(myData.getPension())
+				.etc(myData.getEtc())
+				.id(myData.getId())
+				.userId(myData.getUser().getId())
 				.build();
 		}
 	}

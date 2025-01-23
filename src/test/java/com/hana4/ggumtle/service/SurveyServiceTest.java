@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.hana4.ggumtle.dto.survey.SurveyRequestDto;
 import com.hana4.ggumtle.dto.survey.SurveyResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.portfolioTemplate.PortfolioTemplate;
 import com.hana4.ggumtle.model.entity.survey.Survey;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -39,6 +40,12 @@ class SurveyServiceTest {
 
 	@InjectMocks
 	private SurveyService surveyService;
+
+	@Mock
+	private DreamAccountService dreamAccountService;
+
+	@Mock
+	private DreamAccount dreamAccount;
 
 	private User user;
 	private SurveyRequestDto.CreateSurvey surveyRequestDto;
@@ -72,16 +79,20 @@ class SurveyServiceTest {
 	@Test
 	void createSurvey_ValidUser_Success() {
 		when(portfolioTemplateService.findByName(anyString())).thenReturn(portfolioTemplate);
-		// Create a mock Survey with a valid User
-		Survey mockSurvey = new Survey();
-		mockSurvey.setUser(user);
-		when(surveyRepository.save(any())).thenReturn(mockSurvey);
+
+		Survey savedSurvey = new Survey();
+		savedSurvey.setUser(user);
+		when(surveyRepository.save(any())).thenReturn(savedSurvey);
+
+		when(userService.addSurveyPermission(any())).thenReturn(user);
+		when(dreamAccountService.createDreamAccount(any(), any())).thenReturn(null);
 
 		SurveyResponseDto.CreateResponse response = surveyService.createSurvey(surveyRequestDto, user);
 
 		assertNotNull(response);
 		verify(goalPortfolioService).createGoalPortfolioAndSave(portfolioTemplate, user);
 		verify(userService).addSurveyPermission(user);
+		verify(dreamAccountService).createDreamAccount(any(), eq(user));
 	}
 
 	@Test

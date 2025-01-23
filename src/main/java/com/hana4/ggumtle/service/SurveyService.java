@@ -1,10 +1,12 @@
 package com.hana4.ggumtle.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.hana4.ggumtle.dto.dreamAccount.DreamAccountRequestDto;
 import com.hana4.ggumtle.dto.survey.SurveyRequestDto;
 import com.hana4.ggumtle.dto.survey.SurveyResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
@@ -25,6 +27,7 @@ public class SurveyService {
 	private final GoalPortfolioService goalPortfolioService;
 	private final UserService userService;
 	private final PortfolioTemplateService portfolioTemplateService;
+	private final DreamAccountService dreamAccountService;
 
 	public SurveyResponseDto.CreateResponse createSurvey(SurveyRequestDto.CreateSurvey surveyRequestDto, User user) {
 
@@ -40,6 +43,13 @@ public class SurveyService {
 
 		// user permission 3으로 update
 		User updatedUser = userService.addSurveyPermission(user);
+
+		// 꿈통장 생성
+		DreamAccountRequestDto.Create dto = DreamAccountRequestDto.Create.builder()
+			.balance(BigDecimal.valueOf(0))
+			.total(BigDecimal.valueOf(0))
+			.build();
+		dreamAccountService.createDreamAccount(dto, updatedUser);
 
 		return SurveyResponseDto.CreateResponse.from(surveyRepository.save(surveyRequestDto.toEntity(updatedUser)));
 	}
