@@ -118,17 +118,19 @@ public class PostService {
 		String search) {
 		GroupCategory groupCategory;
 
-		try {
-			groupCategory = GroupCategory.valueOf(category.toUpperCase());
-		} catch (IllegalArgumentException ie) {
-			groupCategory = null;
-		}
+		if (category != null) {
+			try {
+				groupCategory = GroupCategory.valueOf(category.toUpperCase());
+			} catch (IllegalArgumentException ie) {
+				groupCategory = null;
+			}
 
-		if (groupCategory != null) {
-			return postRepository.findAllPostsGroupedByGroupCategory(pageable, groupCategory)
-				.map(post -> PostResponseDto.PostInfo.from(post, isAuthorLike(post.getId(), user.getId()),
-					post.getUser().getId().equals(user.getId()), countLikeByPostId(post.getId()),
-					commentService.countCommentByPostId(post.getId())));
+			if (groupCategory != null) {
+				return postRepository.findAllPostsGroupedByGroupCategory(pageable, groupCategory)
+					.map(post -> PostResponseDto.PostInfo.from(post, isAuthorLike(post.getId(), user.getId()),
+						post.getUser().getId().equals(user.getId()), countLikeByPostId(post.getId()),
+						commentService.countCommentByPostId(post.getId())));
+			}
 		}
 
 		if (search != null) {
