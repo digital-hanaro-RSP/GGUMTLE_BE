@@ -202,7 +202,8 @@ public class UserService {
 	}
 
 	public void deleteUser(String userId) {
-		if (userRepository.existsById(userId)) {
+		log.info("{} : userId", userId);
+		if (!userRepository.existsById(userId)) {
 			throw new CustomException(ErrorCode.NOT_FOUND, "해당 유저를 찾을 수 없습니다.");
 		}
 
