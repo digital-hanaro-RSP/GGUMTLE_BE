@@ -201,4 +201,11 @@ public class UserService {
 		return UserResponseDto.UserInfo.from(user);
 	}
 
+	public void deleteUser(String userId) {
+		if (userRepository.existsById(userId)) {
+			throw new CustomException(ErrorCode.NOT_FOUND, "해당 유저를 찾을 수 없습니다.");
+		}
+
+		userRepository.deleteById(userId);
+	}
 }
