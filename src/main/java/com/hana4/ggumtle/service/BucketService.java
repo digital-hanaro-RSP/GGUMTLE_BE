@@ -50,13 +50,6 @@ public class BucketService {
 			originBucket.setFollowers(originBucket.getFollowers() + 1);
 			bucketRepository.save(originBucket); // 변경 사항 저장
 		}
-		// 일반 버킷 생성 (isRecommended = false, originId = null)
-		else {
-			if (Boolean.TRUE.equals(requestDto.getIsRecommended())) {
-				throw new CustomException(ErrorCode.INVALID_PARAMETER, "일반 버킷은 isRecommended가 true일 수 없습니다.");
-			}
-		}
-
 		// DreamAccount 조회
 		DreamAccount dreamAccount = dreamAccountRepository.findByUserId(user.getId())
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "DreamAccount를 찾을 수 없습니다."));
