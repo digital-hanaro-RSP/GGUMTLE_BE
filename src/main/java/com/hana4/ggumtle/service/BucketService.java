@@ -1,5 +1,8 @@
 package com.hana4.ggumtle.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,6 +32,10 @@ public class BucketService {
 
 	private final BucketRepository bucketRepository;
 	private final DreamAccountRepository dreamAccountRepository;
+
+	private boolean checkValidUser(User user, Bucket bucket) {
+		return user.getId().equals(bucket.getUser().getId());
+	}
 
 	public BucketResponseDto.BucketInfo createBucket(BucketRequestDto.CreateBucket requestDto, User user) {
 		// 추천하는 버킷 (isRecommended = true, originId = null)
@@ -62,21 +69,57 @@ public class BucketService {
 
 	public BucketResponseDto.BucketInfo updateBucket(User user, Long bucketId,
 		BucketRequestDto.CreateBucket requestDto) {
-		bucketRepository.findById(bucketId)
+		Bucket beforeBucket = bucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷을 찾을 수 없습니다."));
+
+		if (!checkValidUser(user, beforeBucket)) {
+			throw new CustomException(ErrorCode.FORBIDDEN, "수정 권한이 없는 사용자입니다.");
+		}
+
 		DreamAccount dreamAccount = dreamAccountRepository.findByUserId(user.getId())
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "DreamAccount를 찾을 수 없습니다."));
 
-		Bucket bucket = bucketRepository.save(requestDto.toEntity(user, dreamAccount));
-		return BucketResponseDto.BucketInfo.from(bucket);
+		LocalDateTime parsedDueDate = null;
+		if (requestDto.getDueDate() != null) {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+			LocalDate localDate = LocalDate.parse(requestDto.getDueDate(), formatter);
+			parsedDueDate = localDate.atStartOfDay(); // LocalDate -> LocalDateTime (00:00:00)
+		}
+		// Update the fields of the bucket using the builder pattern
+		Bucket updatedBucket = beforeBucket.toBuilder()
+			.user(user)
+			.dreamAccount(dreamAccount)
+			.safeBox(beforeBucket.getSafeBox())
+			.title(requestDto.getTitle())
+			.tagType(requestDto.getTagType())
+			.dueDate(parsedDueDate)
+			.howTo(requestDto.getHowTo())
+			.isDueSet(requestDto.getIsDueSet())
+			.isAutoAllocate(requestDto.getIsAutoAllocate())
+			.allocateAmount(requestDto.getAllocateAmount())
+			.cronCycle(requestDto.getCronCycle())
+			.goalAmount(requestDto.getGoalAmount())
+			.memo(requestDto.getMemo())
+			.isRecommended(requestDto.getIsRecommended())
+			.originId(requestDto.getOriginId())
+			.followers(beforeBucket.getFollowers()) // Assuming followers remain the same or can be modified as needed
+			.build();
+
+		// Save the updated bucket
+		bucketRepository.save(updatedBucket);
+
+		return BucketResponseDto.BucketInfo.from(updatedBucket);
 	}
 
-	public BucketResponseDto.BucketInfo updateBucketStatus(Long bucketId, BucketRequestDto.UpdateBucketStatus updates) {
+	public BucketResponseDto.BucketInfo updateBucketStatus(User user, Long bucketId,
+		BucketRequestDto.UpdateBucketStatus updates) {
 		BucketStatus statusValue = updates.getStatus();
 
 		Bucket bucket = bucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷을 찾을 수 없습니다."));
-
+		if (!checkValidUser(user, bucket)) {
+			throw new CustomException(ErrorCode.FORBIDDEN, "수정 권한이 없는 사용자입니다.");
+		}
 		// Enum 변환
 		bucket.setStatus(statusValue);
 
@@ -85,17 +128,21 @@ public class BucketService {
 
 	}
 
-	public void deleteBucket(Long bucketId) {
+	public void deleteBucket(Long bucketId, User user) {
 		Bucket bucket = bucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷을 찾을 수 없습니다."));
+
+		if (!checkValidUser(user, bucket)) {
+			throw new CustomException(ErrorCode.FORBIDDEN, "삭제 권한이 없는 사용자입니다.");
+		}
 
 		bucketRepository.delete(bucket);
 
 		BucketResponseDto.BucketInfo.from(bucket);
 	}
 
-	public List<BucketResponseDto.BucketInfo> getAllBuckets() {
-		List<Bucket> buckets = bucketRepository.findAll();
+	public List<BucketResponseDto.BucketInfo> getAllBuckets(User user) {
+		List<Bucket> buckets = bucketRepository.findAllByUserId(user.getId());
 
 		return buckets.stream()
 			.map(BucketResponseDto.BucketInfo::from)

@@ -11,7 +11,7 @@ import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
 public interface BucketRepository extends JpaRepository<Bucket, Long> {
 	Optional<Bucket> findById(Long bucketId);
 
-	List<Bucket> findAll();
+	List<Bucket> findAllByUserId(String userId);
 
 	List<Bucket> findByIsRecommendedTrue();
 
