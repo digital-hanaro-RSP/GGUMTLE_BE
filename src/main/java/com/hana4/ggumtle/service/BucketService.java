@@ -31,12 +31,30 @@ public class BucketService {
 	private final DreamAccountRepository dreamAccountRepository;
 
 	public BucketResponseDto.BucketInfo createBucket(BucketRequestDto.CreateBucket requestDto, User user) {
-		if (Boolean.TRUE.equals(requestDto.getIsRecommended()) && requestDto.getOriginId() == null) {
-			throw new CustomException(ErrorCode.INVALID_PARAMETER, "추천 플로우에서는 originId가 필요합니다.");
+		// 추천하는 버킷 (isRecommended = true, originId = null)
+		if (Boolean.TRUE.equals(requestDto.getIsRecommended())) {
+			if (requestDto.getOriginId() != null) {
+				throw new CustomException(ErrorCode.INVALID_PARAMETER, "추천하는 버킷은 originId를 가질 수 없습니다.");
+			}
+			if (requestDto.getFollowers() == null) {
+				throw new CustomException(ErrorCode.INVALID_PARAMETER, "추천하는 버킷은 followers를 가져야 합니다.");
+			}
 		}
+		// 추천된 버킷에서 생성되는 경우 (isRecommended = false, originId != null)
+		else if (requestDto.getOriginId() != null) {
+			// originId에 해당하는 버킷을 조회
+			Bucket originBucket = bucketRepository.findById(requestDto.getOriginId())
+				.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "Origin Bucket을 찾을 수 없습니다."));
+
+			// originBucket의 followers 값 증가
+			originBucket.setFollowers(originBucket.getFollowers() + 1);
+			bucketRepository.save(originBucket); // 변경 사항 저장
+		}
+		// DreamAccount 조회
 		DreamAccount dreamAccount = dreamAccountRepository.findByUserId(user.getId())
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "DreamAccount를 찾을 수 없습니다."));
 
+		// 새로운 버킷 생성
 		Bucket bucket = bucketRepository.save(requestDto.toEntity(user, dreamAccount));
 
 		return BucketResponseDto.BucketInfo.from(bucket);
