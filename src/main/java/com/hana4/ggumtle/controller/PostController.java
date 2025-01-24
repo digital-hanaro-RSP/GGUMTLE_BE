@@ -21,6 +21,8 @@ import com.hana4.ggumtle.dto.advertisement.AdvertisementResponseDto;
 import com.hana4.ggumtle.dto.post.PostLikeResponseDto;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
+import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.AdvertisementService;
@@ -91,9 +93,12 @@ public class PostController {
 	@GetMapping("/group/{groupId}/post")
 	public ResponseEntity<CustomApiResponse<Page<PostResponseDto.PostInfo>>> getPostsByPage(
 		@Parameter(description = "그룹 ID") @PathVariable Long groupId,
-		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "0") int offset,
-		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "10") int limit,
+		@Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int offset,
+		@Parameter(description = "페이지 번호") @RequestParam(defaultValue = "10") int limit,
 		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		if (limit <= 0) {
+			throw new CustomException(ErrorCode.INVALID_PARAMETER, "offset은 0 이상이어야 합니다.");
+		}
 		Pageable pageable = PageRequest.of(offset / limit, limit);
 		return ResponseEntity.ok(
 			CustomApiResponse.success(postService.getPostsByPage(groupId, pageable, customUserDetails.getUser())));
@@ -103,11 +108,14 @@ public class PostController {
 	@ApiResponse(responseCode = "200", description = "게시물 목록 조회 성공")
 	@GetMapping("/post/popular")
 	public ResponseEntity<CustomApiResponse<Page<PostResponseDto.PostInfo>>> getPopularPostsByPage(
-		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "0") int offset,
-		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "10") int limit,
+		@Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int offset,
+		@Parameter(description = "페이지 번호") @RequestParam(defaultValue = "10") int limit,
 		@Parameter(description = "그룹 카테고리") @RequestParam(required = false) GroupCategory category,
 		@Parameter(description = "검색") @RequestParam(required = false) String search,
 		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+		if (limit <= 0) {
+			throw new CustomException(ErrorCode.INVALID_PARAMETER, "offset은 0 이상이어야 합니다.");
+		}
 		Pageable pageable = PageRequest.of(offset / limit, limit);
 		return ResponseEntity.ok(
 			CustomApiResponse.success(
