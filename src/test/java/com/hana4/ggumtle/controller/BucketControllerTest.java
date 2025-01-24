@@ -181,7 +181,8 @@ class BucketControllerTest {
 			.build();
 
 		// mock behavior
-		when(bucketService.updateBucketStatus(eq(bucketId), any(BucketRequestDto.UpdateBucketStatus.class))).thenReturn(
+		when(bucketService.updateBucketStatus(any(User.class), eq(bucketId),
+			any(BucketRequestDto.UpdateBucketStatus.class))).thenReturn(
 			responseDto);
 
 		// when & then

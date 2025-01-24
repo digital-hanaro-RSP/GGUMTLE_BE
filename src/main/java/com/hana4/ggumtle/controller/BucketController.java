@@ -48,7 +48,7 @@ public class BucketController {
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> createBucket(
 		@RequestBody @Valid BucketRequestDto.CreateBucket requestDto,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		
+
 		// Bucket 생성 로직 호출
 		BucketResponseDto.BucketInfo createdBucket = bucketService.createBucket(requestDto, userDetails.getUser());
 
@@ -77,8 +77,11 @@ public class BucketController {
 	@PatchMapping("/{bucketId}")
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> updateBucketStatus(
 		@PathVariable("bucketId") Long bucketId,
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+
 		@RequestBody @Valid BucketRequestDto.UpdateBucketStatus updates) {
-		BucketResponseDto.BucketInfo updatedBucket = bucketService.updateBucketStatus(bucketId, updates);
+		BucketResponseDto.BucketInfo updatedBucket = bucketService.updateBucketStatus(userDetails.getUser(), bucketId,
+			updates);
 
 		return ResponseEntity.ok(CustomApiResponse.success(updatedBucket));
 	}
@@ -88,8 +91,10 @@ public class BucketController {
 		@ApiResponse(responseCode = "200", description = "성공 응답")
 	})
 	@DeleteMapping("/{bucketId}")
-	public ResponseEntity<CustomApiResponse<Void>> deleteBucket(@PathVariable("bucketId") Long bucketId) {
-		bucketService.deleteBucket(bucketId);
+	public ResponseEntity<CustomApiResponse<Void>> deleteBucket(@PathVariable("bucketId") Long bucketId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		bucketService.deleteBucket(bucketId, userDetails.getUser());
 		return ResponseEntity.ok(CustomApiResponse.success(null));
 	}
 
@@ -98,8 +103,9 @@ public class BucketController {
 		@ApiResponse(responseCode = "200", description = "성공 응답")
 	})
 	@GetMapping
-	public ResponseEntity<CustomApiResponse<List<BucketResponseDto.BucketInfo>>> getAllBuckets() {
-		List<BucketResponseDto.BucketInfo> allBuckets = bucketService.getAllBuckets();
+	public ResponseEntity<CustomApiResponse<List<BucketResponseDto.BucketInfo>>> getAllBuckets(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		List<BucketResponseDto.BucketInfo> allBuckets = bucketService.getAllBuckets(userDetails.getUser());
 		return ResponseEntity.ok(CustomApiResponse.success(allBuckets));
 	}
 
@@ -109,6 +115,7 @@ public class BucketController {
 	})
 	@GetMapping("/{bucketId}")
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> getBucketById(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable("bucketId") Long bucketId) {
 		BucketResponseDto.BucketInfo bucketInfo = bucketService.getBucketById(bucketId);
 		return ResponseEntity.ok(CustomApiResponse.success(bucketInfo));
