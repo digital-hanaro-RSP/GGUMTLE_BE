@@ -21,6 +21,7 @@ import com.hana4.ggumtle.dto.advertisement.AdvertisementResponseDto;
 import com.hana4.ggumtle.dto.post.PostLikeResponseDto;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
+import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.AdvertisementService;
 import com.hana4.ggumtle.service.PostService;
@@ -104,7 +105,7 @@ public class PostController {
 	public ResponseEntity<CustomApiResponse<Page<PostResponseDto.PostInfo>>> getPopularPostsByPage(
 		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "0") int offset,
 		@Parameter(description = "페이지 번호") @RequestParam(required = false, defaultValue = "10") int limit,
-		@Parameter(description = "그룹 카테고리") @RequestParam(required = false) String category,
+		@Parameter(description = "그룹 카테고리") @RequestParam(required = false) GroupCategory category,
 		@Parameter(description = "검색") @RequestParam(required = false) String search,
 		@Parameter(hidden = true) @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 		Pageable pageable = PageRequest.of(offset / limit, limit);

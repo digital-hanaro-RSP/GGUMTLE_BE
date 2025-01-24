@@ -1,5 +1,8 @@
 package com.hana4.ggumtle.model.entity.post;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -36,6 +39,7 @@ public class Post extends BaseEntity {
 	private User user;
 
 	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "groupId", nullable = false, foreignKey = @ForeignKey(name = "fk_Post_groupId_Group"))
 	private Group group;
 

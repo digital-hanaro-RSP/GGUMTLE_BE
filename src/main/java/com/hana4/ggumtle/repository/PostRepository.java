@@ -20,8 +20,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 		countQuery = "SELECT COUNT(DISTINCT p) FROM Post p")
 	Page<Post> findAllPostsWithLikeCount(Pageable pageable);
 
-	@Query("SELECT p, g FROM Post p JOIN p.group g WHERE g.category = :category ")
-	Page<Post> findAllPostsGroupedByGroupCategory(Pageable pageable, @Param("category") GroupCategory category);
+	@Query("SELECT p FROM Post p JOIN p.group g WHERE g.category = :groupCategory ")
+	Page<Post> findAllPostsGroupedByGroupCategory(Pageable pageable,
+		@Param("groupCategory") GroupCategory groupCategory);
 
 	@Query("SELECT p FROM Post p WHERE p.content LIKE %:search%")
 	Page<Post> findAllPostsWithSearchParam(Pageable pageable, @Param("search") String search);
