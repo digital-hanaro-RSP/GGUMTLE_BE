@@ -114,23 +114,13 @@ public class PostService {
 			});
 	}
 
-	public Page<PostResponseDto.PostInfo> getPopularPostsByPage(Pageable pageable, User user, String category,
-		String search) {
-		GroupCategory groupCategory;
-
-		if (category != null) {
-			try {
-				groupCategory = GroupCategory.valueOf(category.toUpperCase());
-			} catch (IllegalArgumentException ie) {
-				groupCategory = null;
-			}
-
-			if (groupCategory != null) {
-				return postRepository.findAllPostsGroupedByGroupCategory(pageable, groupCategory)
-					.map(post -> PostResponseDto.PostInfo.from(post, isAuthorLike(post.getId(), user.getId()),
-						post.getUser().getId().equals(user.getId()), countLikeByPostId(post.getId()),
-						commentService.countCommentByPostId(post.getId())));
-			}
+	public Page<PostResponseDto.PostInfo> getPopularPostsByPage(Pageable pageable, User user,
+		GroupCategory groupCategory, String search) {
+		if (groupCategory != null) {
+			return postRepository.findAllPostsGroupedByGroupCategory(pageable, groupCategory)
+				.map(post -> PostResponseDto.PostInfo.from(post, isAuthorLike(post.getId(), user.getId()),
+					post.getUser().getId().equals(user.getId()), countLikeByPostId(post.getId()),
+					commentService.countCommentByPostId(post.getId())));
 		}
 
 		if (search != null) {
