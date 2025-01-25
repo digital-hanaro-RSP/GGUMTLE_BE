@@ -2,6 +2,9 @@ package com.hana4.ggumtle.model.entity.myData;
 
 import java.math.BigDecimal;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.hana4.ggumtle.model.entity.user.User;
 
 import jakarta.persistence.Column;
@@ -31,6 +34,7 @@ public class MyData {
 	private Long id;
 
 	@OneToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_MyData_userId_User"))
 	private User user;
 
