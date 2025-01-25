@@ -2,6 +2,9 @@ package com.hana4.ggumtle.model.entity.goalPortfolio;
 
 import java.math.BigDecimal;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.portfolioTemplate.PortfolioTemplate;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -33,6 +36,7 @@ public class GoalPortfolio extends BaseEntity {
 	private Long id;
 
 	@OneToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_GoalPortfolio_userId_User"))
 	private User user;
 
