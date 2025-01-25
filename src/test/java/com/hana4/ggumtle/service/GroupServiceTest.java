@@ -47,7 +47,6 @@ public class GroupServiceTest {
 
 	@Test
 	void createGroup_성공() {
-		//given
 		Group mockGroup = Group.builder()
 			.id(1L)
 			.name("타이거우즈")
@@ -73,11 +72,9 @@ public class GroupServiceTest {
 
 		when(groupRepository.save(any(Group.class))).thenReturn(mockGroup);
 
-		// when
 		GroupResponseDto.CreateGroup expectedResponse = GroupResponseDto.CreateGroup.from(mockGroup, 1);
 		GroupResponseDto.CreateGroup actualResponse = groupService.createGroup(request, mockUser);
 
-		// then
 		assertNotNull(actualResponse);
 		assertEquals(expectedResponse.getId(), actualResponse.getId());
 		assertEquals(expectedResponse.getName(), actualResponse.getName());
@@ -92,7 +89,6 @@ public class GroupServiceTest {
 
 	@Test
 	void getAllGroupsWithMemberCount_성공() {
-		// given
 		GroupCategory category = GroupCategory.HOBBY;
 		String search = null;  // 모든 그룹 조회를 위해 null로 설정
 		Pageable pageable = PageRequest.of(0, 10);
@@ -107,17 +103,13 @@ public class GroupServiceTest {
 			.build();
 
 		Object[] mockResult = new Object[] {mockGroup, 5L}; // 그룹과 멤버 수를 반환하는 결과
-		// Page<Object[]> mockPage = new PageImpl<Object[]>(List.of(mockResult), pageable, 1);
 		Page<Object[]> mockPage = new PageImpl<>(Collections.singletonList(mockResult), pageable, 1);
 
-		// stubbing
 		Mockito.when(groupRepository.findGroupsWithFilters(null, category, search, pageable))
 			.thenReturn(mockPage);
 
-		// when
 		Page<GroupResponseDto.Read> result = groupService.getAllGroupsWithMemberCount(category, search, pageable);
 
-		// then
 		assertNotNull(result);
 		assertEquals(1, result.getTotalElements());
 		GroupResponseDto.Read dto = result.getContent().get(0);
@@ -129,7 +121,6 @@ public class GroupServiceTest {
 
 	@Test
 	void getMyGroupsWithMemberCount_성공() {
-		// given
 		String userId = "test-user-id";
 		GroupCategory category = GroupCategory.INVESTMENT;
 		String search = "투자";
@@ -148,11 +139,9 @@ public class GroupServiceTest {
 
 		when(groupRepository.findGroupsWithFilters(userId, category, search, pageable)).thenReturn(mockPage);
 
-		// when
 		Page<GroupResponseDto.Read> result = groupService.getMyGroupsWithMemberCount(userId, category, search,
 			pageable);
 
-		// then
 		assertThat(result).isNotNull();
 		assertThat(result.getTotalElements()).isEqualTo(1);
 		GroupResponseDto.Read dto = result.getContent().get(0);
@@ -163,7 +152,6 @@ public class GroupServiceTest {
 
 	@Test
 	void leaveGroup_성공() {
-		// given
 		Long groupId = 1L;
 
 		User mockUser = User.builder()
@@ -200,28 +188,23 @@ public class GroupServiceTest {
 			.thenReturn(Optional.of(mockGroupMember));
 
 		Mockito.when(groupMemberRepository.countByGroup(mockGroup))
-			.thenReturn(0); // Remaining members are 0, so the group will be deleted
+			.thenReturn(0);
 
-		// when
 		GroupMemberResponseDto.LeaveGroup response = groupService.leaveGroup(groupId, mockUser);
 
-		// then
 		assertNotNull(response);
 		assertEquals(mockGroupMember.getGroup(), response.getGroupId());
 		assertEquals(mockGroupMember.getUser(), response.getUserId());
 
-		// verify that the group member was deleted
 		Mockito.verify(groupMemberRepository, Mockito.times(1))
 			.delete(mockGroupMember);
 
-		// verify that the group was deleted because remainingMembers == 0
 		Mockito.verify(groupRepository, Mockito.times(1))
 			.delete(mockGroup);
 	}
 
 	@Test
 	void leaveGroup_그룹없음_실패() {
-		// given
 		Long groupId = 1L;
 		User mockUser = User.builder()
 			.id("1")
@@ -230,14 +213,12 @@ public class GroupServiceTest {
 
 		when(groupRepository.findById(groupId)).thenReturn(Optional.empty());
 
-		// when & then
 		assertThrows(CustomException.class, () ->
 			groupService.leaveGroup(groupId, mockUser));
 	}
 
 	@Test
 	void leaveGroup_멤버없음_실패() {
-		// given
 		Long groupId = 1L;
 		User mockUser = User.builder()
 			.id("3")
@@ -253,14 +234,12 @@ public class GroupServiceTest {
 		when(groupMemberRepository.findByGroupAndUser(mockGroup, mockUser))
 			.thenReturn(Optional.empty());
 
-		// when & then
 		assertThrows(CustomException.class, () ->
 			groupService.leaveGroup(groupId, mockUser));
 	}
 
 	@Test
 	void joinGroup_성공() {
-		// given
 		Long groupId = 1L;
 		User mockUser = new User(
 			"1",
@@ -297,10 +276,8 @@ public class GroupServiceTest {
 		when(groupMemberRepository.existsByGroupAndUser(mockGroup, mockUser)).thenReturn(false);
 		when(groupMemberRepository.save(any(GroupMember.class))).thenReturn(mockGroupMember);
 
-		// when
 		GroupMemberResponseDto.JoinGroup response = groupService.joinGroup(groupId, request, mockUser);
 
-		// then
 		assertNotNull(response);
 		assertEquals(mockGroupMember.getId(), response.getId());
 		assertEquals(mockGroup, response.getGroupId());
@@ -313,7 +290,6 @@ public class GroupServiceTest {
 
 	@Test
 	void joinGroup_그룹없음_실패() {
-		// given
 		Long groupId = 1L;
 		User mockUser = new User(
 			"1",
@@ -342,7 +318,6 @@ public class GroupServiceTest {
 
 	@Test
 	void joinGroup_이미존재하는멤버_실패() {
-		// given
 		Long groupId = 1L;
 		User mockUser = new User(
 			"1",
@@ -372,7 +347,6 @@ public class GroupServiceTest {
 		when(groupRepository.findById(groupId)).thenReturn(Optional.of(mockGroup));
 		when(groupMemberRepository.existsByGroupAndUser(mockGroup, mockUser)).thenReturn(true);
 
-		// when & then
 		CustomException exception = assertThrows(CustomException.class, () ->
 			groupService.joinGroup(groupId, request, mockUser));
 		assertEquals(ErrorCode.ALREADY_EXISTS, exception.getErrorCode());
@@ -381,7 +355,6 @@ public class GroupServiceTest {
 	@Test
 	@WithMockUser(username = "testUser")
 	void leaveGroup_그룹자동삭제() {
-		// Given
 		Long groupId = 1L;
 		Group group = new Group();
 		group.setId(groupId);
@@ -397,22 +370,18 @@ public class GroupServiceTest {
 		when(groupMemberRepository.findByGroupAndUser(group, user)).thenReturn(Optional.of(groupMember));
 		when(groupMemberRepository.countByGroup(group)).thenReturn(0); // 마지막 멤버 시뮬레이션
 
-		// When
 		GroupMemberResponseDto.LeaveGroup result = groupService.leaveGroup(groupId, user);
 
-		// Then
 		assertNotNull(result);
 		verify(groupMemberRepository).delete(groupMember);
 		verify(groupRepository).delete(group);
 		verify(groupMemberRepository).countByGroup(group);
 
-		// 추가 검증
 		verifyNoMoreInteractions(groupRepository, groupMemberRepository);
 	}
 
 	@Test
 	void leaveGroup_마지막멤버가_아닐경우() {
-		// Given
 		Long groupId = 1L;
 		Group group = new Group();
 		group.setId(groupId);
@@ -428,17 +397,52 @@ public class GroupServiceTest {
 		when(groupMemberRepository.findByGroupAndUser(group, user)).thenReturn(Optional.of(groupMember));
 		when(groupMemberRepository.countByGroup(group)).thenReturn(1); // 마지막 멤버가 아님을 시뮬레이션
 
-		// When
 		GroupMemberResponseDto.LeaveGroup result = groupService.leaveGroup(groupId, user);
 
-		// Then
 		assertNotNull(result);
 		verify(groupMemberRepository).delete(groupMember);
 		verify(groupMemberRepository).countByGroup(group);
 		verify(groupRepository, never()).delete(group); // 그룹이 삭제되지 않아야 함
 
-		// 추가 검증
 		verifyNoMoreInteractions(groupRepository, groupMemberRepository);
+	}
+
+	@Test
+	void IsMemberOfGroup_성공() {
+		Long groupId = 1L;
+		String userId = "user123";
+		when(groupRepository.existsById(groupId)).thenReturn(true);
+		when(groupMemberRepository.existsByGroupIdAndUserId(groupId, userId)).thenReturn(true);
+		boolean result = groupService.isMemberOfGroup(groupId, userId);
+		assertTrue(result);
+		verify(groupRepository).existsById(groupId);
+		verify(groupMemberRepository).existsByGroupIdAndUserId(groupId, userId);
+	}
+
+	@Test
+	void IsMemberOfGroup_그룹에존재하지않는멤버() {
+		Long groupId = 1L;
+		String userId = "user123";
+		when(groupRepository.existsById(groupId)).thenReturn(true);
+		when(groupMemberRepository.existsByGroupIdAndUserId(groupId, userId)).thenReturn(false);
+		boolean result = groupService.isMemberOfGroup(groupId, userId);
+		assertFalse(result);
+		verify(groupRepository).existsById(groupId);
+		verify(groupMemberRepository).existsByGroupIdAndUserId(groupId, userId);
+	}
+
+	@Test
+	void IsMemberOfGroup_해당그룹없음() {
+		Long groupId = 1L;
+		String userId = "user123";
+		when(groupRepository.existsById(groupId)).thenReturn(false);
+		CustomException exception = assertThrows(CustomException.class, () -> {
+			groupService.isMemberOfGroup(groupId, userId);
+		});
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+		assertEquals("찾는 그룹이 없습니다.", exception.getMessage());
+		verify(groupRepository).existsById(groupId);
+		verifyNoInteractions(groupMemberRepository);
 	}
 
 	@Test
