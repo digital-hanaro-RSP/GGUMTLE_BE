@@ -35,6 +35,7 @@ public class Post extends BaseEntity {
 	private Long id;
 
 	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_Post_userId_User"))
 	private User user;
 
