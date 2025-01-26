@@ -600,7 +600,7 @@ class PostServiceTest {
 			.build();
 		Post post = new Post();
 		when(groupService.getGroup(eq(1L))).thenReturn(group);
-		when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
+		when(groupService.isMemberOfGroup(groupId, user.getId())).thenReturn(true);
 		when(postRepository.findById(eq(1L))).thenReturn(Optional.of(post));
 		post.setImageUrls(newImageUrl);
 		post.setContent(newContent);
@@ -655,7 +655,7 @@ class PostServiceTest {
 			.build();
 
 		when(groupService.getGroup(group.getId())).thenReturn(group);
-		when(groupService.isMatchedGroupUser(eq(user), eq(group))).thenReturn(false);
+		when(groupService.isMemberOfGroup(group.getId(), user.getId())).thenReturn(true);
 
 		assertThrows(CustomException.class, () -> {
 			postService.updatePost(group.getId(), 1L, write, user);
@@ -691,7 +691,7 @@ class PostServiceTest {
 			.imageUrls(newImageUrl)
 			.build();
 		when(groupService.getGroup(eq(1L))).thenReturn(group);
-		when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
+		when(groupService.isMemberOfGroup(groupId, user.getId())).thenReturn(true);
 		when(postRepository.findById(eq(1L))).thenReturn(Optional.of(post));
 
 		assertThrows(CustomException.class, () -> {
@@ -723,7 +723,7 @@ class PostServiceTest {
 		post.setUser(user);
 		post.setId(1L);
 		when(groupService.getGroup(eq(1L))).thenReturn(group);
-		when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
+		when(groupService.isMemberOfGroup(groupId, user.getId())).thenReturn(true);
 		when(postRepository.findById(eq(1L))).thenReturn(Optional.of(post));
 
 		postService.deletePost(groupId, post.getId(), user);
@@ -754,7 +754,8 @@ class PostServiceTest {
 			"https://example.com/group-image.jpg" // imageUrl
 		);
 		when(groupService.getGroup(group.getId())).thenReturn(group);
-		when(groupService.isMatchedGroupUser(eq(user), eq(group))).thenReturn(false);
+		when(groupService.isMemberOfGroup(group.getId(), user.getId())).thenReturn(false);
+
 
 		assertThrows(CustomException.class, () -> {
 			postService.deletePost(group.getId(), 1L, user);
@@ -783,7 +784,8 @@ class PostServiceTest {
 		newUser.setId("2");
 		post.setUser(newUser);
 		when(groupService.getGroup(eq(1L))).thenReturn(group);
-		when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
+		// when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
+		when(groupService.isMemberOfGroup(groupId, user.getId())).thenReturn(true);
 		when(postRepository.findById(eq(1L))).thenReturn(Optional.of(post));
 
 		assertThrows(CustomException.class, () -> {

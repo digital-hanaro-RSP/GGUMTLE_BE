@@ -48,7 +48,7 @@ public class PostService {
 
 	private boolean checkUserWithGroup(Long groupId, User user) {
 		Group group = groupService.getGroup(groupId);
-		return groupService.isMatchedGroupUser(user, group);
+		return groupService.isMemberOfGroup(groupId, user.getId());
 	}
 
 	private String makeSnapShot(PostRequestDto.Write postRequestDto, User user) throws
