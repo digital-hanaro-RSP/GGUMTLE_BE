@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hana4.ggumtle.dto.bucket.BucketResponseDto;
+import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
 import com.hana4.ggumtle.dto.post.PostLikeResponseDto;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
@@ -54,7 +54,7 @@ public class PostService {
 	private String makeSnapShot(PostRequestDto.Write postRequestDto, User user) throws
 		JsonProcessingException {
 		Map<String, Object> snapShotResponse = new HashMap<>();
-		List<BucketResponseDto.BriefInfo> bucketList = new ArrayList<>();
+		List<BucketResponseDto.BucketInfo> bucketList = new ArrayList<>();
 
 		Map<String, Object> snapShot = objectMapper.readValue(postRequestDto.getSnapShot(),
 			new TypeReference<>() {
@@ -72,7 +72,7 @@ public class PostService {
 		}
 
 		for (int bucketId : bucketIds) {
-			bucketList.add(BucketResponseDto.BriefInfo.from(bucketService.getBucket((long)bucketId)));
+			bucketList.add(BucketResponseDto.BucketInfo.from(bucketService.getBucket((long)bucketId)));
 		}
 
 		snapShotResponse.put("bucketLists", bucketList);
