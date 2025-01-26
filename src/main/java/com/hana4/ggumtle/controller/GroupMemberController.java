@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hana4.ggumtle.dto.CustomApiResponse;
+import com.hana4.ggumtle.dto.groupMember.GroupMemberResponseDto;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.GroupService;
@@ -48,7 +49,7 @@ public class GroupMemberController {
 		)
 	})
 	@GetMapping("/{groupId}/membership")
-	public ResponseEntity<CustomApiResponse<Boolean>> isMemberOfGroup(
+	public ResponseEntity<CustomApiResponse<GroupMemberResponseDto.MemberShip>> isMemberOfGroup(
 		@Parameter(description = "조회할 그룹의 ID", required = true, example = "1")
 		@PathVariable Long groupId,
 		@AuthenticationPrincipal CustomUserDetails customUserDetails // 헤더에서 사용자 정보 추출
@@ -59,6 +60,7 @@ public class GroupMemberController {
 		// 해당 그룹에 사용자가 가입되어 있는지 여부 확인
 		boolean isMember = groupService.isMemberOfGroup(groupId, user.getId());
 
-		return ResponseEntity.ok(CustomApiResponse.success(isMember));
+		return ResponseEntity.ok(CustomApiResponse.success(
+			GroupMemberResponseDto.MemberShip.from(groupService.getGroup(groupId), isMember)));
 	}
 }

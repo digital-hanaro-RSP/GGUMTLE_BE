@@ -9,10 +9,13 @@ import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
 import com.hana4.ggumtle.model.entity.user.User;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Generated;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Generated
@@ -57,6 +60,23 @@ public class GroupMemberResponseDto {
 				.groupId(groupMember.getGroup())
 				.userId(groupMember.getUser())
 				.leavedAt(LocalDateTime.now())
+				.build();
+		}
+	}
+
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@ToString
+	@SuperBuilder
+	public static class MemberShip {
+		private String groupName;
+		private Boolean isMember;
+
+		public static MemberShip from(Group group, boolean isMember) {
+			return MemberShip.builder()
+				.groupName(group.getName())
+				.isMember(isMember)
 				.build();
 		}
 	}
