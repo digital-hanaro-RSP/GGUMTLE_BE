@@ -61,4 +61,8 @@ public class GoalPortfolio extends BaseEntity {
 	@ManyToOne
 	@JoinColumn(name = "templateId", nullable = false, foreignKey = @ForeignKey(name = "fk_GoalPortfolio_templateId_PortfolioTemplate"))
 	private PortfolioTemplate template;
+
+	@ManyToOne
+	@JoinColumn(name = "customizedTemplateId", foreignKey = @ForeignKey(name = "fk_GoalPortfolio_customizedTemplateId_PortfolioTemplate"))
+	private PortfolioTemplate customizedTemplate;
 }

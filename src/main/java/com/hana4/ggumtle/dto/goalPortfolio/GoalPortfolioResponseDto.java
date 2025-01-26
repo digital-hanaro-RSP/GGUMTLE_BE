@@ -1,9 +1,12 @@
 package com.hana4.ggumtle.dto.goalPortfolio;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.hana4.ggumtle.dto.BaseDto;
 import com.hana4.ggumtle.model.entity.goalPortfolio.GoalPortfolio;
+import com.hana4.ggumtle.model.entity.portfolioTemplate.PortfolioTemplate;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
@@ -65,6 +68,94 @@ public class GoalPortfolioResponseDto {
 			return InvestmentType.builder()
 				.investmentType(goalPortfolio.getTemplate().getName())
 				.userName(userName)
+				.build();
+		}
+	}
+
+	@Schema(description = "목표 포트폴리오 템플릿 목록 반환 DTO")
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@ToString
+	@Builder
+	public static class GoalTemplateOption {
+		private List<Template> templates;
+
+		public static GoalTemplateOption from(List<PortfolioTemplate> portfolioTemplates) {
+			List<Template> templates = portfolioTemplates.stream()
+				.map(Template::from)
+				.collect(Collectors.toList());
+
+			return GoalTemplateOption.builder()
+				.templates(templates)
+				.build();
+		}
+	}
+
+	@Schema(description = "목표 포트폴리오 템플릿 반환 DTO")
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@ToString
+	@Builder
+	public static class Template {
+		@Schema(description = "id", example = "1")
+		private long id;
+		@Schema(description = "템플릿명", example = "CONSERVATIVE")
+		private String name;
+		@Schema(description = "입출금 비율", example = "0")
+		private BigDecimal depositWithdrawalRatio;
+		@Schema(description = "예적금 비율", example = "0.70")
+		private BigDecimal savingTimeDepositRatio;
+		@Schema(description = "투자 비율", example = "0.20")
+		private BigDecimal investmentRatio;
+		@Schema(description = "외화 비율", example = "0")
+		private BigDecimal foreignCurrencyRatio;
+		@Schema(description = "연금 비율", example = "0.10")
+		private BigDecimal pensionRatio;
+		@Schema(description = "기타 비율", example = "0")
+		private BigDecimal etcRatio;
+
+		public static Template from(PortfolioTemplate portfolioTemplate) {
+			return Template.builder()
+				.id(portfolioTemplate.getId())
+				.name(portfolioTemplate.getName())
+				.depositWithdrawalRatio(portfolioTemplate.getDepositWithdrawalRatio())
+				.savingTimeDepositRatio(portfolioTemplate.getSavingTimeDepositRatio())
+				.investmentRatio(portfolioTemplate.getInvestmentRatio())
+				.foreignCurrencyRatio(portfolioTemplate.getForeignCurrencyRatio())
+				.pensionRatio(portfolioTemplate.getPensionRatio())
+				.etcRatio(portfolioTemplate.getEtcRatio())
+				.build();
+		}
+	}
+
+	@Schema(description = "추천 목표 포트폴리오 반환 DTO")
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@ToString
+	@Builder
+	public static class RecommendGoalPortfolioInfo {
+		private boolean isRecommended;
+		private String investmentType;
+		private String upOrDown;
+		private BigDecimal currentInvestAmount;
+		private BigDecimal estimatedInvestAmount;
+
+		public static RecommendGoalPortfolioInfo from(
+			boolean isRecommended,
+			String investmentType,
+			String upOrDown,
+			BigDecimal currentInvestAmount,
+			BigDecimal estimatedInvestAmount
+		) {
+			return RecommendGoalPortfolioInfo.builder()
+				.isRecommended(isRecommended)
+				.investmentType(investmentType)
+				.upOrDown(upOrDown)
+				.currentInvestAmount(currentInvestAmount)
+				.estimatedInvestAmount(estimatedInvestAmount)
 				.build();
 		}
 	}
