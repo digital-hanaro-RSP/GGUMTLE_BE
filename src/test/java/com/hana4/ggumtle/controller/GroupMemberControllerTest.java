@@ -18,6 +18,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.hana4.ggumtle.WithMockCustomUser;
+import com.hana4.ggumtle.model.entity.group.Group;
+import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.security.filter.JwtAuthFilter;
@@ -59,17 +61,27 @@ class GroupMemberControllerTest {
 	void isMemberOfGroup_멤버인_경우() throws Exception {
 		Long groupId = 1L;
 
+		Group group = new Group(
+			groupId, // id
+			"여행자 모임", // name
+			GroupCategory.TRAVEL, // category (가정: GroupCategory.TECH)
+			"여행 관련 정보와 기술을 공유하는 모임입니다.", // description
+			"https://example.com/group-image.jpg" // imageUrl
+		);
+
 		CustomUserDetails userDetails = createMockUserDetails();
 
 		when(groupService.isMemberOfGroup(eq(groupId), eq(userDetails.getUser().getId())))
 			.thenReturn(true);
+		when(groupService.getGroup(groupId)).thenReturn(group);
 
 		mockMvc.perform(get("/community/groupMember/{groupId}/membership", groupId)
 				.with(user(userDetails)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("ok"))
-			.andExpect(jsonPath("$.data").value(true))
+			.andExpect(jsonPath("$.data.isMember").value(true))
+			.andExpect(jsonPath("$.data.groupName").value(group.getName()))
 			.andDo(print());
 
 		verify(groupService).isMemberOfGroup(eq(groupId), eq(userDetails.getUser().getId()));
@@ -80,18 +92,29 @@ class GroupMemberControllerTest {
 	void isMemberOfGroup_멤버가_아닌_경우() throws Exception {
 		Long groupId = 1L;
 
+		Group group = new Group(
+			groupId, // id
+			"여행자 모임", // name
+			GroupCategory.TRAVEL, // category (가정: GroupCategory.TECH)
+			"여행 관련 정보와 기술을 공유하는 모임입니다.", // description
+			"https://example.com/group-image.jpg" // imageUrl
+		);
+
 		// 모의 사용자 설정 (테스트용 사용자)
 		CustomUserDetails userDetails = createMockUserDetails();
 
 		when(groupService.isMemberOfGroup(eq(groupId), eq(userDetails.getUser().getId())))
 			.thenReturn(false);
+		when(groupService.getGroup(groupId)).thenReturn(group);
+
 
 		mockMvc.perform(get("/community/groupMember/{groupId}/membership", groupId)
 				.with(user(userDetails)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("ok"))
-			.andExpect(jsonPath("$.data").value(false))
+			.andExpect(jsonPath("$.data.isMember").value(false))
+			.andExpect(jsonPath("$.data.groupName").value(group.getName()))
 			.andDo(print());
 
 		verify(groupService).isMemberOfGroup(eq(groupId), eq(userDetails.getUser().getId()));

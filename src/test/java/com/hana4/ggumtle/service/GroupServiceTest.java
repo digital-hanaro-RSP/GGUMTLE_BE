@@ -444,10 +444,4 @@ public class GroupServiceTest {
 		verify(groupRepository).existsById(groupId);
 		verifyNoInteractions(groupMemberRepository);
 	}
-
-	@Test
-	void isMatchedGroupUser() {
-		when(groupMemberRepository.findByGroupAndUser(any(), any())).thenReturn(Optional.empty());
-		assertThat(groupService.isMatchedGroupUser(new User(), new Group())).isEqualTo(false);
-	}
 }
