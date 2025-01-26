@@ -130,8 +130,4 @@ public class GroupService {
 		return groupRepository.findById(groupId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 그룹이 존재하지 않습니다."));
 	}
-
-	public boolean isMatchedGroupUser(User user, Group group) {
-		return groupMemberRepository.findByGroupAndUser(group, user).isPresent();
-	}
 }

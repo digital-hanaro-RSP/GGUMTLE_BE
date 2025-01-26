@@ -34,6 +34,7 @@ import com.hana4.ggumtle.model.entity.bucket.Bucket;
 import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
 import com.hana4.ggumtle.model.entity.bucket.BucketStatus;
 import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
+import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.groupMember.GroupMember;
@@ -164,9 +165,16 @@ class PostServiceTest {
 			"https://example.com/group-image.jpg" // imageUrl
 		);
 
+		DreamAccount dreamAccount = DreamAccount.builder()
+			.id(1L)
+			.user(user)
+			.balance(BigDecimal.valueOf(10000))
+			.total(BigDecimal.valueOf(10000))
+			.build();
+
 		Bucket bucket = Bucket.builder()
 			.id(1L) // ID는 보통 DB에서 자동 생성되므로 테스트에서는 생략할 수 있음
-			.dreamAccount(null) // DreamAccount 객체
+			.dreamAccount(dreamAccount) // DreamAccount 객체
 			.user(user) // User 객체
 			.title("Save for vacation") // 필수 값
 			.tagType(BucketTagType.DO) // 예시: BucketTagType enum
@@ -261,9 +269,16 @@ class PostServiceTest {
 			"https://example.com/group-image.jpg" // imageUrl
 		);
 
+		DreamAccount dreamAccount = DreamAccount.builder()
+			.id(1L)
+			.user(user)
+			.balance(BigDecimal.valueOf(10000))
+			.total(BigDecimal.valueOf(10000))
+			.build();
+
 		Bucket bucket = Bucket.builder()
 			.id(1L) // ID는 보통 DB에서 자동 생성되므로 테스트에서는 생략할 수 있음
-			.dreamAccount(null) // DreamAccount 객체
+			.dreamAccount(dreamAccount) // DreamAccount 객체
 			.user(user) // User 객체
 			.title("Save for vacation") // 필수 값
 			.tagType(BucketTagType.DO) // 예시: BucketTagType enum
@@ -546,6 +561,34 @@ class PostServiceTest {
 			"https://example.com/profile.jpg", // profileImageUrl
 			"hgildong" // nickname
 		);
+
+		DreamAccount dreamAccount = DreamAccount.builder()
+			.id(1L)
+			.user(user)
+			.balance(BigDecimal.valueOf(10000))
+			.total(BigDecimal.valueOf(10000))
+			.build();
+
+		Bucket bucket = Bucket.builder()
+			.id(1L) // ID는 보통 DB에서 자동 생성되므로 테스트에서는 생략할 수 있음
+			.dreamAccount(dreamAccount) // DreamAccount 객체
+			.user(user) // User 객체
+			.title("Save for vacation") // 필수 값
+			.tagType(BucketTagType.DO) // 예시: BucketTagType enum
+			.dueDate(LocalDateTime.of(2025, 12, 31, 23, 59, 59)) // 필수값
+			.isDueSet(true) // 필수값
+			.memo("Save for a trip to Japan") // 선택 값
+			.howTo(BucketHowTo.EFFORT) // 예시: BucketHowTo enum
+			.goalAmount(new BigDecimal("5000.00")) // 예시 값
+			.followers(50L) // 예시 값
+			.status(BucketStatus.DOING) // 예시: BucketStatus enum
+			.isAutoAllocate(false) // 예시 값
+			.allocateAmount(new BigDecimal("1000.00")) // 예시 값
+			.cronCycle("0 0 0 * * ?") // 예시 값
+			.safeBox(new BigDecimal("1000.00")) // 예시 값
+			.isRecommended(true) // 예시 값
+			.build();
+
 		Map<String, Object> realsnap = new HashMap<>();
 		realsnap.put("bucketId", List.of(1, 2, 3));
 		realsnap.put("portfolio", false);
@@ -557,7 +600,7 @@ class PostServiceTest {
 			.build();
 		Post post = new Post();
 		when(groupService.getGroup(eq(1L))).thenReturn(group);
-		when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
+		when(groupService.isMemberOfGroup(groupId, user.getId())).thenReturn(true);
 		when(postRepository.findById(eq(1L))).thenReturn(Optional.of(post));
 		post.setImageUrls(newImageUrl);
 		post.setContent(newContent);
@@ -568,9 +611,9 @@ class PostServiceTest {
 		when(objectMapper.convertValue(eq(realsnap.get("bucketId")), any(TypeReference.class))).thenReturn(
 			List.of(1, 2, 3));
 		when(objectMapper.convertValue(eq(realsnap.get("portfolio")), any(TypeReference.class))).thenReturn(false);
-		when(bucketService.getBucket(1L)).thenReturn(new Bucket());
-		when(bucketService.getBucket(2L)).thenReturn(new Bucket());
-		when(bucketService.getBucket(3L)).thenReturn(new Bucket());
+		when(bucketService.getBucket(1L)).thenReturn(bucket);
+		when(bucketService.getBucket(2L)).thenReturn(bucket);
+		when(bucketService.getBucket(3L)).thenReturn(bucket);
 		when(postRepository.save(post)).thenReturn(post);
 		post.setUser(user);
 		post.setGroup(group);
@@ -612,7 +655,7 @@ class PostServiceTest {
 			.build();
 
 		when(groupService.getGroup(group.getId())).thenReturn(group);
-		when(groupService.isMatchedGroupUser(eq(user), eq(group))).thenReturn(false);
+		when(groupService.isMemberOfGroup(group.getId(), user.getId())).thenReturn(true);
 
 		assertThrows(CustomException.class, () -> {
 			postService.updatePost(group.getId(), 1L, write, user);
@@ -648,7 +691,7 @@ class PostServiceTest {
 			.imageUrls(newImageUrl)
 			.build();
 		when(groupService.getGroup(eq(1L))).thenReturn(group);
-		when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
+		when(groupService.isMemberOfGroup(groupId, user.getId())).thenReturn(true);
 		when(postRepository.findById(eq(1L))).thenReturn(Optional.of(post));
 
 		assertThrows(CustomException.class, () -> {
@@ -680,7 +723,7 @@ class PostServiceTest {
 		post.setUser(user);
 		post.setId(1L);
 		when(groupService.getGroup(eq(1L))).thenReturn(group);
-		when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
+		when(groupService.isMemberOfGroup(groupId, user.getId())).thenReturn(true);
 		when(postRepository.findById(eq(1L))).thenReturn(Optional.of(post));
 
 		postService.deletePost(groupId, post.getId(), user);
@@ -711,7 +754,8 @@ class PostServiceTest {
 			"https://example.com/group-image.jpg" // imageUrl
 		);
 		when(groupService.getGroup(group.getId())).thenReturn(group);
-		when(groupService.isMatchedGroupUser(eq(user), eq(group))).thenReturn(false);
+		when(groupService.isMemberOfGroup(group.getId(), user.getId())).thenReturn(false);
+
 
 		assertThrows(CustomException.class, () -> {
 			postService.deletePost(group.getId(), 1L, user);
@@ -740,7 +784,8 @@ class PostServiceTest {
 		newUser.setId("2");
 		post.setUser(newUser);
 		when(groupService.getGroup(eq(1L))).thenReturn(group);
-		when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
+		// when(groupService.isMatchedGroupUser(any(User.class), any(Group.class))).thenReturn(true);
+		when(groupService.isMemberOfGroup(groupId, user.getId())).thenReturn(true);
 		when(postRepository.findById(eq(1L))).thenReturn(Optional.of(post));
 
 		assertThrows(CustomException.class, () -> {
