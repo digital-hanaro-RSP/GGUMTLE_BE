@@ -1,5 +1,8 @@
 package com.hana4.ggumtle.model.entity.groupMember;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.hana4.ggumtle.model.entity.BaseEntity;
 import com.hana4.ggumtle.model.entity.group.Group;
 import com.hana4.ggumtle.model.entity.user.User;
@@ -33,10 +36,12 @@ public class GroupMember extends BaseEntity {
 	private Long id;
 
 	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "groupId", nullable = false, foreignKey = @ForeignKey(name = "fk_GroupMember_groupId_Group"))
 	private Group group;
 
 	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_GroupMember_groupId_User"))
 	private User user;
 }
