@@ -123,6 +123,4 @@ public class PortfolioController {
 			userDetails.getUser());
 		return ResponseEntity.ok(CustomApiResponse.success(response));
 	}
-
-	// initial data 버킷
 }
