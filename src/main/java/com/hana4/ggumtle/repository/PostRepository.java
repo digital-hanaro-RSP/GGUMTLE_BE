@@ -13,17 +13,17 @@ import io.lettuce.core.dynamic.annotation.Param;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
-	Page<Post> findAllByGroupId(Long groupId, Pageable pageable);
+	Page<Post> findAllByGroupIdOrderByCreatedAtDesc(Long groupId, Pageable pageable);
 
 	@Query(value = "SELECT p FROM Post p LEFT JOIN PostLike pl "
-		+ "ON p = pl.post GROUP BY p ORDER BY COALESCE(COUNT(pl), 0) DESC",
+		+ "ON p = pl.post GROUP BY p ORDER BY COALESCE(COUNT(pl), 0) DESC, p.createdAt DESC",
 		countQuery = "SELECT COUNT(DISTINCT p) FROM Post p")
 	Page<Post> findAllPostsWithLikeCount(Pageable pageable);
 
-	@Query("SELECT p FROM Post p JOIN p.group g WHERE g.category = :groupCategory ")
+	@Query("SELECT p FROM Post p JOIN p.group g WHERE g.category = :groupCategory ORDER BY p.createdAt DESC")
 	Page<Post> findAllPostsGroupedByGroupCategory(Pageable pageable,
 		@Param("groupCategory") GroupCategory groupCategory);
 
-	@Query("SELECT p FROM Post p WHERE p.content LIKE %:search%")
+	@Query("SELECT p FROM Post p WHERE p.content LIKE %:search% ORDER BY p.createdAt DESC")
 	Page<Post> findAllPostsWithSearchParam(Pageable pageable, @Param("search") String search);
 }
