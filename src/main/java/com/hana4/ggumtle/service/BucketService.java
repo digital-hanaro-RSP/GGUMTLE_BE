@@ -203,4 +203,10 @@ public class BucketService {
 		return bucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 Bucket이 존재하지 않습니다."));
 	}
+
+	public List<Bucket> getBucketsDueAfter(String userId, LocalDate dueDate) {
+		LocalDateTime startOfDay = dueDate.atStartOfDay();
+
+		return bucketRepository.findByUserIdAndDueDateIsNullOrDueDateAfter(userId, startOfDay);
+	}
 }

@@ -481,7 +481,7 @@ class PostServiceTest {
 		List<Post> posts = List.of(post);
 		Page<Post> postPage = new PageImpl<>(posts, pageable, posts.size());
 
-		when(postRepository.findAllByGroupId(groupId, pageable)).thenReturn(postPage);
+		when(postRepository.findAllByGroupIdOrderByCreatedAtDesc(groupId, pageable)).thenReturn(postPage);
 		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
 			Optional.of(PostLike.builder().build()));
 		// When
@@ -493,7 +493,7 @@ class PostServiceTest {
 		// Add more assertions...
 
 		// verify(groupService).isMatchedGroupUser(eq(user), any(Group.class));
-		verify(postRepository).findAllByGroupId(groupId, pageable);
+		verify(postRepository).findAllByGroupIdOrderByCreatedAtDesc(groupId, pageable);
 		// verify(postService).isAuthorLike(eq(1L), eq("1"));
 	}
 
@@ -755,7 +755,6 @@ class PostServiceTest {
 		);
 		when(groupService.getGroup(group.getId())).thenReturn(group);
 		when(groupService.isMemberOfGroup(group.getId(), user.getId())).thenReturn(false);
-
 
 		assertThrows(CustomException.class, () -> {
 			postService.deletePost(group.getId(), 1L, user);

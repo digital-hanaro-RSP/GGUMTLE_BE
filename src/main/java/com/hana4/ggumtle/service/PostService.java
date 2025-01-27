@@ -105,7 +105,7 @@ public class PostService {
 	}
 
 	public Page<PostResponseDto.PostInfo> getPostsByPage(Long groupId, Pageable pageable, User user) {
-		return postRepository.findAllByGroupId(groupId, pageable)
+		return postRepository.findAllByGroupIdOrderByCreatedAtDesc(groupId, pageable)
 			.map(post -> {
 				boolean isLiked = isAuthorLike(post.getId(), user.getId());
 				boolean isMine = post.getUser().getId().equals(user.getId());

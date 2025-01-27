@@ -548,3 +548,56 @@
 // 	}
 //
 // }
+
+package com.hana4.ggumtle.service;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.hana4.ggumtle.model.entity.bucket.Bucket;
+import com.hana4.ggumtle.repository.BucketRepository;
+
+@ExtendWith(MockitoExtension.class)
+class BucketServiceTest {
+
+	@Mock
+	private BucketRepository bucketRepository;
+
+	@InjectMocks
+	private BucketService bucketService;
+
+	@Test
+	void getBucketsDueAfter_ReturnsCorrectBuckets() {
+		// Given
+		String userId = "testUser";
+		LocalDate dueDate = LocalDate.of(2025, 1, 27);
+
+		Bucket bucket1 = new Bucket();
+		bucket1.setDueDate(LocalDateTime.now().plusDays(1));
+		Bucket bucket2 = new Bucket();
+		bucket2.setDueDate(LocalDateTime.now().plusYears(1));
+		List<Bucket> expectedBuckets = Arrays.asList(bucket1, bucket2);
+
+		when(bucketRepository.findByUserIdAndDueDateIsNullOrDueDateAfter(eq(userId), any(LocalDateTime.class)))
+			.thenReturn(expectedBuckets);
+
+		// When
+		List<Bucket> result = bucketService.getBucketsDueAfter(userId, dueDate);
+
+		// Then
+		assertEquals(expectedBuckets.size(), result.size());
+		assertEquals(expectedBuckets, result);
+	}
+}
