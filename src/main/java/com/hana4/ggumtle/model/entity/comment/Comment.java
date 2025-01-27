@@ -40,6 +40,7 @@ public class Comment extends BaseEntity {
 	private Post post;
 
 	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "userId", nullable = false, foreignKey = @ForeignKey(name = "fk_Comment_userId_User"))
 	private User user;
 
