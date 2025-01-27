@@ -119,4 +119,38 @@ class MyDataServiceTest {
 			amount.compareTo(BigDecimal.valueOf(10000000)) <= 0 &&
 			amount.remainder(BigDecimal.valueOf(10000)).equals(BigDecimal.ZERO);
 	}
+
+	@Test
+	void getTotalAsset_Success() {
+		String userId = "testUser";
+		MyData myData = new MyData();
+		myData.setDepositWithdrawal(BigDecimal.valueOf(10000));
+		myData.setSavingTimeDeposit(BigDecimal.valueOf(20000));
+		myData.setInvestment(BigDecimal.valueOf(30000));
+		myData.setForeignCurrency(BigDecimal.valueOf(40000));
+		myData.setPension(BigDecimal.valueOf(50000));
+		myData.setEtc(BigDecimal.valueOf(60000));
+
+		when(myDataRepository.findByUserId(userId)).thenReturn(Optional.of(myData));
+
+		BigDecimal result = myDataService.getTotalAsset(userId);
+
+		assertEquals(BigDecimal.valueOf(210000), result);
+		verify(myDataRepository).findByUserId(userId);
+	}
+
+	@Test
+	void getTotalAsset_UserNotFound() {
+		String userId = "nonExistentUser";
+		when(myDataRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
+		CustomException exception = assertThrows(CustomException.class, () -> {
+			myDataService.getTotalAsset(userId);
+		});
+
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+		assertEquals("유저의 자산 정보를 찾을 수 없습니다.", exception.getMessage());
+		verify(myDataRepository).findByUserId(userId);
+	}
+
 }
