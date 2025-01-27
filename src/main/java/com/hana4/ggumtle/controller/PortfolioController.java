@@ -81,14 +81,26 @@ public class PortfolioController {
 	}
 
 	// 추천 계산 반환 api
-	// @GetMapping("/recommendation")
-	// public ResponseEntity<CustomApiResponse<GoalPortfolioResponseDto.RecommendGoalPortfolioInfo>> recommendGoalPortfolio(
-	// 	@AuthenticationPrincipal CustomUserDetails userDetails
-	// ) {
-	// 	GoalPortfolioResponseDto.RecommendGoalPortfolioInfo response = goalPortfolioService.recommendGoalPortfolio(
-	// 		userDetails.getUser());
-	// 	return ResponseEntity.ok(CustomApiResponse.success(response));
-	// }
+	@Operation(summary = "추천 목표 포트폴리오를 반환합니다.", description = "추천 목표 포트폴리오 반환")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "추천 목표 포트폴리오 반환 성공"),
+		@ApiResponse(responseCode = "404", description = "사용자의 목표 포트폴리오를 찾을 수 없음",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 404, \"error\": \"Not Found\", \"message\": \"해당 유저의 목표 포트폴리오를 찾을 수 없습니다.\" }"
+			))),
+		@ApiResponse(responseCode = "500", description = "서버 오류",
+			content = @Content(mediaType = "application/json", schema = @Schema(
+				example = "{ \"code\": 500, \"error\": \"Internal Server Error\", \"message\": \"내부 서버 오류\" }"
+			)))
+	})
+	@GetMapping("/recommendation")
+	public ResponseEntity<CustomApiResponse<GoalPortfolioResponseDto.RecommendGoalPortfolioInfo>> recommendGoalPortfolio(
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		GoalPortfolioResponseDto.RecommendGoalPortfolioInfo response = goalPortfolioService.recommendGoalPortfolio(
+			userDetails.getUser());
+		return ResponseEntity.ok(CustomApiResponse.success(response));
+	}
 
 	// 추천 포트폴리오 적용 api
 	@Operation(summary = "사용자가 목표 포트폴리오를 직접 설정", description = "사용자가 목표 포트폴리오를 수정할 수 있는 api입니다")

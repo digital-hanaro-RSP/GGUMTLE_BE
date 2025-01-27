@@ -1,5 +1,6 @@
 package com.hana4.ggumtle.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,4 +20,6 @@ public interface BucketRepository extends JpaRepository<Bucket, Long> {
 	List<Bucket> findByTagType(BucketTagType tagType);
 
 	List<Bucket> findByTagTypeAndIsRecommendedTrue(BucketTagType tagType);
+
+	List<Bucket> findByUserIdAndDueDateIsNullOrDueDateAfter(String userId, LocalDateTime dueDate);
 }

@@ -27,13 +27,21 @@ public class GoalPortfolioResponseDto {
 	@ToString
 	@SuperBuilder
 	public static class Ratio extends BaseDto {
+		@Schema(description = "입출금 비율", example = "0")
 		private BigDecimal depositWithdrawalRatio;
+		@Schema(description = "예적금 비율", example = "0.70")
 		private BigDecimal savingTimeDepositRatio;
+		@Schema(description = "투자 비율", example = "0.20")
 		private BigDecimal investmentRatio;
+		@Schema(description = "외화 비율", example = "0")
 		private BigDecimal foreignCurrencyRatio;
+		@Schema(description = "연금 비율", example = "0.10")
 		private BigDecimal pensionRatio;
+		@Schema(description = "기타 비율", example = "0")
 		private BigDecimal etcRatio;
+		@Schema(description = "포트폴리오 ID", example = "1")
 		private long id;
+		@Schema(description = "사용자 ID", example = "be4aa756-db01-4594-b83b-4132a94febd7")
 		private String userId;
 
 		public static Ratio from(GoalPortfolio goalPortfolio) {
@@ -137,25 +145,30 @@ public class GoalPortfolioResponseDto {
 	@ToString
 	@Builder
 	public static class RecommendGoalPortfolioInfo {
+		@Schema(description = "추천된 포트폴리오가 있는지 여부", example = "true")
 		private boolean isRecommended;
+		@Schema(description = "CONSERVATIVE(안정형), MODERATELY_CONSERVATIVE(안정추구형), BALANCED(위험중립형), MODERATELY_AGGRESSIVE(적극투자형), AGGRESSIVE(공격투자형)", example = "BALANCED")
 		private String investmentType;
-		private String upOrDown;
-		private BigDecimal currentInvestAmount;
-		private BigDecimal estimatedInvestAmount;
+		@Schema(description = "자산 대비 꿈에 투자해야할 월 투자 비율", example = "0.12")
+		private BigDecimal estimatedInvestRatio;
+
+		public static RecommendGoalPortfolioInfo from(
+			boolean isRecommended
+		) {
+			return RecommendGoalPortfolioInfo.builder()
+				.isRecommended(isRecommended)
+				.build();
+		}
 
 		public static RecommendGoalPortfolioInfo from(
 			boolean isRecommended,
 			String investmentType,
-			String upOrDown,
-			BigDecimal currentInvestAmount,
-			BigDecimal estimatedInvestAmount
+			BigDecimal estimatedInvestRatio
 		) {
 			return RecommendGoalPortfolioInfo.builder()
 				.isRecommended(isRecommended)
 				.investmentType(investmentType)
-				.upOrDown(upOrDown)
-				.currentInvestAmount(currentInvestAmount)
-				.estimatedInvestAmount(estimatedInvestAmount)
+				.estimatedInvestRatio(estimatedInvestRatio)
 				.build();
 		}
 	}

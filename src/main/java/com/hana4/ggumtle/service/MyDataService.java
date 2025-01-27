@@ -45,4 +45,16 @@ public class MyDataService {
 		return MyDataResponseDto.CurrentPortfolio.from(myDataRepository.findByUserId(userId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저의 MyData가 연결되지 않았습니다.")));
 	}
+
+	public BigDecimal getTotalAsset(String userId) {
+		MyData myData = myDataRepository.findByUserId(userId)
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "유저의 자산 정보를 찾을 수 없습니다."));
+
+		return myData.getDepositWithdrawal()
+			.add(myData.getSavingTimeDeposit())
+			.add(myData.getInvestment())
+			.add(myData.getForeignCurrency())
+			.add(myData.getPension())
+			.add(myData.getEtc());
+	}
 }

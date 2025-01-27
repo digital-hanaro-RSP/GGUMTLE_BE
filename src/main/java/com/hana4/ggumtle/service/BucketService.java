@@ -203,4 +203,12 @@ public class BucketService {
 		return bucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 Bucket이 존재하지 않습니다."));
 	}
+
+	public List<Bucket> getBucketsDueAfter(String userId, LocalDate dueDate) {
+		// LocalDate를 LocalDateTime으로 변환 (해당 날짜의 00:00:00)
+		LocalDateTime startOfDay = dueDate.atStartOfDay();
+
+		// JPA 메서드 호출
+		return bucketRepository.findByUserIdAndDueDateIsNullOrDueDateAfter(userId, startOfDay);
+	}
 }
