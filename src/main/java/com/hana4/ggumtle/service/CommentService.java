@@ -42,7 +42,7 @@ public class CommentService {
 		User user) {
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 글이 존재하지 않습니다."));
-		return CommentResponseDto.CommentInfo.from(commentRepository.save(commentWrite.toEntity(post, user)), user,
+		return CommentResponseDto.CommentInfo.from(commentRepository.save(commentWrite.toEntity(post, user)),
 			false, true, 0);
 	}
 
@@ -51,7 +51,7 @@ public class CommentService {
 			throw new CustomException(ErrorCode.NOT_FOUND, "해당 글이 존재하지 않습니다.");
 		}
 		return commentRepository.findAllByPostId(postId, pageable)
-			.map(comment -> CommentResponseDto.CommentInfo.from(comment, user,
+			.map(comment -> CommentResponseDto.CommentInfo.from(comment,
 				isAuthorLike(comment.getId(), user.getId()), comment.getUser().getId().equals(user.getId()),
 				countLikeByCommentId(comment.getId())));
 	}
