@@ -74,7 +74,9 @@ public class GoalPortfolioResponseDto {
 
 		public static InvestmentType from(GoalPortfolio goalPortfolio, String userName) {
 			return InvestmentType.builder()
-				.investmentType(goalPortfolio.getTemplate().getName())
+				.investmentType(
+					goalPortfolio.getCustomizedTemplate() != null ? goalPortfolio.getCustomizedTemplate().getName() :
+						goalPortfolio.getTemplate().getName())
 				.userName(userName)
 				.build();
 		}
