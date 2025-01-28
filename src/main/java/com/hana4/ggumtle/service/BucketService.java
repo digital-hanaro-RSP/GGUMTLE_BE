@@ -16,6 +16,7 @@ import com.hana4.ggumtle.dto.recommendation.RecommendationResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
+import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
 import com.hana4.ggumtle.model.entity.bucket.BucketStatus;
 import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
 import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
@@ -207,6 +208,7 @@ public class BucketService {
 	public List<Bucket> getBucketsDueAfter(String userId, LocalDate dueDate) {
 		LocalDateTime startOfDay = dueDate.atStartOfDay();
 
-		return bucketRepository.findByUserIdAndDueDateIsNullOrDueDateAfter(userId, startOfDay);
+		return bucketRepository.findByUserIdAndHowToEqualsAndDueDateIsNullOrDueDateAfter(userId,
+			BucketHowTo.MONEY, startOfDay);
 	}
 }

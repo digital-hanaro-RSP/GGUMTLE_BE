@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
+import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
 import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
 
 public interface BucketRepository extends JpaRepository<Bucket, Long> {
@@ -21,5 +22,6 @@ public interface BucketRepository extends JpaRepository<Bucket, Long> {
 
 	List<Bucket> findByTagTypeAndIsRecommendedTrue(BucketTagType tagType);
 
-	List<Bucket> findByUserIdAndDueDateIsNullOrDueDateAfter(String userId, LocalDateTime dueDate);
+	List<Bucket> findByUserIdAndHowToEqualsAndDueDateIsNullOrDueDateAfter(String userId, BucketHowTo howTo,
+		LocalDateTime dueDate);
 }
