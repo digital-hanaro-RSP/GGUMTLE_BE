@@ -567,6 +567,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
+import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
 import com.hana4.ggumtle.repository.BucketRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -590,7 +591,9 @@ class BucketServiceTest {
 		bucket2.setDueDate(LocalDateTime.now().plusYears(1));
 		List<Bucket> expectedBuckets = Arrays.asList(bucket1, bucket2);
 
-		when(bucketRepository.findByUserIdAndDueDateIsNullOrDueDateAfter(eq(userId), any(LocalDateTime.class)))
+		when(
+			bucketRepository.findByUserIdAndHowToEqualsAndDueDateIsNullOrDueDateAfter(eq(userId), eq(BucketHowTo.MONEY),
+				any(LocalDateTime.class)))
 			.thenReturn(expectedBuckets);
 
 		// When
