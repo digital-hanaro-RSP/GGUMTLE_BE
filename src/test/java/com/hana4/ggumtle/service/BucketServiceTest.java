@@ -1,574 +1,38 @@
-// // package com.hana4.ggumtle.service;
-// //
-// // import static org.assertj.core.api.Assertions.*;
-// // import static org.junit.jupiter.api.Assertions.*;
-// // import static org.mockito.Mockito.*;
-// //
-// // import java.math.BigDecimal;
-// // import java.util.Optional;
-// //
-// // import org.junit.jupiter.api.BeforeEach;
-// // import org.junit.jupiter.api.Test;
-// // import org.junit.jupiter.api.extension.ExtendWith;
-// // import org.mockito.InjectMocks;
-// // import org.mockito.Mock;
-// // import org.mockito.MockitoAnnotations;
-// // import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-// // import org.springframework.boot.test.context.SpringBootTest;
-// //
-// // import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
-// // import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
-// // import com.hana4.ggumtle.global.error.CustomException;
-// // import com.hana4.ggumtle.global.error.ErrorCode;
-// // import com.hana4.ggumtle.model.entity.bucket.Bucket;
-// // import com.hana4.ggumtle.repository.BucketRepository;
-// //
-// // @SpringBootTest
-// // @AutoConfigureMockMvc
-// // @ExtendWith(MockitoExtension.class)
-// // class BucketServiceTest {
-// //
-// // 	@InjectMocks
-// // 	private BucketService bucketService;
-// //
-// // 	@Mock
-// // 	private BucketRepository bucketRepository;
-// //
-// // 	@BeforeEach
-// // 	void setUp() {
-// // 		MockitoAnnotations.openMocks(this);
-// // 	}
-// //
-// // 	@Test
-// // 	void createBucket_shouldReturnCreatedBucketInfo() {
-// // 		// given
-// // 		BucketRequestDto requestDto = BucketRequestDto.builder()
-// // 			.title("New Bucket")
-// // 			.isRecommended(false)
-// // 			.goalAmount(BigDecimal.valueOf(1000))
-// // 			.build();
-// //
-// // 		Bucket bucketEntity = Bucket.builder()
-// // 			.title("New Bucket")
-// // 			.isRecommended(false)
-// // 			.goalAmount(BigDecimal.valueOf(1000))
-// // 			.build();
-// //
-// // 		when(bucketRepository.save(any(Bucket.class))).thenReturn(bucketEntity);
-// //
-// // 		// when
-// // 		BucketResponseDto.BucketInfo result = bucketService.createBucket(requestDto);
-// //
-// // 		// then
-// // 		assertThat(result.getTitle()).isEqualTo("New Bucket");
-// // 		assertThat(result.getGoalAmount()).isEqualTo(BigDecimal.valueOf(1000));
-// // 		verify(bucketRepository, times(1)).save(any(Bucket.class));
-// // 	}
-// // 	@InjectMocks
-// // 	private BucketService bucketService;
-// //
-// // 	@Test
-// // 	void createBucket_shouldThrowExceptionWhenRecommendedButNoOriginId() {
-// // 		// given
-// // 		BucketRequestDto requestDto = BucketRequestDto.builder()
-// // 			.isRecommended(true)
-// // 			.originId(null)
-// // 			.build();
-// // 	void getBucket_성공() {
-// // 		when(bucketRepository.findById(1L)).thenReturn(Optional.of(new Bucket()));
-// //
-// // 		// when & then
-// // 		assertThatThrownBy(() -> bucketService.createBucket(requestDto))
-// // 			.isInstanceOf(IllegalArgumentException.class)
-// // 			.hasMessage("추천 플로우에서는 originId가 필요합니다.");
-// // 		verify(bucketRepository, never()).save(any(Bucket.class));
-// // 		assertThat(bucketService.getBucket(1L)).isNotNull();
-// // 	}
-// //
-// // 	@Test
-// // 	void updateBucket_shouldReturnUpdatedBucketInfo() {
-// // 		// given
-// // 		Long bucketId = 1L;
-// //
-// // 		Bucket existingBucket = Bucket.builder()
-// // 			.id(bucketId)
-// // 			.title("Old Bucket")
-// // 			.goalAmount(BigDecimal.valueOf(500))
-// // 			.build();
-// //
-// // 		BucketRequestDto requestDto = BucketRequestDto.builder()
-// // 			.title("Updated Bucket")
-// // 			.goalAmount(BigDecimal.valueOf(1500))
-// // 			.build();
-// //
-// // 		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(existingBucket));
-// // 	void getBucket_실패() {
-// // 		// Given
-// // 		Long postId = 1L;
-// // 		when(bucketRepository.findById(postId)).thenReturn(Optional.empty());
-// //
-// // 		// when
-// // 		BucketResponseDto.BucketInfo result = bucketService.updateBucket(bucketId, requestDto);
-// // 		// When & Then
-// // 		CustomException exception = assertThrows(CustomException.class, () -> {
-// // 			bucketService.getBucket(postId);
-// // 		});
-// //
-// // 		// then
-// // 		assertThat(result.getTitle()).isEqualTo("Updated Bucket");
-// // 		assertThat(result.getGoalAmount()).isEqualTo(BigDecimal.valueOf(1500));
-// // 		verify(bucketRepository, times(1)).findById(bucketId);
-// // 		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
-// // 		assertEquals("해당 Bucket이 존재하지 않습니다.", exception.getMessage());
-// // 		verify(bucketRepository).findById(postId);
-// // 	}
-// //
-// // 	@Test
-// // 	void updateBucket_shouldThrowExceptionWhenBucketNotFound() {
-// // 		// given
-// // 		Long bucketId = 1L;
-// // 		BucketRequestDto requestDto = BucketRequestDto.builder()
-// // 			.title("Updated Bucket")
-// // 			.goalAmount(BigDecimal.valueOf(1500))
-// // 			.build();
-// //
-// // 		when(bucketRepository.findById(bucketId)).thenReturn(null);
-// //
-// // 		// when & then
-// // 		assertThatThrownBy(() -> bucketService.updateBucket(bucketId, requestDto))
-// // 			.isInstanceOf(IllegalArgumentException.class)
-// // 			.hasMessage("버킷을 찾을 수 없습니다.");
-// // 		verify(bucketRepository, times(1)).findById(bucketId);
-// // 	}
-// // }
-// //
-// // }
-// package com.hana4.ggumtle.service;
-//
-// import static org.assertj.core.api.Assertions.*;
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.Mockito.*;
-//
-// import java.math.BigDecimal;
-// import java.time.LocalDateTime;
-// import java.util.Arrays;
-// import java.util.List;
-// import java.util.Map;
-// import java.util.Optional;
-//
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
-//
-// import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
-// import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
-// import com.hana4.ggumtle.dto.recommendation.RecommendationResponseDto;
-// import com.hana4.ggumtle.model.entity.bucket.Bucket;
-// import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
-// import com.hana4.ggumtle.model.entity.bucket.BucketStatus;
-// import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
-// import com.hana4.ggumtle.model.entity.user.User;
-// import com.hana4.ggumtle.repository.BucketRepository;
-//
-// @ExtendWith(MockitoExtension.class)
-// class BucketServiceTest {
-//
-// 	@Mock
-// 	private BucketRepository bucketRepository;
-//
-// 	@InjectMocks
-// 	private BucketService bucketService;
-//
-// 	@Test
-// 	void createBucket_ShouldCreateNewBucket() {
-// 		// given
-// 		User mockUser = new User();
-// 		BucketRequestDto.Create requestDto = new BucketRequestDto.Create(
-// 			"Bucket 1",
-// 			BucketTagType.BE,
-// 			LocalDateTime.now(),
-// 			BucketHowTo.MONEY,
-// 			true,
-// 			BigDecimal.valueOf(5000),
-// 			true,
-// 			BigDecimal.valueOf(1000),
-// 			2000L,
-// 			"0 0 12 * * ?",
-// 			BigDecimal.valueOf(1000),
-// 			BucketStatus.DOING,
-// 			"memo",
-// 			true,
-// 			10L
-// 		);
-// 		Bucket savedBucket = new Bucket(1L, null, mockUser, "Bucket 1", BucketTagType.BE, LocalDateTime.now(),
-// 			true, "memo", BucketHowTo.MONEY, BigDecimal.valueOf(5000), 2000L, BucketStatus.DOING, true,
-// 			BigDecimal.valueOf(1000), "0 0 12 * * ?", BigDecimal.valueOf(1000), true, 10L);
-//
-// 		when(bucketRepository.save(any(Bucket.class))).thenReturn(savedBucket);
-//
-// 		// when
-// 		BucketResponseDto.BucketInfo result = bucketService.createBucket(requestDto, mockUser);
-//
-// 		// then
-// 		assertThat(result).isNotNull();
-// 		assertThat(result.getTitle()).isEqualTo("Bucket 1");
-// 		verify(bucketRepository, times(1)).save(any(Bucket.class));
-// 	}
-//
-// 	@Test
-// 	void createBucket_whenIsRecommendedAndOriginIdIsNull_thenThrowsException() {
-// 		// Given
-// 		BucketRequestDto.Create requestDto = BucketRequestDto.Create.builder()
-// 			.isRecommended(true)
-// 			.originId(null) // originId가 null
-// 			.build();
-// 		User user = new User(); // 테스트용 User 객체
-//
-// 		// When & Then
-// 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-// 			() -> bucketService.createBucket(requestDto, user));
-// 		assertEquals("추천 플로우에서는 originId가 필요합니다.", exception.getMessage());
-// 	}
-//
-// 	@Test
-// 	void createBucket_whenIsRecommendedAndOriginIdIsNotNull_thenCreatesBucket() {
-// 		// Given
-// 		User user = new User(); // 테스트용 User 객체
-// 		user.setId("1"); // User 객체에 ID 설정
-//
-// 		Bucket bucket = Bucket.builder()
-// 			.id(1L)
-// 			.title("Test Bucket")
-// 			.user(user) // Bucket에 User 설정
-// 			.build();
-//
-// 		BucketRequestDto.Create requestDto = BucketRequestDto.Create.builder()
-// 			.isRecommended(true)
-// 			.originId(123L) // 유효한 originId
-// 			.build();
-//
-// 		// Mock 설정: save 호출 시 반환할 Bucket 객체
-// 		when(bucketRepository.save(any(Bucket.class))).thenReturn(bucket);
-//
-// 		// When
-// 		BucketResponseDto.BucketInfo result = bucketService.createBucket(requestDto, user);
-//
-// 		// Then
-// 		assertNotNull(result);
-// 		assertEquals(bucket.getId(), result.getId());
-// 		assertEquals(bucket.getTitle(), result.getTitle());
-// 		assertEquals(user.getId(), result.getUserId()); // User ID 확인
-// 	}
-//
-// 	@Test
-// 	void createBucket_whenIsNotRecommended_thenCreatesBucket() {
-// 		// Given
-// 		User user = new User(); // 테스트용 User 객체 생성
-// 		user.setId("1"); // ID 설정
-//
-// 		Bucket bucket = Bucket.builder()
-// 			.id(1L)
-// 			.title("Non-recommended Bucket")
-// 			.user(user) // User 설정
-// 			.build();
-//
-// 		BucketRequestDto.Create requestDto = BucketRequestDto.Create.builder()
-// 			.isRecommended(false) // 추천 플로우 아님
-// 			.build();
-//
-// 		// `bucketRepository.save()`의 반환값 설정
-// 		when(bucketRepository.save(any(Bucket.class))).thenReturn(bucket);
-//
-// 		// When
-// 		BucketResponseDto.BucketInfo result = bucketService.createBucket(requestDto, user);
-//
-// 		// Then
-// 		assertNotNull(result);
-// 		assertEquals(bucket.getId(), result.getId());
-// 		assertEquals(bucket.getTitle(), result.getTitle());
-// 		assertEquals(user.getId(), result.getUserId());
-// 	}
-//
-// 	@Test
-// 	void updateBucket_ShouldUpdateBucket() {
-// 		// given
-// 		User mockUser = new User();
-//
-// 		BucketRequestDto.Create requestDto = new BucketRequestDto.Create(
-// 			"Updated Bucket",    // title
-// 			BucketTagType.BE,    // BucketTagType
-// 			LocalDateTime.now(), // dueDate
-// 			BucketHowTo.MONEY,
-// 			true,
-// 			BigDecimal.valueOf(5000),
-// 			true,
-// 			BigDecimal.valueOf(1000),
-// 			2000L,
-// 			"0 0 12 * * ?",
-// 			BigDecimal.valueOf(1000),
-// 			BucketStatus.DOING,
-// 			"Updated Memo",
-// 			true,
-// 			10L
-// 		);
-//
-// 		// 기존 버킷 정보
-// 		Bucket existingBucket = new Bucket(1L, null, mockUser, "Bucket 1", BucketTagType.BE, LocalDateTime.now(),
-// 			true, "memo", BucketHowTo.MONEY, BigDecimal.valueOf(5000), 2000L, BucketStatus.DOING, true,
-// 			BigDecimal.valueOf(1000), "0 0 12 * * ?", BigDecimal.valueOf(1000), true, 10L);
-//
-// 		when(bucketRepository.findById(1L)).thenReturn(Optional.of(existingBucket));
-//
-// 		// when: 업데이트 메서드를 호출
-// 		BucketResponseDto.BucketInfo result = bucketService.updateBucket(1L, requestDto);
-//
-// 		// then: 결과 검증
-// 		assertThat(result).isNotNull();
-// 		assertThat(result.getTitle()).isEqualTo("Updated Bucket");
-// 		assertThat(result.getMemo()).isEqualTo("Updated Memo");
-//
-// 		// findById 호출 검증
-// 		verify(bucketRepository, times(1)).findById(1L);
-//
-// 		assertThat(existingBucket.getTitle()).isEqualTo("Updated Bucket");
-// 		assertThat(existingBucket.getMemo()).isEqualTo("Updated Memo");
-// 	}
-//
-// 	@Test
-// 	void updateBucket_whenBucketNotFound_thenThrowsException() {
-// 		Long bucketId = 1L;
-//
-// 		// 빌더를 사용해 객체 생성
-// 		BucketRequestDto.Create requestDto = BucketRequestDto.Create.builder()
-// 			.isRecommended(false)
-// 			.originId(null)
-// 			.build();
-//
-// 		when(bucketRepository.findById(bucketId)).thenReturn(Optional.empty());
-//
-// 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-// 			() -> bucketService.updateBucket(bucketId, requestDto));
-// 		assertEquals("버킷을 찾을 수 없습니다.", exception.getMessage());
-// 	}
-//
-// 	@Test
-// 	void updateBucketStatus_ShouldUpdateBucketStatus() {
-// 		User mockUser = new User();
-//
-// 		// given
-// 		Bucket existingBucket = new Bucket(1L, null, mockUser, "Bucket 1", BucketTagType.BE, LocalDateTime.now(),
-// 			true, "memo", BucketHowTo.MONEY, BigDecimal.valueOf(5000), 2000L, BucketStatus.DOING, true,
-// 			BigDecimal.valueOf(1000), "0 0 12 * * ?", BigDecimal.valueOf(1000), true, 10L);
-//
-// 		when(bucketRepository.findById(1L)).thenReturn(Optional.of(existingBucket));
-//
-// 		// when
-// 		BucketResponseDto.BucketInfo result = bucketService.updateBucketStatus(1L, Map.of("status", "DONE"));
-//
-// 		// then
-// 		assertThat(result).isNotNull();
-// 		assertThat(existingBucket.getStatus()).isEqualTo(BucketStatus.DONE);
-// 		verify(bucketRepository, times(1)).findById(1L);
-// 		verify(bucketRepository, times(1)).save(existingBucket);
-// 	}
-//
-// 	@Test
-// 	void updateBucketStatus_throwsException_whenStatusIsMissing() {
-// 		// Given
-// 		Long bucketId = 1L;
-// 		Map<String, String> updates = Map.of(); // status 값 없음
-//
-// 		// When & Then
-// 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-// 			() -> bucketService.updateBucketStatus(bucketId, updates));
-// 		assertEquals("Status 값은 필수입니다.", exception.getMessage());
-// 	}
-//
-// 	@Test
-// 	void updateBucketStatus_whenStatusIsBlank_thenThrowsException() {
-// 		Long bucketId = 1L;
-// 		Map<String, String> updates = Map.of("status", " "); // status 값이 공백
-//
-// 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-// 			() -> bucketService.updateBucketStatus(bucketId, updates));
-// 		assertEquals("Status 값은 필수입니다.", exception.getMessage());
-// 	}
-//
-// 	@Test
-// 	void updateBucketStatus_whenStatusIsInvalid_thenThrowsException() {
-// 		Long bucketId = 1L;
-// 		Map<String, String> updates = Map.of("status", "INVALID_STATUS"); // 잘못된 상태값
-//
-// 		Bucket bucket = Bucket.builder().id(bucketId).status(BucketStatus.DOING).build();
-// 		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(bucket));
-//
-// 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-// 			() -> bucketService.updateBucketStatus(bucketId, updates));
-// 		assertTrue(exception.getMessage().contains("No enum constant"));
-// 	}
-//
-// 	@Test
-// 	void updateBucketStatus_throwsException_whenBucketNotFound() { //버킷 없을때
-// 		// Given
-// 		Long bucketId = 1L;
-// 		Map<String, String> updates = Map.of("status", "DONE");
-//
-// 		// `findById`가 빈 값을 반환하도록 설정
-// 		when(bucketRepository.findById(bucketId)).thenReturn(Optional.empty());
-//
-// 		// When & Then
-// 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-// 			() -> bucketService.updateBucketStatus(bucketId, updates));
-// 		assertEquals("버킷을 찾을 수 없습니다.", exception.getMessage());
-// 	}
-//
-// 	@Test
-// 	void deleteBucket_ShouldDeleteBucket() {
-// 		User mockUser = new User();
-//
-// 		// given
-// 		Bucket existingBucket = new Bucket(1L, null, mockUser, "Bucket 1", BucketTagType.BE, LocalDateTime.now(),
-// 			true, "memo", BucketHowTo.MONEY, BigDecimal.valueOf(5000), 2000L, BucketStatus.DOING, true,
-// 			BigDecimal.valueOf(1000), "0 0 12 * * ?", BigDecimal.valueOf(1000), true, 10L);
-//
-// 		when(bucketRepository.findById(1L)).thenReturn(Optional.of(existingBucket));
-//
-// 		// when
-// 		bucketService.deleteBucket(1L);
-//
-// 		// then
-// 		verify(bucketRepository, times(1)).findById(1L);
-// 		verify(bucketRepository, times(1)).delete(existingBucket);
-// 	}
-//
-// 	@Test
-// 	void deleteBucket_whenBucketNotFound_thenThrowsException() {
-// 		// Given
-// 		Long bucketId = 1L;
-//
-// 		// Mock: 버킷을 찾지 못했을 때 빈 Optional 반환
-// 		when(bucketRepository.findById(bucketId)).thenReturn(Optional.empty());
-//
-// 		// When & Then
-// 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-// 			() -> bucketService.deleteBucket(bucketId));
-// 		assertEquals("버킷을 찾을 수 없습니다.", exception.getMessage());
-//
-// 		// bucketRepository.delete()가 호출되지 않았는지 확인
-// 		verify(bucketRepository, never()).delete(any());
-// 	}
-//
-// 	@Test
-// 	void getAllBuckets_ShouldReturnAllBuckets() {
-// 		User mockUser = new User();
-//
-// 		// given
-// 		Bucket bucket1 = new Bucket(1L, null, mockUser, "Bucket 1", BucketTagType.BE, LocalDateTime.now(),
-// 			true, "memo", BucketHowTo.MONEY, BigDecimal.valueOf(5000), 2000L, BucketStatus.DOING, true,
-// 			BigDecimal.valueOf(1000), "0 0 12 * * ?", BigDecimal.valueOf(1000), true, 10L);
-// 		Bucket bucket2 = new Bucket(1L, null, mockUser, "Bucket 2", BucketTagType.BE, LocalDateTime.now(),
-// 			true, "memo", BucketHowTo.MONEY, BigDecimal.valueOf(5000), 2000L, BucketStatus.DOING, true,
-// 			BigDecimal.valueOf(1000), "0 0 12 * * ?", BigDecimal.valueOf(1000), true, 10L);
-//
-// 		when(bucketRepository.findAll()).thenReturn(Arrays.asList(bucket1, bucket2));
-//
-// 		// when
-// 		List<BucketResponseDto.BucketInfo> result = bucketService.getAllBuckets();
-//
-// 		// then
-// 		assertThat(result).hasSize(2);
-// 		assertThat(result.get(0).getTitle()).isEqualTo("Bucket 1");
-// 		assertThat(result.get(1).getTitle()).isEqualTo("Bucket 2");
-// 		verify(bucketRepository, times(1)).findAll();
-// 	}
-//
-// 	@Test
-// 	void getBucketById_ShouldReturnBucketById() {
-// 		User mockUser = new User();
-//
-// 		// given
-// 		Bucket existingBucket = new Bucket(1L, null, mockUser, "Bucket 1", BucketTagType.BE, LocalDateTime.now(),
-// 			true, "memo", BucketHowTo.MONEY, BigDecimal.valueOf(5000), 2000L, BucketStatus.DOING, true,
-// 			BigDecimal.valueOf(1000), "0 0 12 * * ?", BigDecimal.valueOf(1000), true, 10L);
-//
-// 		when(bucketRepository.findById(1L)).thenReturn(Optional.of(existingBucket));
-//
-// 		// when
-// 		BucketResponseDto.BucketInfo result = bucketService.getBucketById(1L);
-//
-// 		// then
-// 		assertThat(result).isNotNull();
-// 		assertThat(result.getTitle()).isEqualTo("Bucket 1");
-// 		verify(bucketRepository, times(1)).findById(1L);
-// 	}
-//
-// 	@Test
-// 	void getRecommendedBuckets_ShouldReturnTop3Recommendations() {
-// 		User mockUser = new User();
-//
-// 		// given
-// 		Bucket bucket1 = new Bucket(1L, null, mockUser, "Bucket 1", BucketTagType.BE, LocalDateTime.now(),
-// 			true, "memo", BucketHowTo.MONEY, BigDecimal.valueOf(5000), 2000L, BucketStatus.DOING, true,
-// 			BigDecimal.valueOf(1000), "0 0 12 * * ?", BigDecimal.valueOf(1000), true, 10L);
-// 		Bucket bucket2 = new Bucket(2L, null, mockUser, "Bucket 2", BucketTagType.BE, LocalDateTime.now(),
-// 			true, "memo", BucketHowTo.MONEY, BigDecimal.valueOf(5000), 3000L, BucketStatus.DOING, true,
-// 			BigDecimal.valueOf(1000), "0 0 12 * * ?", BigDecimal.valueOf(1000), true, 10L);
-// 		Bucket bucket3 = new Bucket(3L, null, mockUser, "Bucket 3", BucketTagType.BE, LocalDateTime.now(),
-// 			true, "memo", BucketHowTo.MONEY, BigDecimal.valueOf(5000), 4000L, BucketStatus.DOING, true,
-// 			BigDecimal.valueOf(1000), "0 0 12 * * ?", BigDecimal.valueOf(1000), true, 10L);
-//
-// 		when(bucketRepository.findAll()).thenReturn(Arrays.asList(bucket1, bucket2, bucket3));
-//
-// 		// when
-// 		List<RecommendationResponseDto.RecommendedBucketInfo> recommendations = bucketService.getRecommendedBuckets();
-//
-// 		// then
-// 		assertThat(recommendations).hasSize(1);
-// 		assertThat(recommendations.get(0).getRecommendations()).hasSize(3);
-// 		assertThat(recommendations.get(0).getRecommendations().get(0).getId()).isEqualTo(3L);
-// 		assertThat(recommendations.get(0).getRecommendations().get(1).getId()).isEqualTo(2L);
-// 		assertThat(recommendations.get(0).getRecommendations().get(2).getId()).isEqualTo(1L);
-// 		verify(bucketRepository, times(1)).findAll();
-// 	}
-//
-// 	@Test
-// 	void getBucketById_whenBucketNotFound_thenThrowsException() {
-// 		// Given
-// 		Long bucketId = 1L;
-//
-// 		// Mock: 버킷이 없을 때 빈 Optional 반환
-// 		when(bucketRepository.findById(bucketId)).thenReturn(Optional.empty());
-//
-// 		// When & Then
-// 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-// 			() -> bucketService.getBucketById(bucketId));
-// 		assertEquals("버킷을 찾을 수 없습니다.", exception.getMessage());
-// 	}
-//
-// }
-
 package com.hana4.ggumtle.service;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
+import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
+import com.hana4.ggumtle.global.error.CustomException;
+import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
 import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
+import com.hana4.ggumtle.model.entity.bucket.BucketStatus;
+import com.hana4.ggumtle.model.entity.bucket.BucketTagType;
+import com.hana4.ggumtle.model.entity.dreamAccount.DreamAccount;
+import com.hana4.ggumtle.model.entity.user.User;
+import com.hana4.ggumtle.model.entity.user.UserRole;
 import com.hana4.ggumtle.repository.BucketRepository;
+import com.hana4.ggumtle.repository.DreamAccountRepository;
 
 @ExtendWith(MockitoExtension.class)
 class BucketServiceTest {
@@ -576,31 +40,733 @@ class BucketServiceTest {
 	@Mock
 	private BucketRepository bucketRepository;
 
+	@Mock
+	private DreamAccountRepository dreamAccountRepository;
+
 	@InjectMocks
 	private BucketService bucketService;
 
+	private User mockUser;
+	private Bucket mockBucket;
+	private DreamAccount mockDreamAccount;
+
+	@BeforeEach
+	void setUp() {
+		mockUser = User.builder()
+			.id("1")
+			.tel("010-5555-6666")
+			.password("password")
+			.name("최강희")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1999, 7, 30, 0, 0))
+			.gender("M")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile.jpg")
+			.nickname("somsomsomsom")
+			.build();
+
+		mockDreamAccount = DreamAccount.builder()
+			.id(1L)
+			.user(mockUser)
+			.build();
+
+		mockBucket = Bucket.builder()
+			.id(1L)
+			.title("New Bucket")
+			.tagType(BucketTagType.GO)
+			.dueDate(LocalDate.parse("2025-01-21").atStartOfDay())
+			.howTo(BucketHowTo.MONEY)
+			.isDueSet(true)
+			.isAutoAllocate(true)
+			.allocateAmount(new BigDecimal("500.00"))
+			.goalAmount(new BigDecimal("1000000"))
+			.memo("여행 꼭 가고싶다")
+			.followers(300L)
+			.cronCycle("0 0 1 * *")
+			.user(mockUser)
+			.dreamAccount(mockDreamAccount)
+			.build();
+	}
+
 	@Test
-	void getBucketsDueAfter_ReturnsCorrectBuckets() {
+	void createBucket_Success() {
+		// Given: 요청 DTO와 Mock 데이터 준비
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.title("New Bucket")
+			.tagType(BucketTagType.GO)
+			.dueDate("2025-01-21")
+			.howTo(BucketHowTo.MONEY)
+			.isDueSet(true)
+			.isRecommended(false)
+			.isAutoAllocate(true)
+			.allocateAmount(new BigDecimal("500.00"))
+			.goalAmount(new BigDecimal("1000000"))
+			.memo("여행 꼭 가고싶다")
+			.followers(300L)
+			.cronCycle("0 0 1 * *")
+			.build();
+
+		User mockUser = User.builder()
+			.id("1")
+			.tel("010-5555-6666")
+			.password("password")
+			.name("최강희")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1999, 7, 30, 0, 0))
+			.gender("M")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile.jpg")
+			.nickname("somsomsomsom")
+			.build();
+
+		// When: Repository 동작 모킹
+		when(dreamAccountRepository.findByUserId(mockUser.getId())).thenReturn(Optional.of(mockDreamAccount));
+		when(bucketRepository.save(Mockito.any(Bucket.class))).thenReturn(mockBucket);
+
+		// When: 서비스 호출
+		BucketResponseDto.BucketInfo result = bucketService.createBucket(requestDto, mockUser);
+
+		// Then: 결과 검증
+		assertNotNull(result, "BucketInfo 객체가 null로 반환되었습니다.");
+		assertEquals(mockBucket.getId(), result.getId());
+		assertEquals(mockBucket.getTitle(), result.getTitle());
+		assertEquals(mockBucket.getUser().getId(), result.getUserId());
+		assertEquals(mockBucket.getTagType(), result.getTagType());
+		assertEquals(mockBucket.getDueDate(), result.getDueDate());
+		assertEquals(mockBucket.getMemo(), result.getMemo());
+		assertEquals(mockBucket.getGoalAmount(), result.getGoalAmount());
+
+		// Verify: Repository 메서드 호출 확인
+		Mockito.verify(bucketRepository, Mockito.times(1)).save(Mockito.any(Bucket.class));
+		Mockito.verify(dreamAccountRepository, Mockito.times(1)).findByUserId(mockUser.getId());
+	}
+
+	@Test
+	void createBucket_DreamAccountNotFound() {
+		// Given: 요청 DTO 준비
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.title("New Bucket")
+			.build();
+
+		// 임의의 user 객체 설정 (예시로 이전에 설정한 mockUser를 사용)
+
+		// When: dreamAccountRepository에서 해당 user의 DreamAccount를 찾을 수 없을 경우 (Optional.empty() 반환)
+		when(dreamAccountRepository.findByUserId(mockUser.getId())).thenReturn(Optional.empty());
+
+		// Then: CustomException이 발생하고, ErrorCode.NOT_FOUND를 포함하는지 확인
+		CustomException exception = assertThrows(CustomException.class,
+			() -> bucketService.createBucket(requestDto, mockUser));
+
+		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
+
+		// Verify: bucketRepository.save()가 호출되지 않았는지 확인
+		verify(bucketRepository, never()).save(any(Bucket.class));
+	}
+
+	@Test
+	void 추천버킷_OriginId존재_예외발생() {
 		// Given
-		String userId = "testUser";
-		LocalDate dueDate = LocalDate.of(2025, 1, 27);
 
-		Bucket bucket1 = new Bucket();
-		bucket1.setDueDate(LocalDateTime.now().plusDays(1));
-		Bucket bucket2 = new Bucket();
-		bucket2.setDueDate(LocalDateTime.now().plusYears(1));
-		List<Bucket> expectedBuckets = Arrays.asList(bucket1, bucket2);
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.title("추천 버킷")
+			.isRecommended(true)
+			.originId(1L) // 추천 버킷이 originId를 가질 수 없음
+			.followers(50L)
+			.build();
 
-		when(
-			bucketRepository.findByUserIdAndHowToEqualsAndDueDateIsNullOrDueDateAfter(eq(userId), eq(BucketHowTo.MONEY),
-				any(LocalDateTime.class)))
-			.thenReturn(expectedBuckets);
+		// When & Then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> bucketService.createBucket(requestDto, mockUser));
+
+		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_PARAMETER);
+	}
+
+	@Test
+	void testCreateBucket_RecommendedBucketWithoutFollowers() {
+		// given
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.isRecommended(true)  // Make this a recommended bucket
+			.followers(null)      // followers is null, which should trigger the exception
+			.build();
+		User user = mockUser;  // Using the mockUser defined in your setup
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class, () -> {
+			bucketService.createBucket(requestDto, user);  // Call the method
+		});
+
+		// Validate that the exception is thrown with the expected error code and message
+		assertEquals(ErrorCode.INVALID_PARAMETER, exception.getErrorCode());
+		assertEquals("추천하는 버킷은 followers를 가져야 합니다.", exception.getMessage());
+	}
+
+	@Test
+	void testCreateBucket_RecommendedBucket_Success() {
+		// given
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.title("New Bucket")
+			.tagType(BucketTagType.GO)
+			.dueDate("2025-01-21")
+			.howTo(BucketHowTo.MONEY)
+			.isDueSet(true)
+			.isRecommended(true)  // 추천 버킷
+			.originId(null)       // originId 없음 (정상적인 경우)
+			.isAutoAllocate(true)
+			.allocateAmount(new BigDecimal("500.00"))
+			.goalAmount(new BigDecimal("1000000"))
+			.memo("여행 꼭 가고싶다")
+			.followers(300L)      // followers 값 있음 (정상)
+			.cronCycle("0 0 1 * *")
+			.build();
+
+		User user = mockUser; // 테스트에서 사용할 mockUser
+		DreamAccount mockDreamAccount = mock(DreamAccount.class);
+
+		// Mocking: DreamAccountRepository가 정상적으로 DreamAccount를 반환하도록 설정
+		when(dreamAccountRepository.findByUserId(user.getId())).thenReturn(Optional.of(mockDreamAccount));
+
+		// Mocking: BucketRepository가 정상적으로 버킷을 저장하고 반환하도록 설정
+		when(bucketRepository.save(any(Bucket.class))).thenAnswer(invocation -> {
+			Bucket savedBucket = invocation.getArgument(0);
+			savedBucket.setId(1L); // 저장 후 ID가 1L로 설정된다고 가정
+			return savedBucket;
+		});
+
+		// when
+		BucketResponseDto.BucketInfo result = bucketService.createBucket(requestDto, user);
+
+		// then
+		assertNotNull(result);
+		assertEquals("New Bucket", result.getTitle());
+		assertEquals(BucketTagType.GO, result.getTagType());
+		assertEquals(300L, result.getFollowers());
+	}
+
+	@Test
+	void 추천된버킷에서_새로운버킷생성_정상작동() {
+		// Given
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.title("추천된 버킷 복사")
+			.originId(1L) // 기존 추천 버킷의 ID
+			.isRecommended(false)
+			.build();
+
+		when(bucketRepository.findById(1L)).thenReturn(Optional.of(mockBucket));
+		when(dreamAccountRepository.findByUserId(mockUser.getId())).thenReturn(Optional.of(mockDreamAccount));
+		when(bucketRepository.save(any(Bucket.class))).thenReturn(mockBucket);
 
 		// When
-		List<Bucket> result = bucketService.getBucketsDueAfter(userId, dueDate);
+		BucketResponseDto.BucketInfo result = bucketService.createBucket(requestDto, mockUser);
 
 		// Then
-		assertEquals(expectedBuckets.size(), result.size());
-		assertEquals(expectedBuckets, result);
+		assertNotNull(result);
+		assertEquals(mockBucket.getTitle(), result.getTitle());
+		assertEquals(301L, mockBucket.getFollowers()); // followers 증가 확인
+		verify(bucketRepository, times(1)).save(mockBucket);
+	}
+
+	@Test
+	void 추천된버킷에서_OriginBucket없음_예외발생() {
+		// Given
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.title("추천된 버킷 복사")
+			.originId(999L) // 존재하지 않는 OriginId
+			.isRecommended(false)
+			.build();
+
+		when(bucketRepository.findById(999L)).thenReturn(Optional.empty());
+
+		// When & Then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> bucketService.createBucket(requestDto, mockUser));
+
+		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
+	}
+
+	@Test
+	void 일반버킷_생성_정상작동() {
+		// Given
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.title("New Bucket")
+			.isRecommended(false)
+			.build();
+
+		when(dreamAccountRepository.findByUserId(mockUser.getId())).thenReturn(Optional.of(mockDreamAccount));
+		when(bucketRepository.save(any(Bucket.class))).thenReturn(mockBucket);
+
+		// When
+		BucketResponseDto.BucketInfo result = bucketService.createBucket(requestDto, mockUser);
+
+		// Then
+		assertNotNull(result);
+		assertEquals(requestDto.getTitle(), result.getTitle());
+		verify(bucketRepository, times(1)).save(any(Bucket.class));
+	}
+
+	@Test
+	void 일반버킷_DreamAccount없음_예외발생() {
+		// Given
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.title("New Bucket")
+			.build();
+
+		when(dreamAccountRepository.findByUserId(mockUser.getId())).thenReturn(Optional.empty());
+
+		// When & Then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> bucketService.createBucket(requestDto, mockUser));
+
+		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
+	}
+
+	@Test
+	void updateBucket_Success() {
+		// Given: 요청 DTO 및 Mock 객체 준비
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.title("Updated Bucket")
+			.build();
+
+		// Mock Bucket 객체 설정
+		Bucket mockBucket = Bucket.builder()
+			.id(1L)
+			.user(mockUser)
+			.title("Original Bucket")
+			.build();
+
+		// When: Repository 동작 모킹
+		when(bucketRepository.findById(mockBucket.getId())).thenReturn(Optional.of(mockBucket));
+		when(dreamAccountRepository.findByUserId(mockUser.getId())).thenReturn(Optional.of(mockDreamAccount));
+
+		// 서비스 호출
+		BucketResponseDto.BucketInfo result = bucketService.updateBucket(mockUser, mockBucket.getId(), requestDto);
+
+		// Then: 결과 검증
+		assertThat(result.getTitle()).isEqualTo(requestDto.getTitle());
+
+		// Verify: Repository 메서드 호출 확인
+		verify(bucketRepository, times(1)).save(any(Bucket.class));
+	}
+
+	@Test
+	void updateBucket_UnauthorizedUser() {
+		Long bucketId = 2L;
+
+		User anotherUser = User.builder()
+			.id("2")
+			.tel("010-7777-8888")
+			.password("password")
+			.name("박철수")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1994, 5, 15, 0, 0))
+			.gender("M")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile2.jpg")
+			.nickname("anotherUser")
+			.build();
+
+		Bucket anotherBucket = Bucket.builder()
+			.id(bucketId)
+			.user(anotherUser)
+			.title("Another Bucket")
+			.build();
+
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.title("Updated Bucket")
+			.build();
+
+		Mockito.when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(anotherBucket));
+
+		CustomException exception = assertThrows(CustomException.class,
+			() -> bucketService.updateBucket(mockUser, bucketId, requestDto));
+
+		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN);
+
+		Mockito.verify(bucketRepository, Mockito.never()).save(Mockito.any(Bucket.class));
+	}
+
+	@Test
+	void updateBucket_존재하지않는버킷_예외발생() {
+		// Given
+		when(bucketRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+		Long bucketId = 1L;
+
+		// When & Then
+		BucketRequestDto.CreateBucket requestDto = BucketRequestDto.CreateBucket.builder()
+			.title("Updated Bucket")
+			.build();
+
+		CustomException exception = assertThrows(CustomException.class,
+			() -> bucketService.updateBucket(mockUser, bucketId, requestDto));
+
+		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_FOUND);
+	}
+
+	@Test
+	void testUpdateBucket_InvalidDueDateFormat() {
+		// given
+		Long bucketId = 1L;
+		BucketRequestDto.CreateBucket invalidRequestDto = BucketRequestDto.CreateBucket
+			.builder()
+			.dueDate("invalid-date") // 잘못된 날짜 형식
+			.build();
+
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(mockBucket));
+		when(dreamAccountRepository.findByUserId(mockUser.getId())).thenReturn(Optional.of(mockDreamAccount));
+
+		// when & then
+		assertThrows(DateTimeParseException.class, () -> {
+			bucketService.updateBucket(mockUser, bucketId, invalidRequestDto);
+		});
+	}
+
+	@Test
+	void testUpdateBucket_ValidDueDate() {
+		// given
+		Long bucketId = 1L;
+		String validDueDate = "2025-01-21";  // 유효한 날짜 형식
+		BucketRequestDto.CreateBucket validRequestDto = BucketRequestDto.CreateBucket
+			.builder()
+			.dueDate(validDueDate)  // 유효한 날짜
+			.build();
+
+		// mock 객체 설정
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(mockBucket));
+		when(dreamAccountRepository.findByUserId(mockUser.getId())).thenReturn(Optional.of(mockDreamAccount));
+
+		// when
+		BucketResponseDto.BucketInfo result = bucketService.updateBucket(mockUser, bucketId, validRequestDto);
+
+		// then
+		assertNotNull(result);  // 결과가 null이 아님을 확인
+		verify(bucketRepository, times(1)).findById(bucketId);  // bucketRepository의 findById 메서드가 1번 호출되었는지 검증
+		verify(dreamAccountRepository, times(1)).findByUserId(
+			mockUser.getId());  // dreamAccountRepository의 findByUserId 메서드가 1번 호출되었는지 검증
+		verify(bucketRepository, times(1)).save(any(Bucket.class));  // bucketRepository의 save 메서드가 1번 호출되었는지 검증
+	}
+
+	@Test
+	void 버킷_업데이트_시_DreamAccount_찾을_수_없을_때_예외가_발생한다() {
+		// Given
+		Long bucketId = 1L;
+		BucketRequestDto.CreateBucket requestDto = createMockRequestDtoWithoutDueDate(); // dueDate가 없는 경우
+		Bucket existingBucket = mock(Bucket.class); // 기존 버킷 mock
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(existingBucket));
+		when(existingBucket.getUser()).thenReturn(mockUser);
+
+		// Mocking DreamAccount repository to return empty
+		when(dreamAccountRepository.findByUserId(mockUser.getId())).thenReturn(Optional.empty());
+
+		// When & Then
+		assertThrows(CustomException.class, () -> {
+			bucketService.updateBucket(mockUser, bucketId, requestDto);
+		}, "DreamAccount를 찾을 수 없습니다."); // DreamAccount가 없을 때 예외가 발생해야 함
+	}
+
+	@Test
+	void 버킷_완료날짜가_잘못된_형식일_때_예외발생() {
+		// Given
+		Long bucketId = 1L;
+		BucketRequestDto.CreateBucket requestDto = createMockRequestDtoWithValidDueDate("invalid-date");
+
+		// When & Then
+		assertThrows(CustomException.class,
+			() -> bucketService.updateBucket(mockUser, bucketId, requestDto)); // ✅ 형식이 잘못된 경우 예외 발생
+	}
+
+	// Mock CreateBucket DTO (dueDate가 null)
+	private BucketRequestDto.CreateBucket createMockRequestDtoWithoutDueDate() {
+		return BucketRequestDto.CreateBucket.builder()
+			.title("테스트 버킷")
+			.dueDate(null) // ✅ dueDate가 null
+			.build();
+	}
+
+	// Mock CreateBucket DTO (valid dueDate)
+	private BucketRequestDto.CreateBucket createMockRequestDtoWithValidDueDate(String dueDate) {
+		return BucketRequestDto.CreateBucket.builder()
+			.title("테스트 버킷")
+			.dueDate(dueDate) // ✅ 정상적인 날짜
+			.build();
+	}
+
+	@Test
+	void testUpdateBucketStatus_BucketNotFound() {
+		// given
+		Long bucketId = 1L;
+		BucketRequestDto.UpdateBucketStatus updates = BucketRequestDto.UpdateBucketStatus
+			.builder()
+			.status(BucketStatus.DONE)  // 상태를 DONE으로 변경
+			.build();
+
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.empty());  // 버킷이 존재하지 않음
+
+		// when & then
+		CustomException exception = assertThrows(CustomException.class, () -> {
+			bucketService.updateBucketStatus(mockUser, bucketId, updates);
+		});
+
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+		assertEquals("버킷을 찾을 수 없습니다.", exception.getMessage());
+	}
+
+	@Test
+	void testUpdateBucketStatus_InvalidUserPermission() {
+		// given
+		Long bucketId = 1L;
+		BucketRequestDto.UpdateBucketStatus updates = BucketRequestDto.UpdateBucketStatus
+			.builder()
+			.status(BucketStatus.DONE)  // 상태를 DONE으로 설정
+			.build();
+
+		// mockBucket은 다른 사용자로 설정하여 권한 없는 사용자로 처리
+		Bucket mockBucket = new Bucket();
+		User anotherUser = User.builder()
+			.id("2")
+			.tel("010-7777-8888")
+			.password("password")
+			.name("박철수")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1994, 5, 15, 0, 0))
+			.gender("M")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile2.jpg")
+			.nickname("anotherUser")
+			.build();
+		mockBucket.setUser(anotherUser);  // anotherUser는 권한이 없는 다른 사용자
+
+		// bucketRepository가 mockBucket을 반환하도록 설정
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(mockBucket));
+
+		// bucketService를 spy로 감싸서 checkValidUser가 호출될 수 있도록 설정
+		BucketService bucketServiceSpy = Mockito.spy(bucketService);
+		when(bucketServiceSpy.checkValidUser(mockUser, mockBucket)).thenReturn(false);  // 권한이 없으면 false 반환
+
+		// when & then
+		assertThrows(CustomException.class, () -> {
+			bucketServiceSpy.updateBucketStatus(mockUser, bucketId, updates);
+		});
+	}
+
+	@Test
+	void testUpdateBucketStatus_ValidUserPermission() {
+		// given
+		Long bucketId = 1L;
+		BucketRequestDto.UpdateBucketStatus updates = BucketRequestDto.UpdateBucketStatus
+			.builder()
+			.status(BucketStatus.DONE)  // 상태를 DONE으로 설정
+			.build();
+
+		// mockBucket은 권한이 있는 사용자로 설정
+		User mockUser = User.builder()
+			.id("1")
+			.tel("010-5555-6666")
+			.password("password")
+			.name("최강희")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1999, 7, 30, 0, 0))
+			.gender("M")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile.jpg")
+			.nickname("somsomsomsom")
+			.build();
+
+		Bucket mockBucket = Bucket.builder()
+			.id(1L)
+			.title("New Bucket")
+			.tagType(BucketTagType.GO)
+			.dueDate(LocalDate.parse("2025-01-21").atStartOfDay())
+			.howTo(BucketHowTo.MONEY)
+			.isDueSet(true)
+			.isAutoAllocate(true)
+			.allocateAmount(new BigDecimal("500.00"))
+			.goalAmount(new BigDecimal("1000000"))
+			.memo("여행 꼭 가고싶다")
+			.followers(300L)
+			.cronCycle("0 0 1 * *")
+			.user(mockUser)
+			.dreamAccount(mockDreamAccount)
+			.build();
+		;
+
+		// bucketRepository가 mockBucket을 반환하도록 설정
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(mockBucket));
+
+		// bucketService를 spy로 감싸서 checkValidUser가 호출될 수 있도록 설정
+		BucketService bucketServiceSpy = Mockito.spy(bucketService);
+		when(bucketServiceSpy.checkValidUser(mockUser, mockBucket)).thenReturn(true);  // 권한이 있으면 true 반환
+
+		// when & then
+		BucketResponseDto.BucketInfo result = bucketServiceSpy.updateBucketStatus(mockUser, bucketId, updates);
+
+		// 버킷 상태가 DONE으로 변경되었는지 확인
+		assertNotNull(result);
+		assertEquals(BucketStatus.DONE, result.getStatus());  // 상태가 DONE이어야 함
+	}
+
+	@Test
+	void deleteBucket_Success() {
+		// Given: Mock 객체 준비
+		User mockUser = User.builder()
+			.id("1")
+			.tel("010-5555-6666")
+			.password("password")
+			.name("최강희")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1999, 7, 30, 0, 0))
+			.gender("M")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile.jpg")
+			.nickname("somsomsomsom")
+			.build();
+
+		// Mock DreamAccount 객체 설정
+		DreamAccount mockDreamAccount = DreamAccount.builder()
+			.id(1L)
+			.user(mockUser)
+			.balance(new BigDecimal("1000.00"))
+			.total(new BigDecimal("2000.00"))
+			.build();
+
+		// Mock Bucket 객체 설정 (dreamAccount 포함)
+		Bucket mockBucket = Bucket.builder()
+			.id(1L)
+			.user(mockUser)
+			.dreamAccount(mockDreamAccount)  // DreamAccount 설정
+			.title("New Bucket")
+			.build();
+
+		// When: Repository 동작 모킹
+		when(bucketRepository.findById(mockBucket.getId())).thenReturn(Optional.of(mockBucket));
+
+		// 서비스 호출
+		bucketService.deleteBucket(mockBucket.getId(), mockUser);
+
+		// Then: Repository의 delete 메서드가 한 번 호출되었는지 확인
+		verify(bucketRepository, times(1)).delete(mockBucket);
+	}
+
+	@Test
+	void deleteBucket_삭제권한없음_예외발생() {
+		User mockUser = User.builder()
+			.id("1")
+			.tel("010-5555-6666")
+			.password("password")
+			.name("최강희")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1999, 7, 30, 0, 0))
+			.gender("M")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile.jpg")
+			.nickname("somsomsomsom")
+			.build();
+
+		// Mock DreamAccount 객체 설정
+		DreamAccount mockDreamAccount = DreamAccount.builder()
+			.id(1L)
+			.user(mockUser)
+			.balance(new BigDecimal("1000.00"))
+			.total(new BigDecimal("2000.00"))
+			.build();
+		Bucket mockBucket = Bucket.builder()
+			.id(1L)
+			.user(mockUser)
+			.dreamAccount(mockDreamAccount)  // DreamAccount 설정
+			.title("New Bucket")
+			.build();
+		// Given
+		User otherUser = User.builder().id("2").name("다른 유저").build();
+		when(bucketRepository.findById(mockBucket.getId())).thenReturn(Optional.of(mockBucket));
+
+		// When & Then
+		CustomException exception = assertThrows(CustomException.class,
+			() -> bucketService.deleteBucket(mockBucket.getId(), otherUser));
+
+		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.FORBIDDEN);
+	}
+
+	@Test
+	void testDeleteBucket_NotFound() {
+		// given
+		Long bucketId = 999L; // Assuming this ID does not exist in the repository
+		User mockUser = new User(); // Use an actual mock or your pre-defined mock user
+
+		// Mock the bucketRepository to return an empty Optional, simulating a bucket not found
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.empty());
+
+		// when & then
+		// Verify that CustomException is thrown with the expected error message
+		CustomException exception = assertThrows(CustomException.class, () -> {
+			bucketService.deleteBucket(bucketId, mockUser);
+		});
+
+		// Assert that the exception message is correct
+		assertEquals("버킷을 찾을 수 없습니다.", exception.getMessage());
+		assertEquals(ErrorCode.NOT_FOUND,
+			exception.getErrorCode());  // Assuming you have this method in CustomException
+	}
+
+	@Test
+	void getAllBuckets_Success() {
+		// Given: User와 DreamAccount, Bucket 객체 초기화
+		User mockUser = User.builder()
+			.id("1")
+			.tel("010-5555-6666")
+			.password("password")
+			.name("최강희")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1999, 7, 30, 0, 0))
+			.gender("M")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile.jpg")
+			.nickname("somsomsomsom")
+			.build();
+
+		DreamAccount mockDreamAccount = DreamAccount.builder()
+			.id(1L)
+			.user(mockUser)
+			.balance(BigDecimal.ZERO)  // 적절한 값 설정
+			.total(BigDecimal.ZERO)    // 적절한 값 설정
+			.build();
+
+		// Mock Bucket 객체 설정
+		Bucket mockBucket = Bucket.builder()
+			.id(1L)
+			.user(mockUser)           // User 객체 설정
+			.dreamAccount(mockDreamAccount)  // DreamAccount 객체 설정
+			.title("New Bucket")
+			.build();
+
+		// Bucket 목록 생성
+		List<Bucket> bucketList = new ArrayList<>();
+		bucketList.add(mockBucket);
+
+		// When: Repository 동작 모킹
+		when(bucketRepository.findAllByUserId(mockUser.getId())).thenReturn(bucketList);
+
+		// 서비스 호출
+		List<BucketResponseDto.BucketInfo> result = bucketService.getAllBuckets(mockUser);
+
+		// Then: 결과 검증
+		assertThat(result).hasSize(1);
+		assertThat(result.get(0).getTitle()).isEqualTo(mockBucket.getTitle());
+	}
+
+	@Test
+	void testGetBucketById_Success() {
+		// given
+		Long bucketId = 1L;
+
+		// mock bucketRepository to return mockBucket when the findById method is called
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(mockBucket));
+
+		// when
+		BucketResponseDto.BucketInfo result = bucketService.getBucketById(bucketId);
+
+		// then
+		assertNotNull(result);
+		assertEquals(mockBucket.getId(), result.getId());
+		assertEquals(mockBucket.getTitle(), result.getTitle());
+		// You can add more assertions to verify other fields of result as needed.
 	}
 }
