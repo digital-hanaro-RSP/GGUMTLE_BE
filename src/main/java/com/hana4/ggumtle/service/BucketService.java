@@ -34,7 +34,7 @@ public class BucketService {
 	private final BucketRepository bucketRepository;
 	private final DreamAccountRepository dreamAccountRepository;
 
-	private boolean checkValidUser(User user, Bucket bucket) {
+	public boolean checkValidUser(User user, Bucket bucket) {
 		return user.getId().equals(bucket.getUser().getId());
 	}
 
