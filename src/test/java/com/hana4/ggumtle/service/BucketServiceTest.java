@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.hana4.ggumtle.dto.bucketList.BucketRequestDto;
 import com.hana4.ggumtle.dto.bucketList.BucketResponseDto;
+import com.hana4.ggumtle.dto.recommendation.RecommendationResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
@@ -769,4 +771,339 @@ class BucketServiceTest {
 		assertEquals(mockBucket.getTitle(), result.getTitle());
 		// You can add more assertions to verify other fields of result as needed.
 	}
+
+	@Test
+	void testGetBucketById_BucketNotFound() {
+		// given
+		Long bucketId = 1L;
+
+		// mock bucketRepository to return an empty Optional, simulating a bucket not found
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.empty());
+
+		// when & then
+		assertThrows(CustomException.class, () -> {
+			bucketService.getBucketById(bucketId);
+		});
+	}
+
+	@Test
+	void testGetRecommendedBuckets_WithTagType() {
+		// given
+		BucketTagType tagType = BucketTagType.GO;
+		List<Bucket> mockRecommendedBuckets = Arrays.asList(mockBucket, mockBucket);
+
+		// Mock the repository method to return the list of recommended buckets for the specific tag type
+		when(bucketRepository.findByTagTypeAndIsRecommendedTrue(tagType)).thenReturn(mockRecommendedBuckets);
+
+		// when
+		List<RecommendationResponseDto.RecommendedBucketInfo> result = bucketService.getRecommendedBuckets(tagType);
+
+		// then
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
+		// Add more assertions to check the specific fields of the result as needed
+	}
+
+	@Test
+	void testGetRecommendedBuckets_WithNullTagType() {
+		// given
+		BucketTagType tagType = null;
+
+		// Create mock Bucket objects
+		Bucket mockBucket1 = mock(Bucket.class);
+		Bucket mockBucket2 = mock(Bucket.class);
+
+		// Set up mock behavior for mockBucket1 and mockBucket2
+		when(mockBucket1.getTagType()).thenReturn(BucketTagType.GO);
+		when(mockBucket1.getFollowers()).thenReturn(300L);
+
+		when(mockBucket2.getTagType()).thenReturn(BucketTagType.DO);
+		when(mockBucket2.getFollowers()).thenReturn(150L);
+
+		List<Bucket> mockRecommendedBuckets = Arrays.asList(mockBucket1, mockBucket2);
+
+		// Mock the repository method to return the list of recommended buckets
+		when(bucketRepository.findByIsRecommendedTrue()).thenReturn(mockRecommendedBuckets);
+
+		// when
+		List<RecommendationResponseDto.RecommendedBucketInfo> result = bucketService.getRecommendedBuckets(tagType);
+
+		// then
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
+
+		// You can add more assertions to check specific fields of the result
+		// Example:
+		assertEquals(2, result.size());  // Expecting 2 recommended buckets
+	}
+
+	@Test
+	void testGetRecommendedBuckets_SortingAndLimitingTop3() {
+		// given
+		BucketTagType tagType = null;
+		Bucket bucket1 = Bucket.builder()
+			.id(1L)
+			.title("Bucket 1")
+			.followers(100L)
+			.tagType(BucketTagType.GO)
+			.build();
+		Bucket bucket2 = Bucket.builder()
+			.id(2L)
+			.title("Bucket 2")
+			.followers(300L)
+			.tagType(BucketTagType.GO)
+			.build();
+		Bucket bucket3 = Bucket.builder()
+			.id(3L)
+			.title("Bucket 3")
+			.followers(200L)
+			.tagType(BucketTagType.GO)
+			.build();
+		Bucket bucket4 = Bucket.builder()
+			.id(4L)
+			.title("Bucket 4")
+			.followers(150L)
+			.tagType(BucketTagType.GO)
+			.build();
+
+		List<Bucket> mockRecommendedBuckets = Arrays.asList(bucket1, bucket2, bucket3, bucket4);
+
+		// Mock the repository to return the recommended buckets
+		when(bucketRepository.findByIsRecommendedTrue()).thenReturn(mockRecommendedBuckets);
+
+		// when
+		List<RecommendationResponseDto.RecommendedBucketInfo> result = bucketService.getRecommendedBuckets(tagType);
+
+		// then
+		assertNotNull(result);
+		assertFalse(result.isEmpty());
+
+		// Get the first (and only) group since tagType is null
+		RecommendationResponseDto.RecommendedBucketInfo recommendedBucketInfo = result.get(0);
+
+		// Check that the group contains the top 3 recommended buckets by followers
+		List<RecommendationResponseDto.RecommendedBucketInfo.Recommendation> topRecommendations = recommendedBucketInfo.getRecommendations();
+
+		assertEquals(3, topRecommendations.size());  // Check that only 3 recommendations are included
+		assertEquals(300L, topRecommendations.get(0).getFollowers());  // Highest followers first (Bucket 2)
+		assertEquals(200L, topRecommendations.get(1).getFollowers());  // Bucket 3
+		assertEquals(150L, topRecommendations.get(2).getFollowers());  // Bucket 4
+	}
+
+	@Test
+	void testGetBucket_Success() {
+		// given
+		Long bucketId = 1L;
+
+		// Mock a Bucket object that should be returned when the bucket is found
+		Bucket mockBucket = Bucket.builder()
+			.id(bucketId)
+			.title("Test Bucket")
+			.tagType(BucketTagType.GO)
+			.dueDate(LocalDate.parse("2025-01-21").atStartOfDay())
+			.howTo(BucketHowTo.MONEY)
+			.isDueSet(true)
+			.isAutoAllocate(true)
+			.allocateAmount(new BigDecimal("500.00"))
+			.goalAmount(new BigDecimal("1000000"))
+			.memo("Test Memo")
+			.followers(300L)
+			.cronCycle("0 0 1 * *")
+			.user(mockUser) // Assuming mockUser is set up as part of your test
+			.dreamAccount(mockDreamAccount) // Assuming mockDreamAccount is set up as part of your test
+			.build();
+
+		// Mock the bucketRepository to return the mock bucket when findById is called
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(mockBucket));
+
+		// when
+		Bucket result = bucketService.getBucket(bucketId);
+
+		// then
+		assertNotNull(result);
+		assertEquals(bucketId, result.getId());
+		assertEquals("Test Bucket", result.getTitle());
+	}
+
+	@Test
+	void testGetBucket_NotFound() {
+		// given
+		Long bucketId = 999L; // Assuming this ID does not exist in the repository
+
+		// Mock the bucketRepository to return an empty Optional, simulating a bucket not found
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.empty());
+
+		// when & then
+		// Verify that CustomException is thrown with the expected error message
+		CustomException exception = assertThrows(CustomException.class, () -> {
+			bucketService.getBucket(bucketId);
+		});
+
+		// Assert that the exception message is correct
+		assertEquals("버킷을 찾을 수 없습니다.", exception.getMessage());
+		assertEquals(ErrorCode.NOT_FOUND,
+			exception.getErrorCode());  // Assuming you have this method in CustomException
+	}
+
+	@Test
+	void testGetBucketsDueAfter_Success() {
+		// given
+		String userId = mockUser.getId();  // "1"
+		LocalDate dueDate = LocalDate.of(2025, 1, 1);
+		LocalDateTime startOfDay = dueDate.atStartOfDay();
+
+		Bucket bucket1 = Bucket.builder()
+			.id(1L)
+			.title("Bucket 1")
+			.howTo(BucketHowTo.MONEY)
+			.dueDate(null)  // dueDate가 null인 경우 (조건 충족)
+			.user(mockUser)
+			.build();
+
+		Bucket bucket2 = Bucket.builder()
+			.id(2L)
+			.title("Bucket 2")
+			.howTo(BucketHowTo.MONEY)
+			.dueDate(LocalDate.of(2025, 2, 1).atStartOfDay())  // 2025-01-01 이후 (조건 충족)
+			.user(mockUser)
+			.build();
+
+		Bucket bucket3 = Bucket.builder()
+			.id(3L)
+			.title("Bucket 3")
+			.howTo(BucketHowTo.MONEY)
+			.dueDate(LocalDate.of(2024, 12, 31).atStartOfDay())  // 2025-01-01 이전 (조건 불충족)
+			.user(mockUser)
+			.build();
+
+		List<Bucket> mockBuckets = Arrays.asList(bucket1, bucket2);
+
+		// Mocking: 버킷 레포지토리가 특정 조건의 버킷 리스트를 반환하도록 설정
+		when(bucketRepository.findByUserIdAndHowToEqualsAndDueDateIsNullOrDueDateAfter(userId,
+			BucketHowTo.MONEY, startOfDay))
+			.thenReturn(mockBuckets);
+
+		// when
+		List<Bucket> result = bucketService.getBucketsDueAfter(userId, dueDate);
+
+		// then
+		assertNotNull(result);
+		assertEquals(2, result.size());  // 조건을 만족하는 2개의 버킷이 반환되어야 함
+		assertTrue(result.contains(bucket1));
+		assertTrue(result.contains(bucket2));
+	}
+
+	@Test
+	void testUpdateBucketStatus_SetSafeBoxToZero_WhenStatusIsDone() {
+		// given
+		Long bucketId = mockBucket.getId();  // 1L
+		BucketRequestDto.UpdateBucketStatus updates = new BucketRequestDto.UpdateBucketStatus(BucketStatus.DONE);
+
+		// 기존 버킷 상태
+		User mockUser = User.builder()
+			.id("1")
+			.tel("010-5555-6666")
+			.password("password")
+			.name("최강희")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1999, 7, 30, 0, 0))
+			.gender("M")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile.jpg")
+			.nickname("somsomsomsom")
+			.build();
+		Bucket mockBucket = Bucket.builder()
+			.id(1L)
+			.title("New Bucket")
+			.tagType(BucketTagType.GO)
+			.dueDate(LocalDate.parse("2025-01-21").atStartOfDay())
+			.howTo(BucketHowTo.MONEY)
+			.isDueSet(true)
+			.isAutoAllocate(true)
+			.allocateAmount(new BigDecimal("500.00"))
+			.goalAmount(new BigDecimal("1000000"))
+			.memo("여행 꼭 가고싶다")
+			.followers(300L)
+			.cronCycle("0 0 1 * *")
+			.user(mockUser)
+			.safeBox(new BigDecimal("500.00"))
+			.dreamAccount(mockDreamAccount)
+			.build();
+
+		// Mocking: 특정 버킷 ID로 조회할 때 `bucket`이 반환되도록 설정
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(mockBucket));
+		BucketService bucketServiceSpy = Mockito.spy(bucketService);
+
+		// Mocking: checkValidUser가 true를 반환하도록 설정 (유효한 사용자)
+		when(bucketServiceSpy.checkValidUser(mockUser, mockBucket)).thenReturn(true);
+
+		// when
+		BucketResponseDto.BucketInfo result = bucketServiceSpy.updateBucketStatus(mockUser, bucketId, updates);
+
+		// then
+		assertNotNull(result);
+		assertEquals(BucketStatus.DONE, mockBucket.getStatus());  // 상태가 DONE으로 변경되었는지 확인
+		assertEquals(BigDecimal.ZERO, mockBucket.getSafeBox());   // safeBox가 0으로 변경되었는지 확인
+
+		// 저장이 호출되었는지 검증
+		verify(bucketRepository, times(1)).save(mockBucket);
+	}
+
+	@Test
+	void testUpdateBucketStatus_SafeBoxUnchanged_WhenStatusIsNotDone() {
+		// given
+		Long bucketId = mockBucket.getId();  // 1L
+		BucketRequestDto.UpdateBucketStatus updates = new BucketRequestDto.UpdateBucketStatus(BucketStatus.HOLD);
+
+		// 기존 버킷 상태 (safeBox 값이 존재)
+		User mockUser = User.builder()
+			.id("1")
+			.tel("010-5555-6666")
+			.password("password")
+			.name("최강희")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1999, 7, 30, 0, 0))
+			.gender("M")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile.jpg")
+			.nickname("somsomsomsom")
+			.build();
+		Bucket mockBucket = Bucket.builder()
+			.id(1L)
+			.title("New Bucket")
+			.tagType(BucketTagType.GO)
+			.dueDate(LocalDate.parse("2025-01-21").atStartOfDay())
+			.howTo(BucketHowTo.MONEY)
+			.isDueSet(true)
+			.isAutoAllocate(true)
+			.allocateAmount(new BigDecimal("500.00"))
+			.goalAmount(new BigDecimal("1000000"))
+			.safeBox(new BigDecimal("500.00"))
+			.memo("여행 꼭 가고싶다")
+			.followers(300L)
+			.cronCycle("0 0 1 * *")
+			.user(mockUser)
+			.dreamAccount(mockDreamAccount)
+			.build();
+
+		// Mocking: 특정 버킷 ID로 조회할 때 `bucket`이 반환되도록 설정
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(mockBucket));
+		BucketService bucketServiceSpy = Mockito.spy(bucketService);
+
+		// Mocking: checkValidUser가 true를 반환하도록 설정 (유효한 사용자)
+		when(bucketServiceSpy.checkValidUser(mockUser, mockBucket)).thenReturn(true);
+
+		// when
+		BucketResponseDto.BucketInfo result = bucketServiceSpy.updateBucketStatus(mockUser, bucketId, updates);
+
+		// then
+		assertNotNull(result);
+		assertEquals(BucketStatus.HOLD, mockBucket.getStatus());
+		System.out.println();
+		assertEquals(new BigDecimal("500.00"), mockBucket.getSafeBox()); // safeBox 값이 그대로인지 확인
+
+		// 저장이 호출되었는지 검증
+		verify(bucketRepository, times(1)).save(mockBucket);
+	}
+
 }
