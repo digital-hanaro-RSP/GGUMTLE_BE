@@ -5,6 +5,8 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hana4.ggumtle.WithMockCustomUser;
 import com.hana4.ggumtle.config.TestSecurityConfig;
 import com.hana4.ggumtle.dto.advertisement.AdvertisementResponseDto;
-import com.hana4.ggumtle.dto.user.UserRequestDto;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementLocationType;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementProductType;
 import com.hana4.ggumtle.model.entity.user.User;
-import com.hana4.ggumtle.model.entity.user.UserRole;
 import com.hana4.ggumtle.service.AdvertisementService;
 
 @WebMvcTest(
@@ -61,46 +61,51 @@ public class AdvertisementControllerTest {
 	@Test
 	@WithMockCustomUser
 	public void testGetMainAd() throws Exception {
-		// 요청 DTO
-		UserRequestDto.Register request = UserRequestDto.Register.builder()
-			.name("문서아")
-			.tel("01012341234")
-			.password("password")
-			.birthDate("2000-01-01")
-			.gender("f")
-			.nickname("익명의고라니")
+		AdvertisementResponseDto.MainAd mockAd1 = AdvertisementResponseDto.MainAd.builder()
+			.id(1L)
+			.productType(AdvertisementProductType.INVESTMENT)
+			.productName("미래에셋TIGER200중공업증권상장지수투자신탁(주식)")
+			.locationType(AdvertisementLocationType.MAIN)
+			.riskRating("보통위험")
+			.yield("5.23%")
+			.link("https://example1.com")
 			.build();
 
-		// User 엔티티
-		User user = request.toEntity();
-		user.setId("27295730-41ce-4df8-9864-4da1fa3c6caa");
-		user.setRole(UserRole.USER);
-		user.setPermission((short)0);
-
-		AdvertisementResponseDto.MainAd mockAd = AdvertisementResponseDto.MainAd.builder()
+		AdvertisementResponseDto.MainAd mockAd2 = AdvertisementResponseDto.MainAd.builder()
 			.id(2L)
 			.productType(AdvertisementProductType.PENSION)
 			.productName("삼성글로벌메타버스증권자투자신탁UH(주식)Cpe(퇴직연금)")
 			.locationType(AdvertisementLocationType.MAIN)
 			.riskRating("높은위험")
 			.yield("51.93%")
-			.link("https://www.samsungfund.com/fund/product/view.do?id=K55105DK2904")
+			.link("https://example2.com")
 			.build();
 
-		when(advertisementService.getMainAd(any(User.class))).thenReturn(mockAd);
+		AdvertisementResponseDto.MainAdList mockAdList = AdvertisementResponseDto.MainAdList.builder()
+			.mainAds(Arrays.asList(mockAd1, mockAd2))
+			.build();
+
+		when(advertisementService.getMainAd(any(User.class))).thenReturn(mockAdList);
 
 		mockMvc.perform(get("/ads/main")
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("ok"))
-			.andExpect(jsonPath("$.data.id").value(2L))
-			.andExpect(jsonPath("$.data.productType").value("PENSION"))
-			.andExpect(jsonPath("$.data.productName").value("삼성글로벌메타버스증권자투자신탁UH(주식)Cpe(퇴직연금)"))
-			.andExpect(jsonPath("$.data.locationType").value("MAIN"))
-			.andExpect(jsonPath("$.data.riskRating").value("높은위험"))
-			.andExpect(jsonPath("$.data.yield").value("51.93%"))
-			.andExpect(
-				jsonPath("$.data.link").value("https://www.samsungfund.com/fund/product/view.do?id=K55105DK2904"));
+			.andExpect(jsonPath("$.data.mainAds").isArray())
+			.andExpect(jsonPath("$.data.mainAds[0].id").value(1L))
+			.andExpect(jsonPath("$.data.mainAds[0].productType").value("INVESTMENT"))
+			.andExpect(jsonPath("$.data.mainAds[0].productName").value("미래에셋TIGER200중공업증권상장지수투자신탁(주식)"))
+			.andExpect(jsonPath("$.data.mainAds[0].locationType").value("MAIN"))
+			.andExpect(jsonPath("$.data.mainAds[0].riskRating").value("보통위험"))
+			.andExpect(jsonPath("$.data.mainAds[0].yield").value("5.23%"))
+			.andExpect(jsonPath("$.data.mainAds[0].link").value("https://example1.com"))
+			.andExpect(jsonPath("$.data.mainAds[1].id").value(2L))
+			.andExpect(jsonPath("$.data.mainAds[1].productType").value("PENSION"))
+			.andExpect(jsonPath("$.data.mainAds[1].productName").value("삼성글로벌메타버스증권자투자신탁UH(주식)Cpe(퇴직연금)"))
+			.andExpect(jsonPath("$.data.mainAds[1].locationType").value("MAIN"))
+			.andExpect(jsonPath("$.data.mainAds[1].riskRating").value("높은위험"))
+			.andExpect(jsonPath("$.data.mainAds[1].yield").value("51.93%"))
+			.andExpect(jsonPath("$.data.mainAds[1].link").value("https://example2.com"));
 	}
 }
