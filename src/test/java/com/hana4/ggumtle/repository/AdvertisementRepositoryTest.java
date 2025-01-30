@@ -2,7 +2,8 @@ package com.hana4.ggumtle.repository;
 
 import static org.assertj.core.api.Assertions.*;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,66 +28,89 @@ class AdvertisementRepositoryTest {
 	}
 
 	@Test
-	void whenFindFirstByRiskRating_thenReturnAdvertisement() {
-		// Arrange
-		Advertisement ad = Advertisement.builder()
+	void whenFindAllByRiskRatingInOrderByIdDesc_thenReturnSortedAdvertisements() {
+		Advertisement ad1 = Advertisement.builder()
 			.productType(AdvertisementProductType.INVESTMENT)
-			.productName("Test Investment Product")
+			.productName("Investment Product 1")
 			.locationType(AdvertisementLocationType.MAIN)
 			.riskRating("보통위험")
 			.yield("5%")
-			.link("https://example.com")
-			.build();
-
-		advertisementRepository.save(ad);
-
-		// Act
-		Optional<Advertisement> found = advertisementRepository.findFirstByRiskRating("보통위험");
-
-		// Assert
-		assertThat(found).isPresent();
-		assertThat(found.get().getProductName()).isEqualTo("Test Investment Product");
-		assertThat(found.get().getRiskRating()).isEqualTo("보통위험");
-	}
-
-	@Test
-	void whenFindFirstByRiskRating_withNonExistentRisk_thenReturnEmpty() {
-		// Act
-		Optional<Advertisement> found = advertisementRepository.findFirstByRiskRating("존재하지않는위험");
-
-		// Assert
-		assertThat(found).isEmpty();
-	}
-
-	@Test
-	void whenMultipleAdsWithSameRiskRating_thenReturnFirst() {
-		// Arrange
-		Advertisement ad1 = Advertisement.builder()
-			.productType(AdvertisementProductType.INVESTMENT)
-			.productName("First Investment Product")
-			.locationType(AdvertisementLocationType.MAIN)
-			.riskRating("높은위험")
-			.yield("7%")
 			.link("https://example1.com")
 			.build();
 
 		Advertisement ad2 = Advertisement.builder()
 			.productType(AdvertisementProductType.INVESTMENT)
-			.productName("Second Investment Product")
+			.productName("Investment Product 2")
 			.locationType(AdvertisementLocationType.MAIN)
 			.riskRating("높은위험")
-			.yield("8%")
+			.yield("7%")
 			.link("https://example2.com")
 			.build();
 
-		advertisementRepository.save(ad1);
-		advertisementRepository.save(ad2);
+		Advertisement ad3 = Advertisement.builder()
+			.productType(AdvertisementProductType.INVESTMENT)
+			.productName("Investment Product 3")
+			.locationType(AdvertisementLocationType.MAIN)
+			.riskRating("보통위험")
+			.yield("6%")
+			.link("https://example3.com")
+			.build();
 
-		// Act
-		Optional<Advertisement> found = advertisementRepository.findFirstByRiskRating("높은위험");
+		advertisementRepository.saveAll(Arrays.asList(ad1, ad2, ad3));
 
-		// Assert
-		assertThat(found).isPresent();
-		assertThat(found.get().getProductName()).isEqualTo("First Investment Product");
+		List<Advertisement> found = advertisementRepository.findAllByRiskRatingInOrderByIdDesc(
+			Arrays.asList("보통위험", "높은위험"));
+
+		assertThat(found).hasSize(3);
+		assertThat(found.get(0).getProductName()).isEqualTo("Investment Product 3");
+		assertThat(found.get(1).getProductName()).isEqualTo("Investment Product 2");
+		assertThat(found.get(2).getProductName()).isEqualTo("Investment Product 1");
+	}
+
+	@Test
+	void whenFindAllByRiskRatingInOrderByIdDesc_withNonExistentRisk_thenReturnEmpty() {
+		List<Advertisement> found = advertisementRepository.findAllByRiskRatingInOrderByIdDesc(
+			Arrays.asList("존재하지않는위험"));
+
+		assertThat(found).isEmpty();
+	}
+
+	@Test
+	void whenFindAllByRiskRatingInOrderByIdDesc_withMultipleRiskRatings_thenReturnMatchingAds() {
+		Advertisement ad1 = Advertisement.builder()
+			.productType(AdvertisementProductType.INVESTMENT)
+			.productName("Low Risk Product")
+			.locationType(AdvertisementLocationType.MAIN)
+			.riskRating("낮은위험")
+			.yield("3%")
+			.link("https://example1.com")
+			.build();
+
+		Advertisement ad2 = Advertisement.builder()
+			.productType(AdvertisementProductType.INVESTMENT)
+			.productName("Medium Risk Product")
+			.locationType(AdvertisementLocationType.MAIN)
+			.riskRating("보통위험")
+			.yield("5%")
+			.link("https://example2.com")
+			.build();
+
+		Advertisement ad3 = Advertisement.builder()
+			.productType(AdvertisementProductType.INVESTMENT)
+			.productName("High Risk Product")
+			.locationType(AdvertisementLocationType.MAIN)
+			.riskRating("높은위험")
+			.yield("7%")
+			.link("https://example3.com")
+			.build();
+
+		advertisementRepository.saveAll(Arrays.asList(ad1, ad2, ad3));
+
+		List<Advertisement> found = advertisementRepository.findAllByRiskRatingInOrderByIdDesc(
+			Arrays.asList("낮은위험", "높은위험"));
+
+		assertThat(found).hasSize(2);
+		assertThat(found.get(0).getProductName()).isEqualTo("High Risk Product");
+		assertThat(found.get(1).getProductName()).isEqualTo("Low Risk Product");
 	}
 }

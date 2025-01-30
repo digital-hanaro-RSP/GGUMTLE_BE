@@ -1,5 +1,8 @@
 package com.hana4.ggumtle.dto.advertisement;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.hana4.ggumtle.model.entity.advertisement.Advertisement;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementAdType;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementLocationType;
@@ -16,6 +19,24 @@ import lombok.NoArgsConstructor;
 @Schema(description = "광고 응답 DTO")
 @Generated
 public class AdvertisementResponseDto {
+	@Schema(description = "메인 광고 응답 배열")
+	@Getter
+	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@AllArgsConstructor
+	@Builder
+	public static class MainAdList {
+		@Schema(description = "광고배열", example = "")
+		private List<MainAd> mainAds;
+
+		public static MainAdList from(List<Advertisement> advertisements) {
+			List<MainAd> mainAdList = advertisements.stream()
+				.map(MainAd::from)
+				.collect(Collectors.toList());
+			return MainAdList.builder()
+				.mainAds(mainAdList)
+				.build();
+		}
+	}
 
 	@Schema(description = "메인 광고 응답")
 	@Getter
