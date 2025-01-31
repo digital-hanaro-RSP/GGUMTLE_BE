@@ -316,8 +316,8 @@ class PostServiceTest {
 			new GoalPortfolioResponseDto.Ratio(BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7),
 				BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), 1,
 				"1"));
-		when(myDataService.getMyDataByUserId(user.getId())).thenReturn(
-			new MyDataResponseDto.CurrentPortfolio(BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7),
+		when(myDataService.getMyDataRateByUserId(user.getId())).thenReturn(
+			new MyDataResponseDto.CurrentPortfolioRate(BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7),
 				BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), BigDecimal.valueOf(0.7), 1,
 				"1"));
 
