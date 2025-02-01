@@ -48,10 +48,10 @@ public class AdvertisementController {
 		)
 	})
 	@GetMapping("/main")
-	public ResponseEntity<CustomApiResponse<AdvertisementResponseDto.MainAd>> getMainAd(
+	public ResponseEntity<CustomApiResponse<AdvertisementResponseDto.MainAdList>> getMainAd(
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		AdvertisementResponseDto.MainAd response = advertisementService.getMainAd(userDetails.getUser());
+		AdvertisementResponseDto.MainAdList response = advertisementService.getMainAd(userDetails.getUser());
 		return ResponseEntity.ok(CustomApiResponse.success(response));
 	}
 }

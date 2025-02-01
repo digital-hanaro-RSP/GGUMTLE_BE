@@ -1,5 +1,6 @@
 package com.hana4.ggumtle.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -34,7 +35,7 @@ public class BucketService {
 	private final BucketRepository bucketRepository;
 	private final DreamAccountRepository dreamAccountRepository;
 
-	private boolean checkValidUser(User user, Bucket bucket) {
+	public boolean checkValidUser(User user, Bucket bucket) {
 		return user.getId().equals(bucket.getUser().getId());
 	}
 
@@ -123,6 +124,9 @@ public class BucketService {
 		}
 		// Enum 변환
 		bucket.setStatus(statusValue);
+		if (statusValue == BucketStatus.DONE) {
+			bucket.setSafeBox(BigDecimal.valueOf(0));
+		}
 
 		bucketRepository.save(bucket);
 		return BucketResponseDto.BucketInfo.from(bucket);
@@ -202,7 +206,7 @@ public class BucketService {
 
 	public Bucket getBucket(Long bucketId) {
 		return bucketRepository.findById(bucketId)
-			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 Bucket이 존재하지 않습니다."));
+			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷을 찾을 수 없습니다."));
 	}
 
 	public List<Bucket> getBucketsDueAfter(String userId, LocalDate dueDate) {

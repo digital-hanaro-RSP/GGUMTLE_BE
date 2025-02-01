@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,64 +37,73 @@ public class AdvertisementServiceTest {
 	@Mock
 	private GoalPortfolioService goalPortfolioService;
 
-	private Advertisement mockAdvertisement;
+	private List<Advertisement> mockAdvertisements;
 
 	@BeforeEach
 	void setUp() {
-		mockAdvertisement = Advertisement.builder()
-			.id(1L)
-			.productType(AdvertisementProductType.INVESTMENT)
-			.productName("Test Product")
-			.locationType(AdvertisementLocationType.MAIN)
-			.riskRating("보통위험")
-			.yield("10%")
-			.link("https://example.com")
-			.build();
+		mockAdvertisements = Arrays.asList(
+			Advertisement.builder()
+				.id(1L)
+				.productType(AdvertisementProductType.INVESTMENT)
+				.productName("Test Product 1")
+				.locationType(AdvertisementLocationType.MAIN)
+				.riskRating("보통위험")
+				.yield("10%")
+				.link("https://example1.com")
+				.build(),
+			Advertisement.builder()
+				.id(2L)
+				.productType(AdvertisementProductType.PENSION)
+				.productName("Test Product 2")
+				.locationType(AdvertisementLocationType.MAIN)
+				.riskRating("높은위험")
+				.yield("15%")
+				.link("https://example2.com")
+				.build()
+		);
 	}
 
 	@Test
 	void testGetMainAd_Conservative() {
-		testGetMainAdForInvestmentType("CONSERVATIVE", "매우낮은위험");
+		testGetMainAdForInvestmentType("CONSERVATIVE", Arrays.asList("매우낮은위험", "낮은위험", "보통위험"));
 	}
 
 	@Test
 	void testGetMainAd_ModeratelyConservative() {
-		testGetMainAdForInvestmentType("MODERATELY_CONSERVATIVE", "낮은위험");
+		testGetMainAdForInvestmentType("MODERATELY_CONSERVATIVE", Arrays.asList("낮은위험", "보통위험", "높은위험"));
 	}
 
 	@Test
 	void testGetMainAd_Balanced() {
-		testGetMainAdForInvestmentType("BALANCED", "보통위험");
+		testGetMainAdForInvestmentType("BALANCED", Arrays.asList("보통위험", "낮은위험", "높은위험"));
 	}
 
 	@Test
 	void testGetMainAd_ModeratelyAggressive() {
-		testGetMainAdForInvestmentType("MODERATELY_AGGRESSIVE", "높은위험");
+		testGetMainAdForInvestmentType("MODERATELY_AGGRESSIVE", Arrays.asList("높은위험", "보통위험", "매우높은위험"));
 	}
 
 	@Test
 	void testGetMainAd_Aggressive() {
-		testGetMainAdForInvestmentType("AGGRESSIVE", "매우높은위험");
+		testGetMainAdForInvestmentType("AGGRESSIVE", Arrays.asList("매우높은위험", "높은위험", "보통위험"));
 	}
 
-	private void testGetMainAdForInvestmentType(String investmentType, String expectedRiskRating) {
+	private void testGetMainAdForInvestmentType(String investmentType, List<String> expectedRiskRatings) {
 		User user = createTestUser();
 
 		GoalPortfolioResponseDto.InvestmentType mockInvestmentType = mock(
 			GoalPortfolioResponseDto.InvestmentType.class);
 		when(mockInvestmentType.getInvestmentType()).thenReturn(investmentType);
 		when(goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(user)).thenReturn(mockInvestmentType);
-		when(advertisementRepository.findFirstByRiskRating(expectedRiskRating)).thenReturn(
-			Optional.of(mockAdvertisement));
+		when(advertisementRepository.findAllByRiskRatingInOrderByIdDesc(expectedRiskRatings)).thenReturn(
+			mockAdvertisements);
 
-		AdvertisementResponseDto.MainAd result = advertisementService.getMainAd(user);
+		AdvertisementResponseDto.MainAdList result = advertisementService.getMainAd(user);
 
 		assertNotNull(result);
-		assertEquals(mockAdvertisement.getId(), result.getId());
-		assertEquals(mockAdvertisement.getProductName(), result.getProductName());
-		assertEquals(mockAdvertisement.getRiskRating(), result.getRiskRating());
-		assertEquals(mockAdvertisement.getYield(), result.getYield());
-		assertEquals(mockAdvertisement.getLink(), result.getLink());
+		assertEquals(2, result.getMainAds().size());
+		assertEquals(mockAdvertisements.get(0).getId(), result.getMainAds().get(0).getId());
+		assertEquals(mockAdvertisements.get(1).getId(), result.getMainAds().get(1).getId());
 	}
 
 	@Test
@@ -118,11 +128,11 @@ public class AdvertisementServiceTest {
 			GoalPortfolioResponseDto.InvestmentType.class);
 		when(mockInvestmentType.getInvestmentType()).thenReturn("BALANCED");
 		when(goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(user)).thenReturn(mockInvestmentType);
-		when(advertisementRepository.findFirstByRiskRating("보통위험")).thenReturn(Optional.empty());
+		when(advertisementRepository.findAllByRiskRatingInOrderByIdDesc(anyList())).thenReturn(Arrays.asList());
 
-		CustomException exception = assertThrows(CustomException.class, () -> advertisementService.getMainAd(user));
-		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
-		assertTrue(exception.getMessage().contains("해당 위험 등급의 광고가 존재하지 않습니다"));
+		AdvertisementResponseDto.MainAdList result = advertisementService.getMainAd(user);
+		assertNotNull(result);
+		assertTrue(result.getMainAds().isEmpty());
 	}
 
 	private User createTestUser() {
