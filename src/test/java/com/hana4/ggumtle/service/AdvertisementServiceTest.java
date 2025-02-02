@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,8 +20,11 @@ import com.hana4.ggumtle.dto.goalPortfolio.GoalPortfolioResponseDto;
 import com.hana4.ggumtle.global.error.CustomException;
 import com.hana4.ggumtle.global.error.ErrorCode;
 import com.hana4.ggumtle.model.entity.advertisement.Advertisement;
+import com.hana4.ggumtle.model.entity.advertisement.AdvertisementAdType;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementLocationType;
 import com.hana4.ggumtle.model.entity.advertisement.AdvertisementProductType;
+import com.hana4.ggumtle.model.entity.group.Group;
+import com.hana4.ggumtle.model.entity.group.GroupCategory;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.model.entity.user.UserRole;
 import com.hana4.ggumtle.repository.AdvertisementRepository;
@@ -36,6 +40,9 @@ public class AdvertisementServiceTest {
 
 	@Mock
 	private GoalPortfolioService goalPortfolioService;
+
+	@Mock
+	private GroupService groupService;
 
 	private List<Advertisement> mockAdvertisements;
 
@@ -148,4 +155,135 @@ public class AdvertisementServiceTest {
 			.permission((short)0)
 			.build();
 	}
+
+	@Test
+	void getCommunityAd() {
+		Group group = new Group(
+			1L, // id
+			"여행자 모임", // name
+			GroupCategory.INVESTMENT, // category (가정: GroupCategory.TECH)
+			"여행 관련 정보와 기술을 공유하는 모임입니다.", // description
+			"https://example.com/group-image.jpg" // imageUrl
+		);
+
+		Group group2 = new Group(
+			1L, // id
+			"여행자 모임", // name
+			GroupCategory.EDUCATION, // category (가정: GroupCategory.TECH)
+			"여행 관련 정보와 기술을 공유하는 모임입니다.", // description
+			"https://example.com/group-image.jpg" // imageUrl
+		);
+
+		Group group3 = new Group(
+			1L, // id
+			"여행자 모임", // name
+			GroupCategory.AFTER_RETIREMENT, // category (가정: GroupCategory.TECH)
+			"여행 관련 정보와 기술을 공유하는 모임입니다.", // description
+			"https://example.com/group-image.jpg" // imageUrl
+		);
+
+		Group group4 = new Group(
+			1L, // id
+			"여행자 모임", // name
+			GroupCategory.TRAVEL, // category (가정: GroupCategory.TECH)
+			"여행 관련 정보와 기술을 공유하는 모임입니다.", // description
+			"https://example.com/group-image.jpg" // imageUrl
+		);
+
+		Group group5 = new Group(
+			1L, // id
+			"여행자 모임", // name
+			GroupCategory.HOBBY, // category (가정: GroupCategory.TECH)
+			"여행 관련 정보와 기술을 공유하는 모임입니다.", // description
+			"https://example.com/group-image.jpg" // imageUrl
+		);
+		List<Advertisement> hanaAds = new ArrayList<>();
+
+		for (int i = 0; i < 5; i++) {
+			AdvertisementAdType adType = AdvertisementAdType.HANA;
+			hanaAds.add(
+				Advertisement.builder()
+					.locationType(AdvertisementLocationType.COMMUNITY)
+					.adType(adType)
+					.bannerImageUrl("https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/hanainvest.png")
+					.link("https://www.hanaw.com/main/main/index.cmd")
+					.build());
+		}
+
+		List<Advertisement> hobbyAds = new ArrayList<>();
+
+		for (int i = 0; i < 5; i++) {
+			AdvertisementAdType adType = AdvertisementAdType.HOBBY;
+			hobbyAds.add(
+				Advertisement.builder()
+					.locationType(AdvertisementLocationType.COMMUNITY)
+					.adType(adType)
+					.bannerImageUrl("https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/hanainvest.png")
+					.link("https://www.hanaw.com/main/main/index.cmd")
+					.build());
+		}
+
+		List<Advertisement> travelAds = new ArrayList<>();
+
+		for (int i = 0; i < 5; i++) {
+			AdvertisementAdType adType = AdvertisementAdType.TRAVEL;
+			travelAds.add(
+				Advertisement.builder()
+					.locationType(AdvertisementLocationType.COMMUNITY)
+					.adType(adType)
+					.bannerImageUrl("https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/hanainvest.png")
+					.link("https://www.hanaw.com/main/main/index.cmd")
+					.build());
+		}
+
+		List<Advertisement> eduAds = new ArrayList<>();
+
+		for (int i = 0; i < 5; i++) {
+			AdvertisementAdType adType = AdvertisementAdType.EDUCATION;
+			eduAds.add(
+				Advertisement.builder()
+					.locationType(AdvertisementLocationType.COMMUNITY)
+					.adType(adType)
+					.bannerImageUrl("https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/hanainvest.png")
+					.link("https://www.hanaw.com/main/main/index.cmd")
+					.build());
+		}
+
+		List<Advertisement> retireAds = new ArrayList<>();
+
+		for (int i = 0; i < 5; i++) {
+			AdvertisementAdType adType = AdvertisementAdType.RETIREMENT;
+			retireAds.add(
+				Advertisement.builder()
+					.locationType(AdvertisementLocationType.COMMUNITY)
+					.adType(adType)
+					.bannerImageUrl("https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/hanainvest.png")
+					.link("https://www.hanaw.com/main/main/index.cmd")
+					.build());
+		}
+
+		List<Advertisement> advertisements = new ArrayList<>();
+		when(groupService.getGroup(1L)).thenReturn(group);
+		when(groupService.getGroup(2L)).thenReturn(group2);
+		when(groupService.getGroup(3L)).thenReturn(group3);
+		when(groupService.getGroup(4L)).thenReturn(group4);
+		when(groupService.getGroup(5L)).thenReturn(group5);
+		when(advertisementRepository.findAllByAdType(AdvertisementAdType.HANA)).thenReturn(hanaAds);
+		when(advertisementRepository.findAllByAdType(AdvertisementAdType.RETIREMENT)).thenReturn(retireAds);
+		when(advertisementRepository.findAllByAdType(AdvertisementAdType.TRAVEL)).thenReturn(travelAds);
+		when(advertisementRepository.findAllByAdType(AdvertisementAdType.EDUCATION)).thenReturn(eduAds);
+		when(advertisementRepository.findAllByAdType(AdvertisementAdType.HOBBY)).thenReturn(hobbyAds);
+
+		advertisementService.getCommunityAd(1L);
+		advertisementService.getCommunityAd(2L);
+		advertisementService.getCommunityAd(3L);
+		advertisementService.getCommunityAd(4L);
+		advertisementService.getCommunityAd(5L);
+		verify(advertisementRepository).findAllByAdType(AdvertisementAdType.HANA);
+		verify(advertisementRepository).findAllByAdType(AdvertisementAdType.HOBBY);
+		verify(advertisementRepository).findAllByAdType(AdvertisementAdType.TRAVEL);
+		verify(advertisementRepository).findAllByAdType(AdvertisementAdType.RETIREMENT);
+		verify(advertisementRepository).findAllByAdType(AdvertisementAdType.EDUCATION);
+	}
+
 }
