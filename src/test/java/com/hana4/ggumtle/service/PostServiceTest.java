@@ -655,7 +655,7 @@ class PostServiceTest {
 			.build();
 
 		when(groupService.getGroup(group.getId())).thenReturn(group);
-		when(groupService.isMemberOfGroup(group.getId(), user.getId())).thenReturn(true);
+		when(groupService.isMemberOfGroup(group.getId(), user.getId())).thenReturn(false);
 
 		assertThrows(CustomException.class, () -> {
 			postService.updatePost(group.getId(), 1L, write, user);
@@ -823,5 +823,288 @@ class PostServiceTest {
 		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
 		assertEquals("해당 글이 존재하지 않습니다.", exception.getMessage());
 		verify(postRepository).findById(postId);
+	}
+
+	@Test
+	void getPopularPostsByPage_카테고리성공() {
+		// Given
+		Long groupId = 1L;
+		Group group = new Group(groupId, "여행자 모임", GroupCategory.TRAVEL, "설명", "이미지URL");
+
+		User user = new User(
+			"1", // id
+			"010-1234-5678", // tel
+			"password123", // password
+			"홍길동", // name
+			(short)1, // permission
+			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
+			"M", // gender
+			UserRole.USER, // role
+			"https://example.com/profile.jpg", // profileImageUrl
+			"hgildong" // nickname
+		);
+
+		Post post = new Post();
+		post.setId(1L);
+		post.setUser(user);
+		post.setGroup(group);
+		post.setImageUrls("imageUrls");
+		post.setPostType(PostType.POST);
+		post.setContent("content");
+
+		Pageable pageable = PageRequest.of(0, 10);
+		List<Post> posts = List.of(post);
+		Page<Post> postPage = new PageImpl<>(posts, pageable, posts.size());
+
+		when(postRepository.findAllPostsGroupedByGroupCategory(pageable, GroupCategory.TRAVEL)).thenReturn(postPage);
+		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
+			Optional.of(PostLike.builder().build()));
+		// When
+		List<PostResponseDto.PostInfo> result = postService.getPopularPostsByPage(pageable, user, GroupCategory.TRAVEL,
+			null).getContent();
+
+		// Then
+		assertNotNull(result);
+		assertEquals(1, result.size());
+
+		verify(postRepository).findAllPostsGroupedByGroupCategory(pageable, GroupCategory.TRAVEL);
+	}
+
+	@Test
+	void getPopularPostsByPage_검색성공() {
+		// Given
+		Long groupId = 1L;
+		Group group = new Group(groupId, "여행자 모임", GroupCategory.TRAVEL, "설명", "이미지URL");
+
+		User user = new User(
+			"1", // id
+			"010-1234-5678", // tel
+			"password123", // password
+			"홍길동", // name
+			(short)1, // permission
+			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
+			"M", // gender
+			UserRole.USER, // role
+			"https://example.com/profile.jpg", // profileImageUrl
+			"hgildong" // nickname
+		);
+
+		Post post = new Post();
+		post.setId(1L);
+		post.setUser(user);
+		post.setGroup(group);
+		post.setImageUrls("imageUrls");
+		post.setPostType(PostType.POST);
+		post.setContent("content");
+
+		Pageable pageable = PageRequest.of(0, 10);
+		List<Post> posts = List.of(post);
+		Page<Post> postPage = new PageImpl<>(posts, pageable, posts.size());
+
+		when(postRepository.findAllPostsWithSearchParam(pageable, "null")).thenReturn(postPage);
+		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
+			Optional.of(PostLike.builder().build()));
+		// When
+		List<PostResponseDto.PostInfo> result = postService.getPopularPostsByPage(pageable, user, null,
+			"null").getContent();
+
+		// Then
+		assertNotNull(result);
+		assertEquals(1, result.size());
+
+		verify(postRepository).findAllPostsWithSearchParam(pageable, "null");
+	}
+
+	@Test
+	void getPopularPostsByPage_아무것도없이성공() {
+		// Given
+		Long groupId = 1L;
+		Group group = new Group(groupId, "여행자 모임", GroupCategory.TRAVEL, "설명", "이미지URL");
+
+		User user = new User(
+			"1", // id
+			"010-1234-5678", // tel
+			"password123", // password
+			"홍길동", // name
+			(short)1, // permission
+			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
+			"M", // gender
+			UserRole.USER, // role
+			"https://example.com/profile.jpg", // profileImageUrl
+			"hgildong" // nickname
+		);
+
+		Post post = new Post();
+		post.setId(1L);
+		post.setUser(user);
+		post.setGroup(group);
+		post.setImageUrls("imageUrls");
+		post.setPostType(PostType.POST);
+		post.setContent("content");
+
+		Pageable pageable = PageRequest.of(0, 10);
+		List<Post> posts = List.of(post);
+		Page<Post> postPage = new PageImpl<>(posts, pageable, posts.size());
+
+		when(postRepository.findAllPostsWithLikeCount(pageable)).thenReturn(postPage);
+		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
+			Optional.of(PostLike.builder().build()));
+		// When
+		List<PostResponseDto.PostInfo> result = postService.getPopularPostsByPage(pageable, user, null,
+			null).getContent();
+
+		// Then
+		assertNotNull(result);
+		assertEquals(1, result.size());
+
+		verify(postRepository).findAllPostsWithLikeCount(pageable);
+	}
+
+	@Test
+	void addLike_성공() {
+		Long groupId = 1L;
+		Group group = new Group(groupId, "여행자 모임", GroupCategory.TRAVEL, "설명", "이미지URL");
+		String newContent = "newContent";
+		String newImageUrl = "newImageUrl";
+		int page = 0;
+		User user = new User(
+			"1", // id
+			"010-1234-5678", // tel
+			"password123", // password
+			"홍길동", // name
+			(short)1, // permission
+			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
+			"M", // gender
+			UserRole.USER, // role
+			"https://example.com/profile.jpg", // profileImageUrl
+			"hgildong" // nickname
+		);
+
+		Post post = new Post();
+		post.setUser(user);
+		post.setId(1L);
+		when(groupService.getGroup(eq(1L))).thenReturn(group);
+		when(groupService.isMemberOfGroup(groupId, user.getId())).thenReturn(true);
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		// when(postService.getPostById(eq(post.getId()))).thenReturn(post);
+		when(postLikeRepository.save(any(PostLike.class))).thenReturn(PostLike.builder()
+			.post(post)
+			.user(user)
+			.build());
+
+		postService.addLike(1L, post.getId(), user);
+
+		verify(postLikeRepository).save(any(PostLike.class));
+	}
+
+	@Test
+	void addLike_예외처리() {
+		User user = new User(
+			"1", // id
+			"010-1234-5678", // tel
+			"password123", // password
+			"홍길동", // name
+			(short)1, // permission
+			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
+			"M", // gender
+			UserRole.USER, // role
+			"https://example.com/profile.jpg", // profileImageUrl
+			"hgildong" // nickname
+		);
+		when(groupService.isMemberOfGroup(eq(1L), eq(user.getId()))).thenReturn(false);
+		assertThrows(CustomException.class, () -> postService.addLike(1L, 1L, user));
+
+	}
+
+	@Test
+	void removeLike_성공() {
+		Long groupId = 1L;
+		User user = new User(
+			"1", // id
+			"010-1234-5678", // tel
+			"password123", // password
+			"홍길동", // name
+			(short)1, // permission
+			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
+			"M", // gender
+			UserRole.USER, // role
+			"https://example.com/profile.jpg", // profileImageUrl
+			"hgildong" // nickname
+		);
+		Post post = new Post();
+		post.setUser(user);
+		post.setId(1L);
+		when(groupService.isMemberOfGroup(groupId, user.getId())).thenReturn(true);
+		when(postRepository.findById(1L)).thenReturn(Optional.of(post));
+		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
+			Optional.of(PostLike.builder().post(post).user(user).build()));
+
+		postService.removeLike(1L, post.getId(), user);
+	}
+
+	@Test
+	void removeLike_예외처리() {
+		User user = new User(
+			"1", // id
+			"010-1234-5678", // tel
+			"password123", // password
+			"홍길동", // name
+			(short)1, // permission
+			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
+			"M", // gender
+			UserRole.USER, // role
+			"https://example.com/profile.jpg", // profileImageUrl
+			"hgildong" // nickname
+		);
+		when(groupService.isMemberOfGroup(eq(1L), eq(user.getId()))).thenReturn(false);
+		assertThrows(CustomException.class, () -> postService.removeLike(1L, 1L, user));
+	}
+
+	@Test
+	void saveNews_성공() {
+		Long groupId = 1L;
+		Group group = new Group(groupId, "여행자 모임", GroupCategory.TRAVEL, "설명", "이미지URL");
+		User user = new User(
+			"1", // id
+			"010-1234-5678", // tel
+			"password123", // password
+			"홍길동", // name
+			(short)1, // permission
+			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
+			"M", // gender
+			UserRole.USER, // role
+			"https://example.com/profile.jpg", // profileImageUrl
+			"hgildong" // nickname
+		);
+
+		PostRequestDto.Share share = PostRequestDto.Share.builder().content("content").postType(PostType.NEWS).build();
+
+		when(groupService.getGroup(eq(groupId))).thenReturn(group);
+		when(groupService.isMemberOfGroup(groupId, user.getId())).thenReturn(true);
+		when(postRepository.save(any(Post.class))).thenReturn(
+			Post.builder().id(1L).user(user).group(group).content("content").postType(PostType.NEWS).build());
+
+		postService.saveNews(1L, share, user);
+
+		verify(postRepository).save(any(Post.class));
+	}
+
+	@Test
+	void saveNews_예외처리() {
+		User user = new User(
+			"1", // id
+			"010-1234-5678", // tel
+			"password123", // password
+			"홍길동", // name
+			(short)1, // permission
+			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
+			"M", // gender
+			UserRole.USER, // role
+			"https://example.com/profile.jpg", // profileImageUrl
+			"hgildong" // nickname
+		);
+		when(groupService.isMemberOfGroup(eq(1L), eq(user.getId()))).thenReturn(false);
+		assertThrows(CustomException.class,
+			() -> postService.saveNews(1L, PostRequestDto.Share.builder().build(), user));
 	}
 }
