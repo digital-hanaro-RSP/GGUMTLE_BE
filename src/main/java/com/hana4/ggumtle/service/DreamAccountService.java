@@ -25,7 +25,7 @@ public class DreamAccountService {
 	private final DreamAccountRepository dreamAccountRepository;
 	private final BucketRepository bucketRepository;
 
-	private BigDecimal calculateTotalSafeBox(Long dreamAccountId) {
+	public BigDecimal calculateTotalSafeBox(Long dreamAccountId) {
 		List<Bucket> buckets = bucketRepository.findAll();
 		return buckets.stream()
 			.filter(bucket -> bucket.getDreamAccount().getId().equals(dreamAccountId))
