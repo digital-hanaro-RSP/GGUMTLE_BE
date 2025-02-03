@@ -391,4 +391,13 @@ public class UserControllerTest {
 			.andExpect(jsonPath("$.data.permission").value(0));
 	}
 
+	@Test
+	@WithMockCustomUser
+	public void testDeleteUserInfo() throws Exception {
+		mockMvc.perform(delete("/user"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andExpect(jsonPath("$.data").doesNotExist());
+	}
 }

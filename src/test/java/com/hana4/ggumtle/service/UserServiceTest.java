@@ -584,4 +584,30 @@ class UserServiceTest {
 		verify(passwordEncoder, never()).encode(any());
 	}
 
+	@Test
+	void testDeleteUserInfo_UserExists() {
+		// given
+		String userId = "user123";
+		User mockUser = new User();
+		mockUser.setId(userId);
+		when(userRepository.existsById(eq(userId))).thenReturn(true);
+
+		// when
+		userService.deleteUser(userId);
+
+		// then
+		verify(userRepository).deleteById(mockUser.getId());
+	}
+
+	@Test
+	void testDeleteUserInfo_UserNotFound() {
+		// given
+		String userId = "user123";
+		when(userRepository.existsById(userId)).thenReturn(false);
+
+		// when & then
+		assertThatThrownBy(() -> userService.deleteUser(userId))
+			.isInstanceOf(CustomException.class)
+			.hasMessageContaining("해당 유저를 찾을 수 없습니다");
+	}
 }

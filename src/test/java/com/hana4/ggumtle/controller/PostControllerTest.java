@@ -32,10 +32,16 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hana4.ggumtle.WithMockCustomUser;
 import com.hana4.ggumtle.config.TestSecurityConfig;
+import com.hana4.ggumtle.dto.advertisement.AdvertisementResponseDto;
+import com.hana4.ggumtle.dto.post.PostLikeResponseDto;
 import com.hana4.ggumtle.dto.post.PostRequestDto;
 import com.hana4.ggumtle.dto.post.PostResponseDto;
 import com.hana4.ggumtle.dto.user.UserResponseDto;
+import com.hana4.ggumtle.model.entity.advertisement.Advertisement;
+import com.hana4.ggumtle.model.entity.advertisement.AdvertisementAdType;
+import com.hana4.ggumtle.model.entity.advertisement.AdvertisementLocationType;
 import com.hana4.ggumtle.model.entity.group.GroupCategory;
+import com.hana4.ggumtle.model.entity.post.Post;
 import com.hana4.ggumtle.model.entity.post.PostType;
 import com.hana4.ggumtle.security.CustomUserDetails;
 import com.hana4.ggumtle.service.AdvertisementService;
@@ -225,6 +231,50 @@ class PostControllerTest {
 	}
 
 	@Test
+	void getPostsByPage_실패() throws Exception {
+
+		// given
+		Long groupId = 1L;
+		Long postId = 1L;
+		Pageable pageable = PageRequest.of(0, 10);
+
+		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
+			.getAuthentication()
+			.getPrincipal();
+
+		List<PostResponseDto.PostInfo> postInfos = new ArrayList<>();
+
+		PostResponseDto.PostInfo postInfo = PostResponseDto.PostInfo.builder()
+			.id(postId)
+			.userId("1")
+			.groupId(groupId)
+			.snapShot("{\"bucketId\":[3,2,1],\"portfolio\":false}")
+			.imageUrls("")
+			.content("글 내용")
+			.postType(PostType.POST)
+			.isLiked(false)
+			.createdAt(LocalDateTime.now())
+			.updatedAt(LocalDateTime.now())
+			.build();
+
+		for (int i = 0; i < 10; i++)
+			postInfos.add(postInfo);
+
+		Page<PostResponseDto.PostInfo> pages = new PageImpl<>(postInfos, pageable, postInfos.size());
+		System.out.println("customUserDetails = " + customUserDetails.getUser());
+		given(postService.getPostsByPage(eq(groupId), eq(pageable), eq(customUserDetails.getUser()))
+		).willReturn(pages);
+
+		// when, then
+		mockMvc.perform(MockMvcRequestBuilders.get("/community/group/{groupId}/post", 1).param("offset", "0")
+				.param("limit", "-1"))
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.code").value(400))
+			.andExpect(jsonPath("$.message").value("limit은 0 이상이어야 합니다."))
+			.andDo(print());
+	}
+
+	@Test
 	void updatePost() throws Exception {
 
 		// given
@@ -305,5 +355,257 @@ class PostControllerTest {
 			.andDo(print());
 
 		verify(postService).deletePost(groupId, postId, customUserDetails.getUser());
+	}
+
+	@Test
+	void getPopularPostsByPage() throws Exception {
+
+		// given
+		Long groupId = 1L;
+		Long postId = 1L;
+		Pageable pageable = PageRequest.of(0, 10);
+
+		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
+			.getAuthentication()
+			.getPrincipal();
+
+		List<PostResponseDto.PostInfo> postInfos = new ArrayList<>();
+
+		PostResponseDto.PostInfo postInfo = PostResponseDto.PostInfo.builder()
+			.id(postId)
+			.userId("1")
+			.groupId(groupId)
+			.snapShot("{\"bucketId\":[3,2,1],\"portfolio\":false}")
+			.imageUrls("")
+			.content("글 내용")
+			.postType(PostType.POST)
+			.isLiked(false)
+			.createdAt(LocalDateTime.now())
+			.updatedAt(LocalDateTime.now())
+			.build();
+
+		for (int i = 0; i < 10; i++)
+			postInfos.add(postInfo);
+
+		Page<PostResponseDto.PostInfo> pages = new PageImpl<>(postInfos, pageable, postInfos.size());
+		System.out.println("customUserDetails = " + customUserDetails.getUser());
+		given(postService.getPopularPostsByPage(eq(pageable), eq(customUserDetails.getUser()), eq(null), eq(null))
+		).willReturn(pages);
+
+		// when, then
+		mockMvc.perform(MockMvcRequestBuilders.get("/community/post/popular"))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andDo(print());
+
+		verify(postService).getPopularPostsByPage(pageable, customUserDetails.getUser(), null, null);
+	}
+
+	@Test
+	void getPopularPostsByPage_예외처리() throws Exception {
+
+		// given
+		Long groupId = 1L;
+		Long postId = 1L;
+		Pageable pageable = PageRequest.of(0, 10);
+
+		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
+			.getAuthentication()
+			.getPrincipal();
+
+		List<PostResponseDto.PostInfo> postInfos = new ArrayList<>();
+
+		PostResponseDto.PostInfo postInfo = PostResponseDto.PostInfo.builder()
+			.id(postId)
+			.userId("1")
+			.groupId(groupId)
+			.snapShot("{\"bucketId\":[3,2,1],\"portfolio\":false}")
+			.imageUrls("")
+			.content("글 내용")
+			.postType(PostType.POST)
+			.isLiked(false)
+			.createdAt(LocalDateTime.now())
+			.updatedAt(LocalDateTime.now())
+			.build();
+
+		for (int i = 0; i < 10; i++)
+			postInfos.add(postInfo);
+
+		Page<PostResponseDto.PostInfo> pages = new PageImpl<>(postInfos, pageable, postInfos.size());
+		System.out.println("customUserDetails = " + customUserDetails.getUser());
+		given(postService.getPopularPostsByPage(eq(pageable), eq(customUserDetails.getUser()), eq(null), eq(null))
+		).willReturn(pages);
+
+		// when, then
+		mockMvc.perform(MockMvcRequestBuilders.get("/community/post/popular")
+				.param("offset", "0").param("limit", "-1"))
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.code").value(400))
+			.andExpect(jsonPath("$.message").value("limit은 0 이상이어야 합니다."))
+			.andDo(print());
+	}
+
+	@Test
+	void likePost() throws Exception {
+
+		// given
+		String imageUrls = "imageUrl";
+		String content = "content";
+		String snapShot = "snapShot";
+		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
+			.getAuthentication()
+			.getPrincipal();
+		PostRequestDto.Write write = new PostRequestDto.Write(imageUrls, content, snapShot, PostType.POST);
+
+		// PostResponseDto.PostInfo post = new PostResponseDto.PostInfo(
+		// 	1L,
+		// 	"1", // userId
+		// 	1L, // groupId
+		// 	null, // snapShot
+		// 	imageUrls, // imageUrls
+		// 	content, // content
+		// 	PostType.POST, // postType
+		// 	UserResponseDto.BriefInfo.from(customUserDetails.getUser()),
+		// 	GroupCategory.AFTER_RETIREMENT,
+		// 	false,
+		// 	true,
+		// 	0, 0
+		// );
+
+		Post post = new Post();
+		post.setId(1L);
+
+		PostLikeResponseDto.Add addLike = new PostLikeResponseDto.Add(1L, customUserDetails.getUser().getId(), 1L,
+			LocalDateTime.now());
+		System.out.println("customUserDetails = " + customUserDetails.getUser());
+		given(postService.addLike(eq(1L), eq(1L), eq(customUserDetails.getUser()))).willReturn(addLike);
+
+		// when
+		String reqBody = objectMapper.writeValueAsString(write);
+
+		// then
+		mockMvc.perform(MockMvcRequestBuilders.post("/community/group/{groupId}/post/{postId}/like", 1L, 1L)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(reqBody))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andExpect(jsonPath("$.data.userId").value(1L))
+			.andExpect(jsonPath("$.data.postId").value(1L))
+			.andDo(print());
+
+		verify(postService).addLike(1L, 1L, customUserDetails.getUser());
+	}
+
+	@Test
+	void dislikePost() throws Exception {
+		// given
+		Long groupId = 1L;
+		Long postId = 1L;
+
+		String imageUrls = "imageUrl";
+		String content = "글 내용";
+		String snapShot = "{\"bucketId\":[3,2,1],\"portfolio\":false}";
+
+		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
+			.getAuthentication()
+			.getPrincipal();
+		System.out.println("customUserDetails = " + customUserDetails.getUser());
+
+		// when, then
+		mockMvc.perform(
+				MockMvcRequestBuilders.delete("/community/group/{groupId}/post/{postId}/dislike", groupId, postId))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andExpect(jsonPath("$.data").doesNotExist())
+			.andDo(print());
+
+		verify(postService).removeLike(groupId, postId, customUserDetails.getUser());
+	}
+
+	@Test
+	void sharePost() throws Exception {
+
+		// given
+		String imageUrls = "imageUrl";
+		String content = "content";
+		String snapShot = "snapShot";
+		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
+			.getAuthentication()
+			.getPrincipal();
+		PostRequestDto.Share share = new PostRequestDto.Share(content, PostType.NEWS);
+
+		PostResponseDto.ShareInfo post = new PostResponseDto.ShareInfo(
+			1L,
+			content, // content
+			UserResponseDto.BriefInfo.from(customUserDetails.getUser()),
+			PostType.NEWS // postType
+		);
+
+		System.out.println("customUserDetails = " + customUserDetails.getUser());
+		given(postService.saveNews(eq(1L), eq(share), eq(customUserDetails.getUser()))).willReturn(post);
+
+		// when
+		String reqBody = objectMapper.writeValueAsString(share);
+
+		// then
+		mockMvc.perform(MockMvcRequestBuilders.post("/community/group/{groupId}/post/share", 1L)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(reqBody))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andExpect(jsonPath("$.data.id").value(post.getId()))
+			.andExpect(jsonPath("$.data.content").value(post.getContent()))
+			.andExpect(jsonPath("$.data.briefInfo.name").value(post.getBriefInfo().getName()))
+			.andExpect(jsonPath("$.data.postType").value(post.getPostType().name()))
+			.andDo(print());
+
+		verify(postService).saveNews(1L, share, customUserDetails.getUser());
+	}
+
+	@Test
+	void getAdvertisement() throws Exception {
+
+		// given
+		Long groupId = 1L;
+		Long postId = 1L;
+
+		CustomUserDetails customUserDetails = (CustomUserDetails)SecurityContextHolder.getContext()
+			.getAuthentication()
+			.getPrincipal();
+
+		Advertisement community1 = Advertisement.builder()
+			.locationType(AdvertisementLocationType.COMMUNITY)
+			.adType(AdvertisementAdType.HANA)
+			.bannerImageUrl(
+				"https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/hanainvest.png")
+			.link("https://www.hanaw.com/main/main/index.cmd")
+			.build();
+
+		AdvertisementResponseDto.CommunityAd communityAd = AdvertisementResponseDto.CommunityAd.from(community1);
+
+		System.out.println("customUserDetails = " + customUserDetails.getUser());
+		given(advertisementService.getCommunityAd(eq(groupId))).willReturn(communityAd);
+
+		// when, then
+		mockMvc.perform(MockMvcRequestBuilders.get("/community/group/{groupId}/advertisement", groupId))
+			.andExpect(status().isOk())
+			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("ok"))
+			.andExpect(jsonPath("$.data.id").value(communityAd.getId()))
+			.andExpect(jsonPath("$.data.locationType").value(communityAd.getLocationType().name()))
+			.andExpect(jsonPath("$.data.adType").value(communityAd.getAdType().name()))
+			.andExpect(jsonPath("$.data.bannerImageUrl").value(communityAd.getBannerImageUrl()))
+			.andExpect(jsonPath("$.data.link").value(communityAd.getLink()))
+			.andDo(print());
+
+		verify(advertisementService).getCommunityAd(groupId);
 	}
 }
