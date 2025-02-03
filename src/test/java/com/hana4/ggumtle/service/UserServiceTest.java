@@ -275,6 +275,18 @@ class UserServiceTest {
 	}
 
 	@Test
+	void testSendVerificationCode_AlreadyExists() {
+		// Given
+		String userTel = "01012341234";
+		when(userRepository.existsUserByTel(userTel)).thenReturn(true);
+
+		// When & Then
+		assertThatThrownBy(() -> userService.sendVerificationCode(userTel))
+			.isInstanceOf(CustomException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_EXISTS);
+	}
+
+	@Test
 	void testSendVerificationCode_AlreadySent() {
 		// Given
 		String userTel = "01012341234";
