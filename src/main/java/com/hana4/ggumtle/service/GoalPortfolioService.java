@@ -111,17 +111,12 @@ public class GoalPortfolioService {
 			}
 		}
 
-		System.out.println("totalDailyInvestment = " + totalDailyInvestment);
-
 		// 5. 마이데이터에서 총 자산 조회
 		BigDecimal totalAssets = myDataService.getTotalAsset(user.getId());
-		System.out.println("totalAsset" + totalAssets);
 
 		// 6. 투자 비율에 따라 추천 템플릿 결정
 		BigDecimal dailyInvestmentRatio = totalDailyInvestment.multiply(BigDecimal.valueOf(30))
 			.divide(totalAssets, RoundingMode.HALF_UP); // 월 기준 비율
-
-		System.out.println("dailyInvestmentRatio = " + dailyInvestmentRatio);
 
 		String recommendedTemplate;
 

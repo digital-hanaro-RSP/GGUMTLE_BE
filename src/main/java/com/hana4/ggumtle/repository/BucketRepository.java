@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.hana4.ggumtle.model.entity.bucket.Bucket;
 import com.hana4.ggumtle.model.entity.bucket.BucketHowTo;
@@ -22,6 +24,8 @@ public interface BucketRepository extends JpaRepository<Bucket, Long> {
 
 	List<Bucket> findByTagTypeAndIsRecommendedTrue(BucketTagType tagType);
 
-	List<Bucket> findByUserIdAndHowToEqualsAndDueDateIsNullOrDueDateAfter(String userId, BucketHowTo howTo,
-		LocalDateTime dueDate);
+	@Query("SELECT b FROM Bucket b WHERE b.user.id = :userId AND b.howTo = :howTo AND (b.dueDate IS NULL OR b.dueDate > :dueDate)")
+	List<Bucket> findValidBuckets(@Param("userId") String userId,
+		@Param("howTo") BucketHowTo howTo,
+		@Param("dueDate") LocalDateTime dueDate);
 }
