@@ -1,5 +1,6 @@
 package com.hana4.ggumtle.service;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -23,24 +24,23 @@ public class AdvertisementService {
 	private final GoalPortfolioService goalPortfolioService;
 	private final GroupService groupService;
 
-	public AdvertisementResponseDto.MainAd getMainAd(User user) {
+	public AdvertisementResponseDto.MainAdList getMainAd(User user) {
 		GoalPortfolioResponseDto.InvestmentType investmentType = goalPortfolioService.getGoalPortfolioInvestmentTypeByUser(
 			user);
 
-		String riskRating = switch (investmentType.getInvestmentType()) {
-			case "CONSERVATIVE" -> "매우낮은위험";
-			case "MODERATELY_CONSERVATIVE" -> "낮은위험";
-			case "BALANCED" -> "보통위험";
-			case "MODERATELY_AGGRESSIVE" -> "높은위험";
-			case "AGGRESSIVE" -> "매우높은위험";
+		List<String> riskRatings = switch (investmentType.getInvestmentType()) {
+			case "CONSERVATIVE" -> Arrays.asList("매우낮은위험", "낮은위험", "보통위험");
+			case "MODERATELY_CONSERVATIVE" -> Arrays.asList("낮은위험", "보통위험", "높은위험");
+			case "BALANCED" -> Arrays.asList("보통위험", "낮은위험", "높은위험");
+			case "MODERATELY_AGGRESSIVE" -> Arrays.asList("높은위험", "보통위험", "매우높은위험");
+			case "AGGRESSIVE" -> Arrays.asList("매우높은위험", "높은위험", "보통위험");
 			default ->
 				throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR, "지원하지 않는 투자성향 타입입니다. : " + investmentType);
 		};
 
-		Advertisement ad = advertisementRepository.findFirstByRiskRating(riskRating)
-			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 위험 등급의 광고가 존재하지 않습니다"));
+		List<Advertisement> ads = advertisementRepository.findAllByRiskRatingInOrderByIdDesc(riskRatings);
 
-		return AdvertisementResponseDto.MainAd.from(ad);
+		return AdvertisementResponseDto.MainAdList.from(ads);
 	}
 
 	public AdvertisementResponseDto.CommunityAd getCommunityAd(Long groupId) {

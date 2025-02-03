@@ -79,7 +79,7 @@ public class PostService {
 
 		if (portfolio) {
 			snapShotResponse.put("goalPortfolio", goalPortfolioService.getGoalPortfolioByUserId(user.getId()));
-			snapShotResponse.put("currentPortfolio", myDataService.getMyDataByUserId(user.getId()));
+			snapShotResponse.put("currentPortfolio", myDataService.getMyDataRateByUserId(user.getId()));
 		}
 
 		return objectMapper.writeValueAsString(snapShotResponse);
