@@ -2,8 +2,10 @@ package com.hana4.ggumtle.service;
 
 import java.net.URL;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -70,10 +72,17 @@ public class PresignedUrlService {
 		}
 
 		for (ImageRequestDto.Upload.Image fileInfo : imageUrls.getImages()) {
+			String fileExtension = "";
+			int dotIndex = fileInfo.getName().lastIndexOf(".");
+			if (dotIndex != -1) {
+				fileExtension = fileInfo.getName().substring(dotIndex);
+			}
+
+			String uniqueFileName = UUID.randomUUID() + "_" + Instant.now().toEpochMilli() + fileExtension;
 
 			PutObjectRequest putObjectRequest = PutObjectRequest.builder()
 				.bucket(bucketName)
-				.key(fileInfo.getName())
+				.key(uniqueFileName)
 				.contentLength(fileInfo.getSize())
 				.build();
 
