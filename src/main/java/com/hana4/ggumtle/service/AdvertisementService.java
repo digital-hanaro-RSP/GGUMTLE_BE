@@ -49,7 +49,7 @@ public class AdvertisementService {
 			case AFTER_RETIREMENT -> AdvertisementAdType.RETIREMENT;
 			case EDUCATION -> AdvertisementAdType.EDUCATION;
 			case HOBBY -> AdvertisementAdType.HOBBY;
-			case INVESTMENT -> AdvertisementAdType.HANA;
+			case INVESTMENT -> AdvertisementAdType.INVESTMENT;
 			case TRAVEL -> AdvertisementAdType.TRAVEL;
 		};
 		List<Advertisement> advertisements = advertisementRepository.findAllByAdType(adType);
