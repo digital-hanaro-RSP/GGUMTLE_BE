@@ -67,7 +67,8 @@ public class SecurityConfig {
 			mvc.pattern("/v3/api-docs/**"),
 			mvc.pattern("/swagger-ui/**"),
 			mvc.pattern("/webjars/**"),
-			mvc.pattern("/imageUpload/multiple")
+			mvc.pattern("/imageUpload/multiple"),
+			mvc.pattern("/actuator/**")
 		};
 
 		// http request 인증 설정
