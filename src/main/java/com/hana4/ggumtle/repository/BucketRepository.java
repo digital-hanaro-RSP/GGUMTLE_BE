@@ -24,7 +24,7 @@ public interface BucketRepository extends JpaRepository<Bucket, Long> {
 
 	List<Bucket> findByTagTypeAndIsRecommendedTrue(BucketTagType tagType);
 
-	@Query("SELECT b FROM Bucket b WHERE b.user.id = :userId AND b.howTo = :howTo AND (b.dueDate IS NULL OR b.dueDate > :dueDate)")
+	@Query("SELECT b FROM Bucket b WHERE b.user.id = :userId AND b.howTo = :howTo AND (b.dueDate IS NULL OR b.dueDate > :dueDate) AND b.status = 'DOING'")
 	List<Bucket> findValidBuckets(@Param("userId") String userId,
 		@Param("howTo") BucketHowTo howTo,
 		@Param("dueDate") LocalDateTime dueDate);

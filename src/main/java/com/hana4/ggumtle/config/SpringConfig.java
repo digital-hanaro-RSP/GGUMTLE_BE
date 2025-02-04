@@ -24,7 +24,7 @@ public class SpringConfig {
 			)
 			.info(info())
 			// .addServersItem(new Server().url("/data"))
-			.addServersItem(new Server().url("https://ggumtle.topician.com"))
+			.addServersItem(new Server().url("https://ggumtle.topician.com/data"))
 			.addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
 	}
 
