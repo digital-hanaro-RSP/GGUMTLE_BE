@@ -116,6 +116,13 @@ public class PostService {
 
 	public Page<PostResponseDto.PostInfo> getPopularPostsByPage(Pageable pageable, User user,
 		GroupCategory groupCategory, String search) {
+		if (groupCategory != null && search != null) {
+			return postRepository.findAllPostsGroupedByGroupCategoryWithSearchParam(pageable, groupCategory, search)
+				.map(post -> PostResponseDto.PostInfo.from(post, isAuthorLike(post.getId(), user.getId()),
+					post.getUser().getId().equals(user.getId()), countLikeByPostId(post.getId()),
+					commentService.countCommentByPostId(post.getId())));
+		}
+
 		if (groupCategory != null) {
 			return postRepository.findAllPostsGroupedByGroupCategory(pageable, groupCategory)
 				.map(post -> PostResponseDto.PostInfo.from(post, isAuthorLike(post.getId(), user.getId()),
