@@ -155,7 +155,7 @@ public class InitialDataLoader implements ApplicationRunner {
 
 			Advertisement community1 = Advertisement.builder()
 				.locationType(AdvertisementLocationType.COMMUNITY)
-				.adType(AdvertisementAdType.HANA)
+				.adType(AdvertisementAdType.INVESTMENT)
 				.bannerImageUrl(
 					"https://ggumtlebucket.s3.ap-northeast-2.amazonaws.com/hanainvest.png")
 				.link("https://www.hanaw.com/main/main/index.cmd")
