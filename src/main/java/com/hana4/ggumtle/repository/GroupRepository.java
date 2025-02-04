@@ -23,7 +23,11 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 			")) " +
 			"AND (:category IS NULL OR g.category = :category) " +
 			"AND (:search IS NULL OR LOWER(g.name) LIKE LOWER(CONCAT('%', :search, '%'))) " +
-			"GROUP BY g.id, g.name, g.category, g.description, g.imageUrl"
+			"GROUP BY g.id, g.name, g.category, g.description, g.imageUrl " +
+			"ORDER BY " +
+			"    CASE WHEN :userId IS NULL THEN COUNT(DISTINCT gm.id) END DESC, " +  // 모든 그룹 조회 시 멤버 수 많은 순 정렬
+			"    CASE WHEN :userId IS NULL THEN MAX(gm.createdAt) END DESC, " +  // 모든 그룹 조회 시 최근 가입 순 추가 정렬
+			"    CASE WHEN :userId IS NOT NULL THEN MAX(gm.createdAt) END DESC"  // 내 그룹 조회 시 최근 가입 순 정렬
 	)
 	Page<Object[]> findGroupsWithFilters(
 		@Param("userId") String userId,

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -153,4 +154,54 @@ class MyDataServiceTest {
 		verify(myDataRepository).findByUserId(userId);
 	}
 
+	@Test
+	void getMyDataRate_성공() {
+		MyData myData = new MyData();
+		User user = new User();
+		user.setId("1");
+		myData.setUser(new User());
+		myData.setDepositWithdrawal(BigDecimal.ONE);
+		myData.setSavingTimeDeposit(BigDecimal.ONE);
+		myData.setInvestment(BigDecimal.ONE);
+		myData.setForeignCurrency(BigDecimal.ONE);
+		myData.setPension(BigDecimal.ONE);
+		myData.setEtc(BigDecimal.ONE);
+		myData.setId(1L);
+
+		BigDecimal sum = myData.getDepositWithdrawal().add(myData.getSavingTimeDeposit())
+			.add(myData.getInvestment())
+			.add(myData.getForeignCurrency())
+			.add(myData.getPension())
+			.add(myData.getEtc());
+
+		when(myDataRepository.findByUserId("1")).thenReturn(Optional.of(myData));
+
+		assertThat(myDataService.getMyDataRateByUserId("1").getDepositWithdrawal()).isEqualTo(
+			myData.getDepositWithdrawal().divide(sum, 2, RoundingMode.HALF_UP));
+		assertThat(myDataService.getMyDataRateByUserId("1").getSavingTimeDeposit()).isEqualTo(
+			myData.getSavingTimeDeposit().divide(sum, 2, RoundingMode.HALF_UP));
+		assertThat(myDataService.getMyDataRateByUserId("1").getInvestment()).isEqualTo(
+			myData.getInvestment().divide(sum, 2, RoundingMode.HALF_UP));
+		assertThat(myDataService.getMyDataRateByUserId("1").getForeignCurrency()).isEqualTo(
+			myData.getForeignCurrency().divide(sum, 2, RoundingMode.HALF_UP));
+		assertThat(myDataService.getMyDataRateByUserId("1").getPension()).isEqualTo(
+			myData.getPension().divide(sum, 2, RoundingMode.HALF_UP));
+		assertThat(myDataService.getMyDataRateByUserId("1").getEtc()).isEqualTo(
+			myData.getEtc().divide(sum, 2, RoundingMode.HALF_UP));
+		assertThat(myDataService.getMyDataRateByUserId("1").getId()).isEqualTo(1L);
+	}
+
+	@Test
+	void getMyDataRate_실패_사용자MyData없음() {
+		User user = new User();
+		user.setId("1");
+
+		CustomException exception = assertThrows(CustomException.class, () -> {
+			myDataService.getMyDataRateByUserId(user.getId());
+		});
+
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+		assertEquals("해당 유저의 MyData가 연결되지 않았습니다.", exception.getMessage());
+		verify(myDataRepository).findByUserId(user.getId());
+	}
 }

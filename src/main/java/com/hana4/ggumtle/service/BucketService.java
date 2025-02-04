@@ -212,7 +212,7 @@ public class BucketService {
 	public List<Bucket> getBucketsDueAfter(String userId, LocalDate dueDate) {
 		LocalDateTime startOfDay = dueDate.atStartOfDay();
 
-		return bucketRepository.findByUserIdAndHowToEqualsAndDueDateIsNullOrDueDateAfter(userId,
+		return bucketRepository.findValidBuckets(userId,
 			BucketHowTo.MONEY, startOfDay);
 	}
 }
