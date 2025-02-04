@@ -120,7 +120,7 @@ public class PresignedUrlServiceTest {
 			.images(Arrays.asList(
 				ImageRequestDto.Upload.Image.builder()
 					.name("large-image.png")
-					.size(2 * 1024 * 1024L) // 2MB
+					.size(20 * 1024 * 1024L) // 2MB
 					.build()))
 			.build();
 		CustomException exception = assertThrows(CustomException.class, () -> {
@@ -208,7 +208,7 @@ public class PresignedUrlServiceTest {
 					.build(),
 				ImageRequestDto.Upload.Image.builder()
 					.name("large-image.jpg")
-					.size(2 * 1024 * 1024L) // 2MB
+					.size(20 * 1024 * 1024L) // 2MB
 					.build()))
 			.build();
 
@@ -233,5 +233,3 @@ public class PresignedUrlServiceTest {
 		assertEquals(ErrorCode.INTERNAL_SERVER_ERROR, exception.getErrorCode());
 	}
 }
-
-

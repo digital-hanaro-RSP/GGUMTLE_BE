@@ -460,7 +460,7 @@ class GoalPortfolioServiceTest {
 		CustomException exception = assertThrows(CustomException.class,
 			() -> goalPortfolioService.recommendGoalPortfolio(user));
 		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
-		assertEquals("해당 유저의 목표 포트폴리오를 찾을 수 없습니다.", exception.getMessage());
+		assertEquals("해당 유저의 목표 포트폴리오가 존재하지 않습니다.", exception.getMessage());
 	}
 
 	@Test
