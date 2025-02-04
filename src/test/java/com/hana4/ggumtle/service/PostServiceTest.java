@@ -916,6 +916,53 @@ class PostServiceTest {
 	}
 
 	@Test
+	void getPopularPostsByPage_그룹이랑검색성공() {
+		// Given
+		Long groupId = 1L;
+		Group group = new Group(groupId, "여행자 모임", GroupCategory.TRAVEL, "설명", "이미지URL");
+
+		User user = new User(
+			"1", // id
+			"010-1234-5678", // tel
+			"password123", // password
+			"홍길동", // name
+			(short)1, // permission
+			LocalDateTime.of(1990, 1, 1, 0, 0, 0, 0), // birthDate
+			"M", // gender
+			UserRole.USER, // role
+			"https://example.com/profile.jpg", // profileImageUrl
+			"hgildong" // nickname
+		);
+
+		Post post = new Post();
+		post.setId(1L);
+		post.setUser(user);
+		post.setGroup(group);
+		post.setImageUrls("imageUrls");
+		post.setPostType(PostType.POST);
+		post.setContent("content");
+
+		Pageable pageable = PageRequest.of(0, 10);
+		List<Post> posts = List.of(post);
+		Page<Post> postPage = new PageImpl<>(posts, pageable, posts.size());
+
+		when(postRepository.findAllPostsGroupedByGroupCategoryWithSearchParam(pageable, GroupCategory.TRAVEL,
+			"null")).thenReturn(postPage);
+		when(postLikeRepository.findByPostIdAndUserId(post.getId(), user.getId())).thenReturn(
+			Optional.of(PostLike.builder().build()));
+		// When
+		List<PostResponseDto.PostInfo> result = postService.getPopularPostsByPage(pageable, user, GroupCategory.TRAVEL,
+			"null").getContent();
+
+		// Then
+		assertNotNull(result);
+		assertEquals(1, result.size());
+
+		verify(postRepository).findAllPostsGroupedByGroupCategoryWithSearchParam(pageable, GroupCategory.TRAVEL,
+			"null");
+	}
+
+	@Test
 	void getPopularPostsByPage_아무것도없이성공() {
 		// Given
 		Long groupId = 1L;
