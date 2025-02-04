@@ -77,11 +77,11 @@ public class GoalPortfolioService {
 
 	public GoalPortfolioResponseDto.RecommendGoalPortfolioInfo recommendGoalPortfolio(User user) {
 		// 1. 현재 목표 포트폴리오 조회
-		GoalPortfolio currentGoal = goalPortfolioRepository.findByUserId(user.getId())
-			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "해당 유저의 목표 포트폴리오를 찾을 수 없습니다."));
+		GoalPortfolioResponseDto.InvestmentType currentGoal = this.getGoalPortfolioInvestmentTypeByUser(
+			user);
 
 		// 2. 현재 템플릿이 AGGRESSIVE 이면 false 반환
-		String templateName = currentGoal.getTemplate().getName();
+		String templateName = currentGoal.getInvestmentType();
 		if (templateName.equals("AGGRESSIVE")) {
 			return GoalPortfolioResponseDto.RecommendGoalPortfolioInfo.from(false);
 		}
