@@ -128,6 +128,10 @@ public class UserService {
 	}
 
 	public void sendVerificationCode(String userTel) {
+		if (userRepository.existsUserByTel(userTel)) {
+			throw new CustomException(ErrorCode.ALREADY_EXISTS, "해당 전화번호로 가입된 사용자가 존재합니다.");
+		}
+
 		if (telCodeValidationRepository.hasKey(userTel)) {
 			throw new CustomException(ErrorCode.SMS_ALREADY_SENT, "인증 코드가 이미 발송되었습니다. 잠시 후 다시 시도해주세요.");
 		}

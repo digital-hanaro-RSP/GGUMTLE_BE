@@ -979,7 +979,7 @@ class BucketServiceTest {
 		List<Bucket> mockBuckets = Arrays.asList(bucket1, bucket2);
 
 		// Mocking: 버킷 레포지토리가 특정 조건의 버킷 리스트를 반환하도록 설정
-		when(bucketRepository.findByUserIdAndHowToEqualsAndDueDateIsNullOrDueDateAfter(userId,
+		when(bucketRepository.findValidBuckets(userId,
 			BucketHowTo.MONEY, startOfDay))
 			.thenReturn(mockBuckets);
 
