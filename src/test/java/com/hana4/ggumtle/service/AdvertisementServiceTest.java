@@ -200,7 +200,7 @@ public class AdvertisementServiceTest {
 		List<Advertisement> hanaAds = new ArrayList<>();
 
 		for (int i = 0; i < 5; i++) {
-			AdvertisementAdType adType = AdvertisementAdType.HANA;
+			AdvertisementAdType adType = AdvertisementAdType.INVESTMENT;
 			hanaAds.add(
 				Advertisement.builder()
 					.locationType(AdvertisementLocationType.COMMUNITY)
@@ -268,7 +268,7 @@ public class AdvertisementServiceTest {
 		when(groupService.getGroup(3L)).thenReturn(group3);
 		when(groupService.getGroup(4L)).thenReturn(group4);
 		when(groupService.getGroup(5L)).thenReturn(group5);
-		when(advertisementRepository.findAllByAdType(AdvertisementAdType.HANA)).thenReturn(hanaAds);
+		when(advertisementRepository.findAllByAdType(AdvertisementAdType.INVESTMENT)).thenReturn(hanaAds);
 		when(advertisementRepository.findAllByAdType(AdvertisementAdType.RETIREMENT)).thenReturn(retireAds);
 		when(advertisementRepository.findAllByAdType(AdvertisementAdType.TRAVEL)).thenReturn(travelAds);
 		when(advertisementRepository.findAllByAdType(AdvertisementAdType.EDUCATION)).thenReturn(eduAds);
@@ -279,7 +279,7 @@ public class AdvertisementServiceTest {
 		advertisementService.getCommunityAd(3L);
 		advertisementService.getCommunityAd(4L);
 		advertisementService.getCommunityAd(5L);
-		verify(advertisementRepository).findAllByAdType(AdvertisementAdType.HANA);
+		verify(advertisementRepository).findAllByAdType(AdvertisementAdType.INVESTMENT);
 		verify(advertisementRepository).findAllByAdType(AdvertisementAdType.HOBBY);
 		verify(advertisementRepository).findAllByAdType(AdvertisementAdType.TRAVEL);
 		verify(advertisementRepository).findAllByAdType(AdvertisementAdType.RETIREMENT);
