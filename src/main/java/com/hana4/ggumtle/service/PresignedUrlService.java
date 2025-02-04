@@ -63,10 +63,12 @@ public class PresignedUrlService {
 		}
 
 		List<String> presignedUrls = new ArrayList<>();
-		long MAX_TOTAL_SIZE = 1 * 1024 * 1024; // 1MB in bytes
+		long MAX_TOTAL_SIZE_SUM = 10 * 1024 * 1024; // 10MB in bytes
+		long totalSize = 0;
 
 		for (ImageRequestDto.Upload.Image fileInfo : imageUrls.getImages()) {
-			if (fileInfo.getSize() > MAX_TOTAL_SIZE) {
+			totalSize += fileInfo.getSize();
+			if (totalSize > MAX_TOTAL_SIZE_SUM) {
 				throw new CustomException(ErrorCode.FILE_SIZE_EXCEEDED);
 			}
 		}
