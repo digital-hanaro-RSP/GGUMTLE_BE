@@ -65,6 +65,7 @@ public class GoalPortfolioResponseDto {
 	@AllArgsConstructor
 	@ToString
 	@Builder
+	@Generated
 	@Schema(description = "메인페이지 사용자이름,투자성향 DTO")
 	public static class InvestmentType {
 		@Schema(description = "사용자 이름", example = "홍길동")

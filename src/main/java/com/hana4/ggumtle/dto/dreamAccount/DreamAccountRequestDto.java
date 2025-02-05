@@ -25,6 +25,7 @@ public class DreamAccountRequestDto {
 	@AllArgsConstructor
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
 	@EqualsAndHashCode
+	@Generated
 	public static class Create {
 
 		// @Schema(description = "DreamAccount과 연결된 사용자", requiredMode = Schema.RequiredMode.REQUIRED)
