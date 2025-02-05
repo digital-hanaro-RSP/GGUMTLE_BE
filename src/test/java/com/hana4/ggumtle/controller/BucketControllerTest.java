@@ -283,7 +283,7 @@ class BucketControllerTest {
 			.build();
 
 		// mock behavior
-		when(bucketService.getBucketById(anyLong())).thenReturn(responseDto);
+		when(bucketService.getBucketById(anyLong(), any(User.class))).thenReturn(responseDto);
 
 		// when & then
 		mockMvc.perform(get("/buckets/{bucketId}", 1L)
