@@ -131,6 +131,7 @@ public class UserRequestDto {
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor(access = AccessLevel.PROTECTED)
+	@Generated
 	public static class UpdateUser {
 		@Schema(description = "새 비밀번호", example = "newpassword123", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
 		private String password;

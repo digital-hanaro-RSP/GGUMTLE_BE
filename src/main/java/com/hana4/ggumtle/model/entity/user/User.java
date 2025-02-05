@@ -72,13 +72,4 @@ public class User extends BaseEntity {
 	public void addPermission(short newPermission) {
 		this.permission |= newPermission;
 	}
-
-	public boolean hasPermission(short permissionToCheck) {
-		return (this.permission & permissionToCheck) == permissionToCheck;
-	}
-
-	public void removePermission(short permissionToRemove) {
-		this.permission &= (short)~permissionToRemove;
-	}
-
 }
