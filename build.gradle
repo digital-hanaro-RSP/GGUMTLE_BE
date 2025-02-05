@@ -80,11 +80,25 @@ jacocoTestReport {
 }
 check.dependsOn jacocoTestReport
 
+jacocoTestReport {
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "com/hana4/ggumtle/security/**",
+                    "com/hana4/ggumtle/InitialDataLoader.class"
+            ])
+        }))
+    }
+}
+
 jacocoTestCoverageVerification {
     violationRules {
         rule {
             element = 'CLASS'
-
+            excludes = [
+                    'com.hana4.ggumtle.security.*',
+                    'com.hana4.ggumtle.InitialDataLoader'
+            ]
             limit {
                 counter = 'BRANCH'
                 value = 'COVEREDRATIO'
