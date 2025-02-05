@@ -2,6 +2,7 @@ package com.hana4.ggumtle.controller;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -28,8 +29,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hana4.ggumtle.WithMockCustomUser;
 import com.hana4.ggumtle.config.TestSecurityConfig;
+import com.hana4.ggumtle.dto.MainPortfolio.MainPortfolioResponseDto;
 import com.hana4.ggumtle.dto.goalPortfolio.GoalPortfolioRequestDto;
 import com.hana4.ggumtle.dto.goalPortfolio.GoalPortfolioResponseDto;
+import com.hana4.ggumtle.dto.myData.MyDataResponseDto;
+import com.hana4.ggumtle.model.entity.goalPortfolio.GoalPortfolio;
+import com.hana4.ggumtle.model.entity.myData.MyData;
 import com.hana4.ggumtle.model.entity.user.User;
 import com.hana4.ggumtle.service.GoalPortfolioService;
 import com.hana4.ggumtle.service.MainPortfolioService;
@@ -63,6 +68,51 @@ public class PortfolioControllerTest {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
 			.apply(springSecurity())
 			.build();
+	}
+
+	@Test
+	@WithMockCustomUser
+	void getGoalPortfolioByUserId() throws Exception {
+		// given
+		MyData myData = mock(MyData.class);
+		GoalPortfolio goalPortfolio = mock(GoalPortfolio.class);
+		User user = mock(User.class);
+
+		when(myData.getDepositWithdrawal()).thenReturn(BigDecimal.valueOf(1000000.00));
+		when(myData.getSavingTimeDeposit()).thenReturn(BigDecimal.valueOf(5000000.00));
+		when(myData.getInvestment()).thenReturn(BigDecimal.valueOf(3000000.00));
+		when(myData.getForeignCurrency()).thenReturn(BigDecimal.valueOf(2000000.00));
+		when(myData.getPension()).thenReturn(BigDecimal.valueOf(10000000.00));
+		when(myData.getEtc()).thenReturn(BigDecimal.valueOf(500000.00));
+		when(myData.getId()).thenReturn(1L);
+		when(myData.getUser()).thenReturn(user);
+
+		when(goalPortfolio.getDepositWithdrawalRatio()).thenReturn(BigDecimal.valueOf(0.0));
+		when(goalPortfolio.getSavingTimeDepositRatio()).thenReturn(BigDecimal.valueOf(0.70));
+		when(goalPortfolio.getInvestmentRatio()).thenReturn(BigDecimal.valueOf(0.20));
+		when(goalPortfolio.getForeignCurrencyRatio()).thenReturn(BigDecimal.valueOf(0.0));
+		when(goalPortfolio.getPensionRatio()).thenReturn(BigDecimal.valueOf(0.10));
+		when(goalPortfolio.getEtcRatio()).thenReturn(BigDecimal.valueOf(0.0));
+		when(goalPortfolio.getId()).thenReturn(1L);
+		when(goalPortfolio.getUser()).thenReturn(user);
+
+		MyDataResponseDto.CurrentPortfolio currentPortfolio = MyDataResponseDto.CurrentPortfolio.from(myData);
+		GoalPortfolioResponseDto.Ratio goalPortfolioRatio = GoalPortfolioResponseDto.Ratio.from(goalPortfolio);
+
+		MainPortfolioResponseDto.PortfolioInfo responseDto = MainPortfolioResponseDto.PortfolioInfo.from(
+			currentPortfolio, goalPortfolioRatio
+		);
+
+		// Mock 서비스 설정
+		when(mainPortfolioService.getMainPortfolioByUserId(anyString())).thenReturn(responseDto);
+
+		// when & then
+		mockMvc.perform(get("/portfolio")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.currentPortfolio.depositWithdrawal").value(1000000.00))
+			.andExpect(jsonPath("$.data.goalPortfolio.depositWithdrawalRatio").value(0.0));
 	}
 
 	@Test
