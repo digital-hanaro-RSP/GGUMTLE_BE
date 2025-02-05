@@ -154,10 +154,13 @@ public class BucketService {
 			.collect(Collectors.toList());
 	}
 
-	public BucketResponseDto.BucketInfo getBucketById(Long bucketId) {
+	public BucketResponseDto.BucketInfo getBucketById(Long bucketId, User user) {
 		Bucket bucket = bucketRepository.findById(bucketId)
 			.orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND, "버킷을 찾을 수 없습니다."));
 
+		if (!checkValidUser(user, bucket)) {
+			throw new CustomException(ErrorCode.FORBIDDEN, "권한이 없는 사용자입니다.");
+		}
 		return BucketResponseDto.BucketInfo.from(bucket);
 	}
 

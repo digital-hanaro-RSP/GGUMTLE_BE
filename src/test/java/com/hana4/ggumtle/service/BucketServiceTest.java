@@ -763,7 +763,7 @@ class BucketServiceTest {
 		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(mockBucket));
 
 		// when
-		BucketResponseDto.BucketInfo result = bucketService.getBucketById(bucketId);
+		BucketResponseDto.BucketInfo result = bucketService.getBucketById(bucketId, mockUser);
 
 		// then
 		assertNotNull(result);
@@ -782,8 +782,37 @@ class BucketServiceTest {
 
 		// when & then
 		assertThrows(CustomException.class, () -> {
-			bucketService.getBucketById(bucketId);
+			bucketService.getBucketById(bucketId, mockUser);
 		});
+	}
+
+	@Test
+	void testGetBucketById_ForbiddenUser() {
+		// given
+		Long bucketId = 1L;
+		User unauthorizedUser = User.builder()
+			.id("2") // 다른 사용자 ID (권한 없음)
+			.tel("010-9999-8888")
+			.password("password")
+			.name("김철수")
+			.permission((short)1)
+			.birthDate(LocalDateTime.of(1995, 5, 15, 0, 0))
+			.gender("M")
+			.role(UserRole.USER)
+			.profileImageUrl("https://example.com/profile2.jpg")
+			.nickname("not_owner")
+			.build();
+		// bucketRepository의 findById()가 mockBucket을 반환하도록 설정
+		when(bucketRepository.findById(bucketId)).thenReturn(Optional.of(mockBucket));
+		// bucketService를 Spy 객체로 감싸고 특정 메서드만 stub 설정
+		BucketService spyBucketService = spy(bucketService);
+		doReturn(false).when(spyBucketService).checkValidUser(unauthorizedUser, mockBucket);
+		// when & then
+		CustomException exception = assertThrows(CustomException.class, () -> {
+			spyBucketService.getBucketById(bucketId, unauthorizedUser);
+		});
+		assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
+		assertEquals("권한이 없는 사용자입니다.", exception.getMessage());
 	}
 
 	@Test
