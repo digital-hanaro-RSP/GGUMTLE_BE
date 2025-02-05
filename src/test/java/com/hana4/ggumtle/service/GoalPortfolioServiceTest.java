@@ -472,12 +472,12 @@ class GoalPortfolioServiceTest {
 		currentGoal.getTemplate().setName("BALANCED");
 
 		Bucket bucketWithSafeBox = new Bucket();
-		bucketWithSafeBox.setGoalAmount(BigDecimal.valueOf(10000));
+		bucketWithSafeBox.setGoalAmount(BigDecimal.valueOf(100000000));
 		bucketWithSafeBox.setSafeBox(BigDecimal.valueOf(1000));
 		bucketWithSafeBox.setDueDate(LocalDateTime.now().plusYears(2));
 
 		Bucket bucketWithoutSafeBox = new Bucket();
-		bucketWithoutSafeBox.setGoalAmount(BigDecimal.valueOf(10000));
+		bucketWithoutSafeBox.setGoalAmount(BigDecimal.valueOf(100000000));
 		bucketWithoutSafeBox.setDueDate(LocalDateTime.now().plusYears(2));
 
 		when(goalPortfolioRepository.findByUserId(user.getId())).thenReturn(Optional.of(currentGoal));
@@ -488,6 +488,12 @@ class GoalPortfolioServiceTest {
 		GoalPortfolioResponseDto.RecommendGoalPortfolioInfo result = goalPortfolioService.recommendGoalPortfolio(user);
 
 		assertNotNull(result);
+		assertTrue(result.isRecommended());
+		assertNotNull(result.getInvestmentType());
+		assertNotNull(result.getEstimatedInvestRatio());
+		verify(goalPortfolioRepository).findByUserId(user.getId());
+		verify(bucketService).getBucketsDueAfter(eq(user.getId()), any(LocalDate.class));
+		verify(myDataService).getTotalAsset(user.getId());
 	}
 
 	@Test
@@ -510,6 +516,12 @@ class GoalPortfolioServiceTest {
 		GoalPortfolioResponseDto.RecommendGoalPortfolioInfo result = goalPortfolioService.recommendGoalPortfolio(user);
 
 		assertNotNull(result);
+		assertFalse(result.isRecommended());
+		assertNull(result.getInvestmentType());
+		assertNull(result.getEstimatedInvestRatio());
+		verify(goalPortfolioRepository).findByUserId(user.getId());
+		verify(bucketService).getBucketsDueAfter(eq(user.getId()), any(LocalDate.class));
+		verify(myDataService).getTotalAsset(user.getId());
 	}
 
 	@Test
@@ -532,6 +544,12 @@ class GoalPortfolioServiceTest {
 		GoalPortfolioResponseDto.RecommendGoalPortfolioInfo result = goalPortfolioService.recommendGoalPortfolio(user);
 
 		assertNotNull(result);
+		assertFalse(result.isRecommended());
+		assertNull(result.getInvestmentType());
+		assertNull(result.getEstimatedInvestRatio());
+		verify(goalPortfolioRepository).findByUserId(user.getId());
+		verify(bucketService).getBucketsDueAfter(eq(user.getId()), any(LocalDate.class));
+		verify(myDataService).getTotalAsset(user.getId());
 	}
 
 	@Test

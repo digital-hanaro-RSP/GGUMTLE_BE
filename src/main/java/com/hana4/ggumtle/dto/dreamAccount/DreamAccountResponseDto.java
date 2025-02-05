@@ -9,11 +9,13 @@ import com.hana4.ggumtle.model.entity.user.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+@Generated
 public class DreamAccountResponseDto {
 
 	@Schema(description = "꿈통장 정보 응답")

@@ -117,7 +117,7 @@ public class BucketController {
 	public ResponseEntity<CustomApiResponse<BucketResponseDto.BucketInfo>> getBucketById(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable("bucketId") Long bucketId) {
-		BucketResponseDto.BucketInfo bucketInfo = bucketService.getBucketById(bucketId);
+		BucketResponseDto.BucketInfo bucketInfo = bucketService.getBucketById(bucketId, userDetails.getUser());
 		return ResponseEntity.ok(CustomApiResponse.success(bucketInfo));
 	}
 

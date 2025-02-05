@@ -232,4 +232,34 @@ public class PresignedUrlServiceTest {
 		});
 		assertEquals(ErrorCode.INTERNAL_SERVER_ERROR, exception.getErrorCode());
 	}
+
+	@Test
+	void generateMultiplePresignedUrls_FileExtensionHandling() {
+		ImageRequestDto.Upload imageUploadRequest = ImageRequestDto.Upload.builder()
+			.images(Arrays.asList(
+				ImageRequestDto.Upload.Image.builder().name("test.png").size(500_000L).build(),
+				ImageRequestDto.Upload.Image.builder().name("noextension").size(500_000L).build()
+			))
+			.build();
+
+		URL mockUrl1 = createMockUrl("test.png");
+		URL mockUrl2 = createMockUrl("noextension");
+		PresignedPutObjectRequest mockPresignedRequest1 = mock(PresignedPutObjectRequest.class);
+		PresignedPutObjectRequest mockPresignedRequest2 = mock(PresignedPutObjectRequest.class);
+		when(mockPresignedRequest1.url()).thenReturn(mockUrl1);
+		when(mockPresignedRequest2.url()).thenReturn(mockUrl2);
+
+		when(mockS3Presigner.presignPutObject(any(PutObjectPresignRequest.class)))
+			.thenReturn(mockPresignedRequest1)
+			.thenReturn(mockPresignedRequest2);
+
+		List<String> presignedUrls = presignedUrlService.generateMultiplePresignedUrls(imageUploadRequest);
+
+		assertThat(presignedUrls).hasSize(2);
+		assertThat(presignedUrls.get(0)).contains("/test.png");
+		assertThat(presignedUrls.get(1)).matches(
+			"https://test-bucket\\.s3\\.ap-northeast-2\\.amazonaws\\.com/noextension\\?.*");
+
+		verify(mockS3Presigner, times(2)).presignPutObject(any(PutObjectPresignRequest.class));
+	}
 }
